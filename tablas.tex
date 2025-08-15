@@ -1,24 +1,22 @@
-Como va?
+Pagina de tablas
 
 \begin{table}[H]
-    \centering
-    \begin{tabular}{|c|c|c|}
-        Marca & Modelo & Ancho de banda & Tasa de muestreo & Categoría eléctrica & Tensión máxima \\
-        GW Instek & GDS-1022 & 25 MHz & 250 MSa/s & CAT II & 300 V \\
+    \begin{tabular}{cccccc}
+        \toprule
+        \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Marca}}} &
+        \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Modelo}}} &
+        \textbf{Ancho de} &
+        \textbf{Tasa de} &
+        \textbf{Tensión} &
+        \textbf{Controlador} \\
+        & & \textbf{banda} & \textbf{muestreo} & \textbf{máxima} & \textbf{LabVIEW} \\
+        \midrule
+        GW Instek & GDS-1022 & 25 MHz & 250 MSa/s & 300 V & Sí \\
+        GW Instek & GDS-1102A-U & 100 MHz & 1 GSa/s & 300 V & Sí \\
+        Owon & PDS7102T & 100 MHz & 500 MSa/s & 300 V & No \\
+        Keysight & GDS-1102A-U & 100 MHz & 1 GSa/s & 300 V & Sí \\
+        \bottomrule
     \end{tabular}
-
-
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|c|} \hline 
-         $R_L~[k\Omega]$& $V_{in}~[V]$\\ \hline 
-         $1$& $-9  ~a~7,8$\\ \hline 
-         $2$& $-4,5~a~3,9$\\ \hline 
-         $5$& $-1,9~a~1,6$\\ \hline 
-         $10$&$-0,9~a~0,8$\\ \hline
-    \end{tabular}
-    \caption{Rango de $V_{in}$ en función de $R_L$}
-    \label{tab:Vin=f(RL)}
-\end{table}
+    \caption{Comparativa técnica de osciloscopio disponibles.}
+    \label{tab:osciloscopio}
 \end{table}

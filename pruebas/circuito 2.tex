@@ -1,0 +1,343 @@
+\section{Circuito II: Fuente de corriente controlada por tensión.}
+
+En este caso se tiene un amplificador operacional operando con realimentación positiva y negativa, trabajando como fuente de corriente controlada por tensión, alimentado con una fuente de alimentación partida $\pm10V$ ($V_{CC}, V_{SS}$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{img/C2/Lab_1_Circ_2-esquema.png}
+    \caption{Circuito esquemático de la fuente de corriente.}
+    \label{fig:Esquematico2}
+\end{figure}
+
+Datos de los elementos del circuito de la \autoref{fig:Esquematico2}:
+\begin{itemize}
+    \item Amplificador Operacional LM324.
+    \item $V_{CC}=10~V.$
+    \item $V_{SS}=-10~V.$
+    \item $R_1=100~\Omega, R_2=10~k\Omega, R_3=1~k\Omega$ y $R_4=100~k\Omega.$
+\end{itemize}
+
+\subsection{Análisis Teórico.}
+
+Se analizará el circuito para las siguientes condiciones:
+\begin{align}
+    I_{R_L}&=f(V_{in},R_L) \label{eq:Consigna:I_{R_L}} \\
+    V_0&=f(V_{in},R_L) \label{eq:Consigna:V_0} \\
+    R_{Lmax}&=f(V_{in}) \label{eq:Consigna:R_L}
+\end{align}
+
+\subsubsection{Salida $V_0$ en función de $V_{in}$ y $R_L$.}
+A partir del esquema de la \autoref{fig:Esquematico2} se reacomoda el circuito  de la siguiente manera, tal que $V_{in}$ y $R_3$ conforman la alimentación, $R_L$ es la carga y el resto conforman la fuente de Howland (conversor de inmitancia negativa).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/C2/Lab_1_Circ_2_secciones.png}
+    \caption{Secciones del circuito}
+    \label{fig:Lab_1_Circ_2_secciones}
+\end{figure}
+
+Se plantea su equivalente de Thevenin:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/C2/Lab_1_Circ_2_equivalente-Thevenin.png}
+    \caption{Equivalente de Thevenin del circuito}
+    \label{fig:Lab_1_Circ_2_Thevenin}
+\end{figure}
+
+Se reemplazan la alimentación por su equivalente de Norton:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/C2/Lab_1_Circ_2_equivalente-Norton.png}
+    \caption{Equivalente de Norton del circuito}
+    \label{fig:Lab_1_Circ_2_Norton}
+\end{figure}
+
+Donde:
+\begin{equation}
+    R_{in}=R_3
+\end{equation}
+\begin{equation}
+    I_{in}=\frac{V_{in}}{R_{in}}=\frac{V_{in}}{R_3}
+    \label{eq:I_{in}}
+\end{equation}
+
+Se analiza la fuente de Howland:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{img/C2/Lab_1_Circ_2_FuenteHowland.png}
+    \caption{Fuente de Howland}
+    \label{fig:Lab_1_Circ_2_FuenteHowland}
+\end{figure}
+
+Del circuito, por considerar el Amplificador operacional ideal, se puede deducir:
+\begin{align}
+    V_X &= V=V_0\frac{R_4}{R_2+R_4} \label{eq:V_X} \\
+    I_X &= I_1=\frac{V-V_0}{R_1} \label{eq:I_X}
+\end{align}
+
+Luego, se despeja $V_0$ de la \autoref{eq:V_X}:
+\begin{equation*}
+    V_0=V\frac{R_2+R_4}{R_4}=V\left(1+\frac{R_2}{R_4}\right)
+\end{equation*}
+
+Se reemplaza $V$ y $V_0$ en \autoref{eq:I_X}:
+\begin{align*}
+    I_X &= \frac{V_X - V_X\left(1 + \frac{R_2}{R_4}\right)}{R_1} \\
+    I_X &= \frac{V_X\left(1 - \left(1 + \frac{R_2}{R_4}\right)\right)}{R_1} \\
+    I_X &= \frac{V_X\left(- \frac{R_2}{R_4}\right)}{R_1} \\
+    I_X &= -V_X \frac{R_2}{R_1 R_4}
+\end{align*}
+
+Luego:
+\begin{equation*}
+    Z^+=\frac{V_X}{I_X}=-\frac{R_1R_4}{R_2}
+\end{equation*}
+
+Tal que, se se cumpla:
+\begin{equation}
+    Z^+=-R_3
+    \label{eq:Z^+}
+\end{equation}
+
+Por lo tanto:
+\begin{equation*}
+    R_{in}//Z^+=R_3//-R_3
+\end{equation*}
+
+Pero dado que en la práctica no es posible lograr con exactitud la \autoref{eq:Z^+}, resulta:
+\begin{equation*}
+    Z^+=-R_3(1+\alpha)
+\end{equation*}
+
+Luego:
+\begin{align*}
+    R_{in}//Z^+ &= \frac{R_3*(-R_3(1+\alpha))}{R_3+(-R_3(1+\alpha))} \\
+    R_{in}//Z^+ &= \frac{-R_3^2(1+\alpha)}{R_3-R_3-R_3\alpha} \\
+    R_{in}//Z^+ &= \frac{-R_3^2(1+\alpha)}{-R_3\alpha} \\
+    R_{in}//Z^+ &= R_3\frac{(1+\alpha)}{\alpha}
+\end{align*}
+
+Como en general se cumple que $\alpha<<1$, resulta:
+\begin{equation*}
+    R_{in}//Z^+ \approx \frac{R_3}{\alpha}
+\end{equation*}
+
+Entonces, el equivalente de Norton de la fig. \ref{fig:Lab_1_Circ_2_Norton} queda:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/C2/Lab_1_Circ_2_DivisorCorriente.png}
+    \caption{Equivalente de Norton resultante}
+    \label{fig:Lab_1_Circ_2_DivisorCorriente}
+\end{figure}
+
+Donde:
+\begin{equation*}
+    I_{R_L}=I_{in}\frac{R_3/\alpha}{R_3/\alpha+R_L}
+\end{equation*}
+
+Se reemplaza $I_{in}$ por la \autoref{eq:I_{in}}:
+\begin{align*}    
+    I_{R_L} &= \frac{V_{in}}{R_3}\frac{R_3/\alpha}{R_3/\alpha+R_L} \\
+    I_{R_L} &= V_{in}\frac{\alpha}{\alpha (R_3+\alpha R_L)}
+\end{align*}
+
+Por lo tanto, la \autoref{eq:Consigna:I_{R_L}} resulta:
+\begin{equation}
+    \boxed{I_{R_L}=\frac{V_{in}}{R_3+\alpha R_L}}
+    \label{eq:Resultado_I_{R_L}=f(V_in,R_L)}
+\end{equation}
+
+Considerando que $\alpha<<1$:
+\begin{equation}
+    \boxed{I_{R_L}=\frac{V_{in}}{R_3}}
+\end{equation}
+
+
+\subsubsection{Salida $I_{R_L}$ en función de $V_{in}$ y $R_L$.}
+
+De la \autoref{fig:Lab_1_Circ_2_secciones} se observa:
+\begin{equation}
+    V=R_L*I_{R_L}
+    \label{eq:V_{R_L}}
+\end{equation}
+
+Luego, se reemplaza $V$ (\autoref{eq:V_X}) e $I_{R_L}$ (\autoref{eq:Resultado_I_{R_L}=f(V_in,R_L)}) en \autoref{eq:V_{R_L}}:
+\begin{equation*}
+    V_0\frac{R_4}{R_2+R_4}=R_L*\frac{V_{in}}{R_3+\alpha R_L}
+\end{equation*}
+
+Se despeja $V_0$:
+\begin{equation*}
+    V_0=V_{in}\frac{R_L}{R_3+\alpha R_L}\frac{R_2+R_4}{R_4}
+\end{equation*}
+
+Por lo tanto, la \autoref{eq:Consigna:V_0} resulta:
+\begin{equation}
+    \boxed{V_0=V_{in}\frac{1}{\frac{R_3}{R_L}+\alpha}\left(1+\frac{R_2}{R_4}\right)}
+    \label{eq:Resultado_V_O=f(V_in,R_L)}
+\end{equation}
+
+Considerando que $\alpha<<1$:
+\begin{equation}
+    \boxed{V_0 \approx V_{in}\frac{R_L}{R_3}\left(1+\frac{R_2}{R_4}\right)}
+    \label{eq:Resultado_V_O=f(V_in,R_L)_bis}
+\end{equation}
+
+\subsubsection{Carga máxima $R_{Lmax}$ en función de $V_{in}$.}
+
+Se despeja $R_L$ de la \autoref{eq:Resultado_V_O=f(V_in,R_L)}:
+\begin{align*}
+    V_0 &= V_{in}\frac{1}{\frac{R_3}{R_L}+\alpha}\left(1+\frac{R_2}{R_4}\right) \\
+    \frac{R_3}{R_L}+\alpha &= \frac{V_{in}}{V_0}\left(1+\frac{R_2}{R_4}\right) \\
+    \frac{R_3}{R_L} &= \frac{V_{in}}{V_0}\left(1+\frac{R_2}{R_4}\right)-\alpha
+\end{align*}
+
+Por lo tanto, la \autoref{eq:Consigna:R_L} resulta:
+\begin{equation}
+    \boxed{R_L=\frac{R_3}{\frac{V_{in}}{V_0}\left(1+\frac{R_2}{R_4}\right)-\alpha}}
+\end{equation}
+
+Considerando que $\alpha<<1$:
+\begin{equation*}
+    R_L \approx \frac{R_3}{\frac{V_{in}}{V_0}\left(1+\frac{R_2}{R_4}\right)}
+\end{equation*}    
+\begin{equation}
+    \boxed{R_L \approx \frac{V_0}{V_{in}}\frac{R_3}{\left(1+\frac{R_2}{R_4}\right)}}
+\end{equation}
+
+Para determinar la resistencia máxima admisible del circuito, se debe tener en cuenta que la tensión máxima de salida es de 10 Volts ($V_{0max}=10~V$), limitada por la alimentación del amplificador. Sin embargo, es importante destacar que contamos con dos variables, $V_{in}$ y $R_L$, las cuales pueden variar de distintas maneras, y es posible alcanzar la tensión máxima de salida con diversas combinaciones.
+
+Finalmente, de los cálculos se obtuvieron los siguientes valores:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hhline{-----}
+        %primera fila 
+        \multicolumn{2}{|c|}{\multirow{2}{*}{$I_{R_L}$}} & \multicolumn{3}{c|}{$V_{in}~[V]$}\\
+        \hhline{~~---}
+        %segunda fila
+        \multicolumn{2}{|c|}{} & $-1$ & $0,5$ & $2$ \\
+        \hhline{-----}
+        %Tercera Fila
+        \multirow{5}{*}{$R_L~[k\Omega]$} & $0$ & $-1,000~mA$ & $500,000~\mu A$ & $2,000~mA$ \\
+        \hhline{~----}
+         & $1$ & $-0,952~mA$ & $476,190~\mu A$ & $1,905~mA$ \\
+        \hhline{~----}
+         & $2$ & $-0,909~mA$ & $454,545~\mu A$ & $1,818~mA$ \\
+        \hhline{~----}
+         & $5$ & $-0,800~mA$ & $400,000~\mu A$ & $1,600~mA$ \\
+        \hhline{~----}
+         & $10$ & $-0,667~mA$ & $333,333~\mu A$ & $1,333~mA$ \\
+        \hhline{-----}
+    \end{tabular}
+    \caption{Resultados analíticos de $I_{R_L}=f(V_{in}, R_L)$}
+    \label{tab:ResultadosCalculo}
+\end{table}
+
+\subsection{Simulación.}
+Se simula el circuito con la tensión de entrada de corriente continua, haciendo un barrido de $V_{in}$, para distintas cargas $R_L$ ($0~\Omega$, $1~k\Omega$, $2~k\Omega$, $5~k\Omega$ y $10~k\Omega$).
+
+Cabe aclarar que como el simulador no permite colocar una resistencia con valor cero, se aproxima con un valor muy pequeño que tiende a cero ($R_L=1~p\Omega$).
+
+\begin{figure}[H]
+    %\centering
+    \includegraphics[width=1\linewidth]{img/C2/Lab_1_Circ_2_IRL-esquema.png}
+    \caption{Circuito esquemático para $I_{R_L}=f(V_{in}, R_L)$ y $V_0=f(V_{in}, R_L)$.}
+    \label{fig:Lab_1_Circ_2_IRL+V0-esquema}
+\end{figure}
+
+\subsubsection{Parametrización de $I_{R_L}$ en función de $V_{in}$ y $R_L$.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/C2/Lab_1_Circ_2_IRL-ondas.png}
+    \caption{Curva característica de $I_{R_L}=f(V_{in}, R_L)$}
+    \label{fig:Lab_1_Circ_2_IRL-ondas}
+\end{figure}
+
+\subsubsection{Parametrización de $V_0$ en función de $V_{in}$ y $R_L$.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/C2/Lab_1_Circ_2_V0-ondas.png}
+    \caption{Curva característica de $V_0=f(V_{in}, R_L)$}
+    \label{fig:Lab_1_Circ_2_V0-ondas}
+\end{figure}
+
+Se puede observar en ambas figuras (fig. \ref{fig:Lab_1_Circ_2_IRL-ondas} y \ref{fig:Lab_1_Circ_2_V0-ondas}) que, a medida que aumenta el valor de $R_L$ disminuye el rango de $V_{in}$ aceptable para que la tensión de salida $V_0$ y la corriente de carga $I_{R_L}$ no se saturen.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|} \hline 
+         $R_L~[k\Omega]$& $V_{in}~[V]$\\ \hline 
+         $1$& $-9  ~a~7,8$\\ \hline 
+         $2$& $-4,5~a~3,9$\\ \hline 
+         $5$& $-1,9~a~1,6$\\ \hline 
+         $10$&$-0,9~a~0,8$\\ \hline
+    \end{tabular}
+    \caption{Rango de $V_{in}$ en función de $R_L$}
+    \label{tab:Vin=f(RL)}
+\end{table}
+
+\subsubsection{Parametrización de $R_L$ en función de $V_{in}$.}
+\begin{figure}[H]
+    %\centering
+    \includegraphics[width=1\linewidth]{img/C2/Lab_1_Circ_2_RL-esquema.png}
+    \caption{Circuito esquemático para $I_{R_L}=f(V_{in}, R_L)$ y $V_0=f(V_{in}, R_L)$.}
+    \label{fig:Lab_1_Circ_2_RL-esquema}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{img/C2/Lab_1_Circ_2_RL-ondas.png}
+    \caption{Curva característica de $R_L=f(V_{in})$}
+    \label{fig:Lab_1_Circ_2_RL-ondas}
+\end{figure}
+De la \autoref{fig:Lab_1_Circ_2_RL-ondas} se puede observar que a medida que aumenta el valor de tensión de entrada $V_{in}$ disminuye el valor máximo de carga $R_{Lmax}$ permitido.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|} \hline 
+         $V_{in}~[V]$& $R_L~[k\Omega]$\\ \hline 
+         1& 7,8\\ \hline 
+         2& 3,9\\ \hline 
+         3& 2,6\\ \hline 
+         4& 1,9\\ \hline 
+         5& 1,5\\ \hline 
+         6& 1,3\\ \hline 
+         7& 1,1\\ \hline 
+         8& 0,9\\ \hline 
+         9& 0,8\\ \hline 
+       10& 0,7\\ \hline
+    \end{tabular}
+    \caption{$R_{Lmax}$ en función de $V_{in}$}
+    \label{tab:RL=f(Vin)}
+\end{table}
+
+Finalmente, de las simulaciones se obtuvieron los siguientes valores:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hhline{-----}
+        %primera fila 
+        \multicolumn{2}{|c|}{\multirow{2}{*}{$I_{R_L}$}} & \multicolumn{3}{c|}{$V_{in}~[V]$}\\
+        \hhline{~~---}
+        %segunda fila
+        \multicolumn{2}{|c|}{} & $-1$ & $0,5$ & $2$ \\
+        \hhline{-----}
+        %Tercera Fila
+        \multirow{5}{*}{$R_L~[k\Omega]$}
+        & $0$ & $-1,002~mA$ & $497,656~\mu A$ & $1,998~mA$ \\
+        \hhline{~----}
+        & $1$ & $-1,002~mA$ & $497,656~\mu A$ & $1,998~mA$ \\
+        \hhline{~----}
+        & $2$ & $-1,002~mA$ & $497,656~\mu A$ & $1,998~mA$ \\
+        \hhline{~----}
+        & $5$ & $-1,002~mA$ & $497,656~\mu A$ & $1,549~mA$ \\
+        \hhline{~----}
+        & $10$ & $-0,904~mA$ & $497,656~\mu A$ & $0,783~mA$ \\
+        \hhline{-----}
+    \end{tabular}
+    \caption{Resultados de simulación de $I_{R_L}=f(V_{in},R_L)$}
+    \label{tab:ResultadosSimulacion}
+\end{table}
+%\subsection{Mediciones prácticas de laboratorio.}
