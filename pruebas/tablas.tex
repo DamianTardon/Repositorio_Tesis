@@ -1,0 +1,24 @@
+Pagina de tablas
+
+\begin{table}[H]
+    \begin{small}
+        \begin{tabular}{cccccc}
+            \toprule
+            \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Marca}}} &
+            \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Modelo}}} &
+            \textbf{Ancho de} &
+            \textbf{Tasa de} &
+            \textbf{Manual de} &
+            \textbf{Compatibilidad}\\
+            & & \textbf{banda} & \textbf{muestreo} & \textbf{programación} & \textbf{VISA}\\
+            \midrule
+            GW Instek & GDS-1022 & 25 MHz & 250 MSa/s & Sí & Sí\\
+            GW Instek & GDS-1102A-U & 100 MHz & 1 GSa/s & Sí & Sí\\
+            Keysight & GDS-1102A-U & 100 MHz & 1 GSa/s & No& No\\
+            Owon & PDS7102T & 100 MHz & 500 MSa/s & No& No\\
+            \bottomrule
+        \end{tabular}
+        \caption{Comparativa técnica de osciloscopio disponibles.}
+        \label{tab:osciloscopio}
+    \end{small} % Termina el tamaño reducido
+\end{table}

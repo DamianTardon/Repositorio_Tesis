@@ -1,0 +1,89 @@
+% !TeX program = lualatex
+\documentclass[11pt]{report} % Clase de documento para un informe.
+% Documento y codificación general.
+\usepackage[utf8]{inputenc} % Tildes, "ñ" y símbolos especiales.
+% Idioma y traducción
+\usepackage[spanish,es-tabla]{babel} % Traduce el documento al español.
+\usepackage[a4paper,left=3cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry} % Tamaño de la página.
+\usepackage{fontspec} % Permite usar fuentes del sistema.
+\usepackage[spanish, bidi=basic, provide=*]{babel} % Soporte para texto en español.
+\babelprovide[import, onchar=ids fonts]{spanish} % Manejo de caracteres y reglas gramaticales.
+\babelprovide[import, onchar=ids fonts]{english}
+\babelprovide[import, onchar=ids fonts]{portuguese}
+\babelfont{rm}{Noto Serif} % Fuente serif.
+% Imágenes y figuras
+\usepackage{graphicx} % Permite incluir imágenes.
+\usepackage{subcaption} % Permite agregar subfiguras dentro de una figura principal, cada una con su leyenda.
+\usepackage{float} % Permite fijar la posición de las figuras y tablas [H].
+% Matemáticas y símbolos
+\usepackage{amsmath} % Entornos matemáticos avanzados.
+\usepackage{amssymb} % Símbolos matemáticos adicionales.
+\usepackage{mathtools} % Herramientas matemáticas avanzadas.
+\usepackage{multirow}  % Para texto en varias filas.
+\usepackage{booktabs} % Formateo de tablas.
+\usepackage{setspace} % Control de interlineado.
+\usepackage{enumitem} % Configuración de listas.
+% Hipervinculos y referencias
+\usepackage[hidelinks]{hyperref} % Hipervínculos transparentes dentro del documento.
+\usepackage[table,xcdraw]{xcolor} % Colores, textos y tablas.
+\usepackage[backend=biber]{biblatex} % Gestionar bibliografía.
+\usepackage{csquotes} % Mejora el formato de citas textuales.
+\usepackage{setspace}
+\onehalfspacing % Interlineado de 1.5.
+\setlist[itemize]{label=-} % Configuración de listas con guiones.
+\setlength{\parskip}{1.5ex} % Espacio entre párrafos.
+
+% Redefinición de títulos.
+\addto\captionsspanish{
+  \renewcommand{\contentsname}{Índice}
+  \renewcommand{\listtablename}{Lista de Tablas}
+  \renewcommand{\listfigurename}{Lista de Figuras}
+}
+
+\begin{document}
+
+\pagenumbering{roman}
+\input{capitulos/00_portada.tex}
+\input{capitulos/00_acta_tribunal.tex}
+\input{capitulos/00_acta_director.tex}
+\input{capitulos/00_dedicatoria.tex}
+\input{capitulos/00_agradecimientos.tex}
+\input{capitulos/00_resumen.tex}
+
+\tableofcontents
+\listoftables
+\addcontentsline{toc}{section}{Lista de Tablas}
+\listoffigures
+\addcontentsline{toc}{section}{Lista de Figuras}
+
+\newpage
+\pagenumbering{arabic}
+% ==============================================================================================================
+% INTRODUCCIÓN
+% ==============================================================================================================
+\input{capitulos/01_introduccion.tex}
+
+% ==============================================================================================================
+% MARCO TEÓRICO
+% ==============================================================================================================
+\part{MARCO TEÓRICO}
+
+% ==============================================================================================================
+% MARCO METODOLÓGICO
+% ==============================================================================================================
+\part{MARCO METODOLÓGICO}
+
+% ==============================================================================================================
+% RESULTADOS Y CONCLUSIONES
+% ==============================================================================================================
+\part{RESULTADOS Y CONCLUSIONES}
+
+% ==============================================================================================================
+% BIBLIOGRAFÍA
+% ==============================================================================================================
+
+% ==============================================================================================================
+% ANEXOS
+% ==============================================================================================================
+\part*{ANEXOS}
+\end{document}
