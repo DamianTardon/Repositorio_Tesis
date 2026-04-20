@@ -1,1 +1,11 @@
 **/ejemplo/
+*.aux
+*.bbl
+*.bcf
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc

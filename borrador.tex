@@ -1,9 +1,9 @@
 % !TeX program = lualatex
 \documentclass[11pt]{book} % Clase de documento para un informe.
-%\documentclass[11pt, draft]{book} % Clase de documento para un informe.
+
 % --- IDIOMA Y LOCALIZACIÓN ---
-\usepackage[bidi=basic, provide=*]{babel}
-\babelprovide[main, import, onchar=ids fonts]{spanish}
+\usepackage[spanish, bidi=basic, provide=*]{babel} % Soporte para texto en español.
+\babelprovide[import, onchar=ids fonts]{spanish} % Manejo de caracteres y reglas gramaticales.
 \babelprovide[import, onchar=ids fonts]{english}
 \babelprovide[import, onchar=ids fonts]{portuguese}
 
@@ -54,6 +54,7 @@
 \begin{document}
 
 \pagenumbering{roman}
+
 \input{capitulos/00_portada.tex}
 \input{capitulos/00_acta_tribunal.tex}
 \input{capitulos/00_acta_director.tex}
@@ -71,34 +72,24 @@
 \listoffigures
 \addcontentsline{toc}{chapter}{\listfigurename}
 
-\cleardoublepage
-\input{capitulos/00_simbolos_convenciones.tex}
-\addcontentsline{toc}{chapter}{c}
-
 \newpage
 \pagenumbering{arabic}
 
-% INTRODUCCIÓN =================================================================================================
 \input{capitulos/01_introduccion.tex}
 
-% MARCO TEÓRICO ================================================================================================
 \part{MARCO TEÓRICO}
 
 
-% MARCO METODOLÓGICO ===========================================================================================
 \part{MARCO METODOLÓGICO}
 
 
-% RESULTADOS Y CONCLUSIONES ====================================================================================
 \part{RESULTADOS Y CONCLUSIONES}
 
 
-% BIBLIOGRAFÍA =================================================================================================
 \cleardoublepage
 % La bibliografía solo aparecerá si hay citas en el texto y el archivo .bib existe.
-%\printbibliography[heading=bibintoc, title={Bibliografía}]
+\printbibliography[heading=bibintoc, title={Bibliografía}]
 
-% ANEXOS =======================================================================================================
 \part*{ANEXOS}
 \addcontentsline{toc}{part}{ANEXOS}
 
