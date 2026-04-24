@@ -1,6 +1,7 @@
 % !TeX program = lualatex
 \documentclass[11pt]{book} % Clase de documento para un informe.
 %\documentclass[11pt, draft]{book} % Clase de documento para un informe.
+
 % --- IDIOMA Y LOCALIZACIÓN ---
 \usepackage[bidi=basic, provide=*]{babel}
 \babelprovide[main, import, onchar=ids fonts]{spanish}
@@ -22,8 +23,11 @@
 % --- MATEMÁTICAS Y TABLAS ---
 \usepackage{amsmath, amssymb, mathtools}
 \usepackage{booktabs} % Formateo de tablas.
+\usepackage{tabularx}
 %\usepackage{multirow, booktabs} % Para texto en varias filas, y Formateo de tablas.
 \usepackage[table, xcdraw]{xcolor}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,}}
 
 % --- GRÁFICOS ---
 \usepackage{graphicx} % Permite incluir imágenes.
@@ -55,39 +59,39 @@
 
 \pagenumbering{roman}
 \input{capitulos/00_portada.tex}
-\input{capitulos/00_acta_tribunal.tex}
-\input{capitulos/00_acta_director.tex}
-\input{capitulos/00_dedicatoria.tex}
-\input{capitulos/00_agradecimientos.tex}
-\input{capitulos/00_resumen.tex}
+%\input{capitulos/00_acta_tribunal.tex}
+%\input{capitulos/00_acta_director.tex}
+%\input{capitulos/00_dedicatoria.tex}
+%\input{capitulos/00_agradecimientos.tex}
+%\input{capitulos/00_resumen.tex}
 
-\tableofcontents
+%\tableofcontents
 
 \cleardoublepage
-\listoftables
+%\listoftables
 \addcontentsline{toc}{chapter}{\listtablename}
 
 \cleardoublepage
-\listoffigures
+%\listoffigures
 \addcontentsline{toc}{chapter}{\listfigurename}
 
 \cleardoublepage
-\input{capitulos/00_simbolos_convenciones.tex}
+%\input{capitulos/00_simbolos_convenciones.tex}
 \addcontentsline{toc}{chapter}{c}
 
 \newpage
 \pagenumbering{arabic}
 
 % INTRODUCCIÓN =================================================================================================
-\input{capitulos/01_introduccion.tex}
+%\input{capitulos/01_introduccion.tex}
 
 % MARCO TEÓRICO ================================================================================================
-\part{MARCO TEÓRICO}
+%\part{MARCO TEÓRICO}
 
 
 % MARCO METODOLÓGICO ===========================================================================================
-\part{MARCO METODOLÓGICO}
-
+%\part{MARCO METODOLÓGICO}
+\input{capitulos/04_arquitectura_sistema.tex}
 
 % RESULTADOS Y CONCLUSIONES ====================================================================================
 \part{RESULTADOS Y CONCLUSIONES}
