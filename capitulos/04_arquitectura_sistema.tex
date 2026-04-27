@@ -2,18 +2,70 @@
 \chapter{Arquitectura del sistema}
 \vspace{3\baselineskip}
 
-En este caítulo se presentan los fundamentos por los cuáles se adoptó Python como lenguaje de programación para desarrollar el software.\par
+Este capítulo detalla el diseño estructural del software desarrollado para la adquisición y análisis de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}). Se describe el patrón de diseño implementado para garantizar la escalabilidad y el desacople de los componentes, el flujo de datos desde el osciloscopio digital hasta la generación de reportes, y se presenta la justificación técnica del \textit{stack} de desarrollo seleccionado en contraste con otras alternativas de la industria. Finalmente, se definen los lineamientos de gestión del entorno de desarrollo y el control de versiones aplicados durante el ciclo de vida del proyecto.\par
 
-\section{Comparativa entre Python y LabVIEW}
-Para desarrollar el software de control del osciloscopio y procesamiento de los datos, se analizaron dos opciones que se consideran las más adecuadas para este contexto: Python y LabVIEW. Ambas opciones ofrecen herramientas y bibliotecas para la comunicación con instrumentos de medición.\par
+\section{Patrones de arquitectura del software}
+
+Actualmente, para el desarrollo de software en general, se existen diversos patrones de diseño que ayudan a organizar el código, mejorar la mantenibilidad y facilitar la escalabilidad. Algunos de los patrones más comunes son: \textit{Model-View-Controller} (MVC), \textit{Model-View-Presenter} (MVP) y \textit{Model-View-ViewModel} (MVVM), entre otros.\par
+
+El patrón \textit{Model-View-Controller} (MVC) es un patrón de diseño de software que se utiliza para separar la lógica de presentación, la lógica de negocio (procesar los datos, realizar cálculos y tomar decisiones) y la gestión de eventos en una aplicación. En este patrón, el \textbf{Modelo} representa los datos y la lógica de negocio, la \textbf{Vista} se encarga de la presentación visual y la interacción con el usuario, y el \textbf{Controlador} actúa como intermediario entre el Modelo y la Vista, gestionando las entradas del usuario y actualizando la Vista en consecuencia.\par
+El patrón \textit{Model-View-Presenter} (MVP) es similar al MVC, pero con una separación más clara entre la lógica de presentación y la lógica de negocio. En este patrón, el \textbf{Presentador} se encarga de manejar la lógica de presentación y la interacción con el usuario, mientras que el \textbf{Modelo} sigue representando los datos y la lógica de negocio. La \textbf{Vista} se limita a mostrar los datos proporcionados por el Presentador y a enviar las acciones del usuario al Presentador.\par
+El patrón \textit{Model-View-ViewModel} (MVVM) es una evolución del MVP, el cual introduce el concepto de \textbf{ViewModel}, que actúa como un enlace entre el Modelo y la Vista. En este patrón, el ViewModel expone los datos y comandos que la Vista puede enlazar directamente, lo que facilita la separación de responsabilidades y mejora la testabilidad de la aplicación.\par
+
+\subsection{Arquitectura de software adoptada}
+
+El sistema se diseñó bajo el patrón arquitectónico \textit{Model-View-Presenter} (MVP), con el objetivo de separar estrictamente la lógica de presentación (GUI), la lógica de negocio, y la gestión de eventos (presionar botones, ingresar texto o capturar una señal). Esta segregación es fundamental para cumplir con los requerimientos de validación algorítmica establecidos por la norma IEC 61083-2, permitiendo someter los módulos matemáticos a pruebas unitarias, utilizando los datos de calibración provistos en el software \textit{Test Data Generator} o TDG, incluído en la norma, sin dependencia de la interfaz gráfica.\par
+
+Los componentes de la arquitectura se distribuyen de la siguiente manera:\par
+
+\begin{itemize}
+    \item \textbf{View (Vista):} Maneja exclusivamente la representación visual del software y la interacción del usuario, generada con la herramienta gráfica \texttt{Qt Designer} junto con la biblioteca \texttt{PySide6},  y la presentación de los gráficos mediante la librería \texttt{pyqtgraph}. La vista se mantiene completamente independiente de la lógica de adquisición y procesamiento, emitiendo señales (\texttt{Qt Signals}) que son capturadas por el presentador para desencadenar las acciones correspondientes.
+    \item \textbf{Model (Modelo):} Contiene el manejo del hardware en \texttt{GWInstekGDS1000AU}, con su gestión de comandos SCPI vía \texttt{PyVISA}, en \texttt{FileManager} tiene la lógica de persistencia, encargado del almacenamiento jerárquico en formato HDF5 y exportación a CSV/XLSX, y en \texttt{ImpulseAnalyzer} se encuentra el motor de cálculo, que centraliza el procesamiento de señales, la aplicación de filtros digitales y el ajuste de curvas mediante el algoritmo de Levenberg-Marquardt, para extraer los parámetros de la onda ($U_t$, $T_1$, $T_2$, $OS\%$) exigidos por la norma IEC 60060-1.
+    \item \textbf{Presenter (Presentador):} Implementado en la clase \texttt{MainController}. Actúa como orquestador conectando las señales emitidas por la Vista con los métodos (\textit{slots}) correspondientes para interactuar con el Modelo, y actualizando la interfaz gráfica con los resultados procesados.
+\end{itemize}
+
+\subsection{Manejo de Concurrencia y Flujo de Datos}
+
+Dado que la comunicación con el osciloscopio (GW Instek GDS-1102A-U) requiere operaciones de entrada/salida (I/O) bloqueantes —específicamente durante la espera del disparo (\textit{trigger}) del impulso—, la arquitectura incorpora un enfoque multihilo.
+
+Se implementó la clase \texttt{WaitWaveformThread} heredada de \texttt{QThread}. Este hilo secundario sondea el estado del osciloscopio en segundo plano. Cuando se detecta el disparo, el hilo emite una señal (\texttt{wave\_detected}) que es capturada por el hilo principal para proceder con la descarga del bloque de datos. Este diseño previene el congelamiento (\textit{freezing}) de la GUI.
+
+El flujo de datos continuo se define en cuatro etapas secuenciales:
+
+\begin{enumerate}
+    \item \textbf{Adquisición:} El osciloscopio digitaliza la señal analógica. El bloque de datos binario es transferido a la PC vía USB (PyVISA), desempaquetado y convertido a un \textit{array} de NumPy considerando los factores de atenuación del sistema de medición.
+    \item \textbf{Procesamiento:} Se almacena en el objeto \texttt{LightningImpulseAnalyzer} el \textit{array} de tensión crudo. Se aplica la rutina indicada en el Anexo B de la norma IEC 60060-1, para obtener los parámetros característicos de la onda.
+    \item \textbf{Visualización:} Los \textit{arrays} resultantes se inyectan en los objetos \texttt{PlotCurveItem} de \texttt{pyqtgraph} para su renderizado inmediato en pantalla.
+    \item \textbf{Persistencia:} La metadata del ensayo, las condiciones ambientales y los \textit{arrays} de tensión (crudos y procesados) se empaquetan y almacenan en un archivo HDF5, garantizando la trazabilidad de los datos.
+\end{enumerate}
+
+\section{Elección del stack tecnológico}
+
+Para desarrollar el software de control del osciloscopio y procesamiento de los datos, se analizaron tres opciones que se consideran las más adecuadas para este trabajo: Python, C++ y LabVIEW. Estas opciones ofrecen herramientas y bibliotecas para la comunicación con instrumentos de medición.\par
 Python es un lenguaje de programación de alto nivel, conocido por su simplicidad y legibilidad. Cuenta con una amplia gama de bibliotecas y frameworks que facilitan el desarrollo de aplicaciones científicas y de ingeniería. Además, es de código abierto, gratuito y de uso libre, incluso para fines comerciales, lo que permite acceder a una gran cantidad de recursos sin tener que pagar licencias.\par
-Por otro lado, LabVIEW, es un entorno de desarrollo gráfico utilizado principalmente en aplicaciones de ingeniería y automatización, conocido por su facilidad para crear interfaces de usuario y su capacidad para interactuar con hardware de medición. Sin embargo, es un software propietario, con licencias que comienzan en varios cientos de dólares, lo que lo convierte en una opción menos accesible.\par
-Ambas herramientras llevan mucho tiempo en el mercado y son ampliamente utilizadas en la industria, por lo que son opciones viables para llevar a cabo este proyecto. Sin embargo, dado la diferencias de costos que tienen, Python se presenta como una opción más accesible para el contexto del laboratorio.\par
+C++ es un lenguaje compilado que destaca por su máximo rendimiento en tiempo de ejecución y control a bajo nivel de los recursos del sistema. Presenta una curva de desarrollo pronunciada, la necesidad de gestionar la memoria manualmente, y la verbosidad de su sintaxis que incrementan drásticamente los tiempos de programación frente a lenguajes de mayor nivel de abstracción. Según el tipo de licencia que se adopte para QT, puede ser gratis o tener un costo asociado.\par
+LabVIEW, es un entorno de desarrollo gráfico utilizado principalmente en aplicaciones de ingeniería y automatización, conocido por su facilidad para crear interfaces de usuario y su capacidad para interactuar con hardware de medición. Sin embargo, es un software propietario, con licencias costosas, que lo convierte en la opción menos accesible.\par
+Las tres herramientas llevan mucho tiempo en el mercado y son ampliamente utilizadas en la industria, por lo que son opciones viables para llevar a cabo este proyecto. Sin embargo, dada la diferencia de costos y la agilidad de desarrollo requerida, Python se presenta como la opción más balanceada, accesible y eficiente para el contexto del laboratorio.\par
+En la Tabla 1 se sintetiza el análisis comparativo que decantó en la adopción conjunto de herramientas: Python 3 para la lógica de negocio, PySide6 para la interfaz gráfica y PyVISA para la comunicación con el hardware.\par
+
+\begin{table}[h!]
+    \centering
+    \begin{tabularx}{\textwidth}{>{\hsize=0.8\hsize\raggedright\arraybackslash}X >{\hsize=1.1\hsize\raggedright\arraybackslash}X >{\hsize=1.1\hsize\raggedright\arraybackslash}X >{\hsize=1\hsize\raggedright\arraybackslash}X}
+        \toprule
+        \textbf{Criterio de Evaluación}      & \textbf{Python}                                         & \textbf{C++}                                           & \textbf{LabVIEW} \\ \midrule
+        \textbf{Tipo de Lenguaje}       & Interpretado (Alto nivel).                                                            & Compilado (Alto nivel/Bajo nivel).                                                    & Gráfico (Flujo de datos). \\ \addlinespace
+        \textbf{Bibliotecas}       & Nativas + Externas. Multiples aplicaciones.                                                            & Nativas + Externas. Enfocadas en rendimiento.                                                    & Nativas. Especializadas en hardware/instrumentos. \\ \addlinespace
+        \textbf{Desarrollo de GUI}           & QT Desiger (\textit{Drag \& Drop}). Hay que codificar las funciones.           & QT Desiger (\textit{Drag \& Drop}). Hay que codificar las funciones.   & Nativo (\textit{Drag \& Drop}). Funciones ya codificadas. \\ \addlinespace
+        \textbf{Costos}     & Gratis. \textit{Open Source} (GPL/LGPL/BSD).                 & Depende de la licencia de Qt. \textit{Open Source} o Comercial . & Licencia costosa. \\\addlinespace
+        \textbf{Mantenimiento} & Alto. Código basado en texto.                                                      & Alto. Código basado en texto.                                              & Bajo. Archivos binarios (\texttt{.vi}), difícil revisión y actualización de código. \\ \bottomrule
+    \end{tabularx}
+    \caption{Análisis comparativo de entornos para instrumentación y procesamiento de señales.}
+\end{table}
 
 \section{Bibliotecas utilizadas}
 
-Una biblioteca (o librería) en programación es un conjunto de código preescrito, funciones, clases y métodos reutilizables que permiten añadir funcionalidades específicas a las aplicaciones propias sin tener que escribir todo desde cero. Sirven para ahorrar tiempo, optimizar tareas comunes y estandarizar el desarrollo de software.
-Una vez elegido Python como lenguaje de programación, se procedió a seleccionar las bibliotecas necesarias. Para ello se utilizó bibliotecas estándar, integradas en Python \autoref{Tab:LibreriasIntegradas}, y de Terceros \autoref{Tab:LibreriasExternas}.\par
+Una biblioteca (o librería) en programación es un conjunto de código preescrito, funciones, clases y métodos reutilizables que permiten añadir funcionalidades específicas a las aplicaciones propias sin tener que escribir todo desde cero. Sirven para ahorrar tiempo, optimizar tareas comunes y estandarizar el desarrollo de software.\par
+Una vez elegido Python como lenguaje de programación, a medida que se desarrolló el sistema, se incorporó las bibliotecas necesarias. Para ello se utilizó bibliotecas estándar, integradas en Python (\autoref{Tab:LibreriasIntegradas}), y de Terceros (\autoref{Tab:LibreriasExternas}).\par
 
 \begin{table}[H]
     \begin{tabularx}{\textwidth}{lXX}
@@ -41,7 +93,6 @@ Una vez elegido Python como lenguaje de programación, se procedió a selecciona
         \textbf{Librería} & \textbf{Función general} & \textbf{Rol en el sistema} \\ \midrule
         fpdf2      & Generar documentos PDF.                                                                               & Generar documentos de calibración en formato PDF.                                    \\ \addlinespace
         h5py       & Almacenar datos numéricos en formato binario HDF5, y manipularlos con NumPy.                          & Almacenar permanentemente los datos tipeados, digitalizados y/o calculados.          \\ \addlinespace
-        matplotlib & Crear visualizaciones estáticas, animadas e interactivas.                                             & Graficar las ondas de impulsos.                                                      \\ \addlinespace
         numpy      & Manejar y procesar grandes volúmenes de datos.                                                        & Realizar el procesamiento digital de las señales.                                    \\ \addlinespace
         openpyxl   & Leer/escribir archivos Excel 2010 xlsx/xlsm/xltx/xltm.                                                & Generar hoja de cálculo para exportar los resultados.                                \\ \addlinespace
         pandas     & Analizar y manipular datos.                                                                           & Estructurar datos para exportar resultados.                                          \\ \addlinespace
@@ -57,75 +108,15 @@ Una vez elegido Python como lenguaje de programación, se procedió a selecciona
     \label{Tab:LibreriasExternas}
 \end{table}
 
+\section{Gestión del entorno de desarrollo y control de versiones}
 
-\section{Definición de la arquitectura del software.}
+El desarrollo del código fuente se centralizó en el entorno de desarrollo integrado Visual Studio Code (VS Code). Para asegurar la reproducibilidad del entorno de ejecución a través de diferentes estaciones de trabajo y evitar conflictos con los paquetes del sistema operativo, el proyecto se aisló utilizando entornos virtuales nativos (\texttt{venv}). Todas las dependencias (ej. \texttt{PySide6}, \texttt{numpy}, \texttt{h5py}) quedaron registradas explícitamente en un archivo de requerimientos (\texttt{requirements.txt}) con sus versiones exactas. Esta homologación garantiza la utilización de las mismas librerías independientemente de la computadora de desarrollo, certificando así la estabilidad y el comportamiento determinista de los algoritmos matemáticos a lo largo del tiempo.\par
 
-\section{Gestión del entorno de desarrollo y control de versiones.}
-
-%===============================================================================================================================================
-
-\section{ Arquitectura General del Sistema y Tecnologías}
-
-Este capítulo detalla el diseño estructural del software desarrollado para la adquisición y análisis de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}). Se describe el patrón de diseño implementado para garantizar la escalabilidad y el desacople de los componentes, el flujo de datos desde el osciloscopio digital hasta la generación de reportes, y se presenta la justificación técnica del \textit{stack} de desarrollo seleccionado en contraste con otras alternativas de la industria. Finalmente, se definen los lineamientos de gestión del entorno de desarrollo y el control de versiones aplicados durante el ciclo de vida del proyecto.
-
-\subsection{Definición de la arquitectura del software}
-
-El sistema se diseñó bajo el patrón arquitectónico \textit{Model-View-Controller} (MVC), con el objetivo de separar estrictamente la lógica de presentación (GUI), la lógica de negocio (cálculo matemático), y la gestión de eventos. Esta segregación es fundamental para cumplir con los requerimientos de validación algorítmica establecidos por la norma IEC 61083-2, permitiendo someter los módulos matemáticos a pruebas unitarias (mediante un \textit{Test Data Generator} o TDG) sin dependencia de la interfaz gráfica.
-
-Los componentes del patrón se distribuyen de la siguiente manera:
+El control de versiones del código fuente se gestionó mediante Git. Se adoptó un flujo de trabajo basado en la creación de ramas. Esta estrategia permitió:
 
 \begin{itemize}
-    \item \textbf{View (Vista):} Definida mediante PySide6 (generada con la herramienta Qt Designer). Maneja exclusivamente la representación visual, la captura de la interacción del usuario y la instanciación de los gráficos mediante la librería \texttt{pyqtgraph}.
-    \item \textbf{Model (Modelo):} Compuesto por las clases de dominio. Incluye la abstracción del hardware \texttt{GWInstekGDS1000AU} (gestión de comandos SCPI vía PyVISA), la lógica de persistencia \texttt{FileManager} (almacenamiento jerárquico en formato HDF5 y exportación a CSV), y el motor de cálculo, la clase \texttt{LightningImpulseAnalyzer}. Este último centraliza el procesamiento de señales, la aplicación de filtros digitales y el ajuste de curvas (\textit{curve fitting}) mediante el algoritmo de Levenberg-Marquardt, para extraer los parámetros de la onda ($U_t$, $T_1$, $T_2$, $OS\%$) exigidos por la norma IEC 60060-1.
-    \item \textbf{Controller (Controlador):} Implementado en la clase \texttt{MainController}. Actúa como orquestador conectando las señales emitidas por la Vista con los métodos (\textit{slots}) correspondientes para interactuar con el Modelo, y actualizando la interfaz gráfica con los resultados procesados.
-\end{itemize}
-
-\subsubsection{Manejo de Concurrencia y Flujo de Datos}
-
-Dado que la comunicación con el osciloscopio (GW Instek GDS-1102A-U) requiere operaciones de entrada/salida (I/O) bloqueantes —específicamente durante la espera del disparo (\textit{trigger}) del impulso—, la arquitectura incorpora un enfoque multihilo (\textit{threading}).
-
-Se implementó la clase \texttt{WaitWaveformThread} heredada de \texttt{QThread}. Este hilo secundario sondea el estado del osciloscopio en segundo plano. Cuando se detecta el disparo, el hilo emite una señal (\texttt{wave\_detected}) que es capturada por el hilo principal (\textit{main thread}) para proceder con la descarga del bloque de datos (\textit{block data}). Este diseño previene el congelamiento (\textit{freezing}) de la GUI.
-
-El flujo de datos continuo se define en cuatro etapas secuenciales:
-
-\begin{enumerate}
-    \item \textbf{Adquisición:} El instrumento digitaliza la señal analógica. El bloque binario es transferido a la PC vía USB (PyVISA), desempaquetado y convertido a un \textit{array} de NumPy considerando los factores de atenuación de las sondas del instrumento.
-    \item \textbf{Procesamiento:} El \textit{array} de tensión ingresa al objeto \texttt{LightningImpulseAnalyzer}. Se aplican rutinas de compensación de \textit{offset}, determinación del origen virtual ($O_1$) e interpolación lineal, para obtener la base de tiempo alineada y los parámetros característicos de la onda.
-    \item \textbf{Visualización:} Los \textit{arrays} resultantes se inyectan en los objetos \texttt{PlotCurveItem} de \texttt{pyqtgraph} para su renderizado inmediato en pantalla.
-    \item \textbf{Persistencia:} La metadata del ensayo, las condiciones ambientales y los \textit{arrays} crudos, junto con los procesados se empaquetan y almacenan en un archivo HDF5, garantizando la trazabilidad de los datos.
-\end{enumerate}
-
-\subsection{Justificación del stack tecnológico}
-
-La elección de las herramientas de desarrollo se fundamentó en una evaluación multicriterio frente a entornos tradicionalmente utilizados en la instrumentación virtual, como C++ (Qt nativo) y LabVIEW. En la Tabla 1 se sintetiza el análisis comparativo que decantó en la adopción de Python 3.x, PySide6 y PyVISA.
-
-\begin{table}[h!]
-\centering
-\begin{tabularx}{\textwidth}{>{\hsize=0.8\hsize\raggedright\arraybackslash}X >{\hsize=1.1\hsize\raggedright\arraybackslash}X >{\hsize=1.1\hsize\raggedright\arraybackslash}X >{\hsize=1\hsize\raggedright\arraybackslash}X}
-\toprule
-\textbf{Criterio de Evaluación}      & \textbf{Python (PySide6 + PyVISA + SciPy)}                                              & \textbf{C++ (Qt C++ + VISA API)}                                           & \textbf{LabVIEW (NI VISA)} \\ \midrule
-\textbf{Ecosistema Matemático}       & Require integrar bibliotecas de terceros.                                               & Requiere integrar librerías de terceros.                                   & Bibliotecas nativas pero difícil de personalizar. \\ \addlinespace
-\textbf{Desarrollo de GUI}           & Alto rendimiento mediante \texttt{PySide6} y \texttt{pyqtgraph} (corre C++ por debajo). & Máximo rendimiento. Curva de desarrollo lenta.                             & Rápido (\textit{Drag \& Drop}), pero fuertemente acoplado al código fuente. \\ \addlinespace
-\textbf{Interacción con Hardware}    & Eficiente y directa (PyVISA abstrayendo la librería NI-VISA subyacente).                & Eficiente, pero requiere gestión manual de punteros y memoria en C.        & Excelente (Integración nativa del fabricante). \\ \addlinespace
-\textbf{Licenciamiento y Costos}     & \textit{Open Source} (GPL/LGPL/BSD). PySide6 permite uso comercial.                     & \textit{Open Source} o Comercial dependiendo de la licencia de Qt elegida. & Propietario. Altos costos de licencia de desarrollo y \textit{runtime}. \\\addlinespace
-\textbf{Mantenibilidad y Versionado} & Alta. Código basado en texto.                                                           & Alta. Código basado en texto.                                              & Baja. Archivos binarios (\texttt{.vi}), dificulta \textit{merges} y revisión de código (\textit{diffs}). \\ \bottomrule
-
-\end{tabularx}
-\caption{Análisis comparativo de entornos para instrumentación y procesamiento de señales.}
-\end{table}
-
-La norma IEC 61083-2 exige ajustes de curvas doble exponenciales con restricciones específicas de tolerancia y filtrado paso bajo. La disponibilidad de \texttt{scipy.optimize.curve\_fit} en Python proporcionó una implementación robusta y testeada del algoritmo de Levenberg-Marquardt. Si bien C++ ofrece una velocidad de ejecución bruta superior, el cuello de botella del sistema reside en el ancho de banda del bus USB para la transferencia de datos y no en el tiempo de CPU durante el cálculo post-adquisición. Por lo tanto, Python ofreció el equilibrio óptimo entre tiempo de desarrollo, capacidades científicas y rendimiento de ejecución.
-
-\subsection{Gestión del entorno de desarrollo y control de versiones}
-
-Para asegurar la reproducibilidad del entorno de ejecución y evitar conflictos de dependencias entre paquetes del sistema operativo, el desarrollo se aisló utilizando entornos virtuales nativos (\texttt{venv}). Todas las dependencias (ej. \texttt{PySide6}, \texttt{pyqtgraph}, \texttt{numpy}, \texttt{scipy}, \texttt{h5py}, \texttt{pyvisa}) quedaron registradas de manera explícita en un archivo de requerimientos, definiendo las versiones exactas para certificar la estabilidad de los algoritmos matemáticos en el tiempo.
-
-El control de versiones del código fuente se gestionó mediante Git. Se adoptó un flujo de trabajo basado en la creación de ramas (\textit{Feature Branch Workflow}). Esta estrategia permitió:
-
-\begin{itemize}
-    \item Desarrollar características experimentales de forma aislada (ej. implementación del filtro digital fase-cero estipulado por la norma) en ramas secundarias.
+    \item Desarrollar características experimentales de forma aislada (ej. implementación de la GUI) en ramas secundarias.
     \item Integrar (\textit{merge}) el código a la rama principal (\texttt{main}) únicamente tras la validación funcional de los módulos frente a las señales de referencia del TDG.
-    \item Mantener una separación semántica en el repositorio, estructurado en directorios específicos para la interfaz gráfica (\texttt{/ui}), la lógica de negocio/modelos (\texttt{/models}), controladores (\texttt{/controllers}) y utilidades de acceso a datos.
 \end{itemize}
 
 \end{document}
