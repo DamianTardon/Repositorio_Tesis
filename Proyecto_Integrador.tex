@@ -1,6 +1,7 @@
 % !TeX program = lualatex
 %\documentclass[11pt]{book} % Clase de documento para un informe.
 \documentclass[11pt, draft]{book} % Clase de documento para un informe.
+\usepackage{fancyhdr}
 
 % --- IDIOMA Y LOCALIZACIÓN ---
 \usepackage[bidi=basic, provide=*]{babel}
@@ -16,6 +17,7 @@
 
 % --- GEOMETRÍA Y DISEÑO ---
 \usepackage[a4paper, left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry} % Tamaño de la página.
+%\usepackage[headheight=13.6pt]{geometry}
 \usepackage{setspace} % Control de interlineado.
 \onehalfspacing % Interlineado de 1.5.
 \setlength{\parskip}{1.5ex} % Espacio entre párrafos.
@@ -55,7 +57,20 @@
   \renewcommand{\tablename}{Tabla}
 }
 
+% Configuración de encabezado y pie de página a partir de la "Introduccion"
+\fancypagestyle{normal}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{1pt}
+    \renewcommand{\footrulewidth}{1pt}
+    \fancyhead[RE]{\nouppercase{\textit{\leftmark}}}
+    \fancyhead[LO]{\nouppercase{\textit{\rightmark}}}
+    \fancyfoot[RO, LE]{\textit{Tardón Damián David}} 
+    \fancyfoot[C]{\thepage}
+    \pagenumbering{arabic}
+}
+
 \begin{document}
+\pagestyle{fancy}
 
 \pagenumbering{roman}
 \input{capitulos/00_portada.tex}
@@ -80,21 +95,23 @@
 \addcontentsline{toc}{chapter}{c}
 
 \newpage
-\pagenumbering{arabic}
+%\pagenumbering{arabic}
+\pagestyle{normal} % A partir de aquí cambia el estilo de numeración
 
 % INTRODUCCIÓN =================================================================================================
 %\input{capitulos/01_introduccion.tex}
 
 % MARCO TEÓRICO ================================================================================================
 %\part{MARCO TEÓRICO}
-
+\input{capitulos/02_fundamentos_at.tex}
+%\input{capitulos/04_arquitectura_sistema.tex}
 
 % MARCO METODOLÓGICO ===========================================================================================
 %\part{MARCO METODOLÓGICO}
-\input{capitulos/04_arquitectura_sistema.tex}
+
 
 % RESULTADOS Y CONCLUSIONES ====================================================================================
-\part{RESULTADOS Y CONCLUSIONES}
+%\part{RESULTADOS Y CONCLUSIONES}
 
 
 % BIBLIOGRAFÍA =================================================================================================
@@ -103,7 +120,7 @@
 %\printbibliography[heading=bibintoc, title={Bibliografía}]
 
 % ANEXOS =======================================================================================================
-\part*{ANEXOS}
+%\part*{ANEXOS}
 \addcontentsline{toc}{part}{ANEXOS}
 
 \end{document}
