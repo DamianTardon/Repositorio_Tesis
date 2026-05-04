@@ -1,0 +1,90 @@
+\newpage
+\chapter{Adquisición y procesamiento digital de señales}
+\vspace{3\baselineskip}
+
+Este capítulo detalla los fundamentos teóricos y prácticos del procesamiento digital de señales (DSP) y los sistemas de adquisición de datos (DAQ) en el contexto de ensayos de alta tensión. Se aborda la transición del dominio analógico al digital para la captura de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}) empleando un osciloscopio de almacenamiento digital (DSO).\par
+A lo largo de las siguientes secciones, se analizan los criterios de muestreo y cuantización exigidos para transitorios de alta velocidad, las arquitecturas de hardware subyacentes, las técnicas de filtrado digital orientadas a la mitigación de ruido sin alteración de la morfología del impulso, y los algoritmos de interpolación necesarios para la extracción paramétrica. Toda la metodología de procesamiento matemático y validación algorítmica se fundamenta en los lineamientos establecidos por la norma IEC 61083-2 para software utilizado en la evaluación de ensayos con impulsos de tensión y corriente.\par
+
+\section{Teoría de muestreo y cuantización de señales}
+
+El análisis de impulsos tipo rayo, caracterizados por tiempos de frente ($T_1$) del orden de microsegundos y componentes espectrales de alta frecuencia, exige un tratamiento riguroso en la etapa de digitalización. La conversión analógica-digital (ADC) se rige fundamentalmente por el Teorema de Muestreo de Nyquist-Shannon, el cual establece que la frecuencia de muestreo ($f_s$) debe ser mayor al doble de la componente de máxima frecuencia ($f_{\max}$) presente en la señal para evitar el fenómeno destructivo del aliasing. Matemáticamente, el criterio se define como:\par
+\begin{equation}
+    f_s > 2 f_{\max}
+\end{equation}
+En este aspecto, la frecuencia de muestreo debe ser lo suficientemente alta para capturar con precisión el frente de la onda de impulso cuyo valor nominal de $T_1$ es de \SI{1,2}{\micro\second}, lo que implica la presencia de componentes espectrales alrededor de \SI{1}{\mega\hertz}.\par
+
+Mientras que el muestreo discretiza el eje temporal, la cuantización divide el eje de amplitudes. Este proceso introduce un error numérico inherente denominado error de cuantización, ocasionado por la aproximación del valor real al nivel discreto más cercano. El tamaño del paso de cuantización o resolución del LSB (Bit Menos Significativo, por sus siglas en inglés) está dado por:\par
+\begin{equation}
+    q = \frac{V_{FSR}}{2^N}
+\end{equation}
+Donde $V_{FSR}$ representa el rango dinámico de escala completa (FSR) (relación entre el valor máximo y el valor mínimo de la señal que se puede capturar o representar), y $N$ es la resolución en bits del convertidor. Por ejemplo, en un osciloscopio con un ADC de 8 bits, el eje de amplitud queda seccionado en $2^8 = 256$ niveles discretos, lo que le confiere un error de cuantización teórico de $\pm 0,5$ LSB.\par
+
+\section{Filtros digitales}
+
+Los filtros digitales son algoritmos matemáticos diseñados para modificar selectivamente las componente en frecuencia de una señal, permitiendo el paso de ciertas frecuencias y atenuando otras, tal como ocurre con los filtros analógicos constituídos por componentes electrónicos (resistencias, capacitores e inductores), ya que buscan simular su comportamiento. Estos se clasifican principalmente en dos grandes familias, FIR o IIR, según la duración de su respuesta al impulso.\par
+
+\subsection{Filtro de respuesta impulsional finita (FIR)}
+
+Un filtro FIR se caracteriza porque su respuesta al impulso decae a cero en un número finito de pasos. Se implementa mediante una estructura no recursiva (feedforward), lo que significa que la salida actual del filtro depende exclusivamente de los valores presentes y pasados de la señal de entrada.\par
+Su mayor ventaja es que son intrínsecamente estables, ya que carecen de lazos de retroalimentación que puedan causar oscilaciones.\par
+Tienen desfasaje lineal, lo que asegura que todas las frecuencias de la señal poseen el mismo retraso temporal, logrando fidelidad de la forma de onda original.\par
+Su principal limitación es la ineficiencia computacional. Ya que, para lograr un corte abrupto entre la banda de paso y la de atenuación, necesitan un orden muy elevado, lo cual exige mayor potencia de cálculo.\par
+
+\subsection{Filtro de respuesta impulsional infinita (IIR)}
+
+Un filtro IIR posee una respuesta al impulso que puede prolongarse indefinidamente en el tiempo.
+A diferencia de los FIR, estos filtros utilizan retroalimentación (feedback). Es decir, la salida actual se calcula utilizando las entradas actuales y pasadas, y además las salidas anteriores del propio filtro.\par
+Destacan por su eficiencia computacional. Ya que, pueden lograr caídas de atenuación muy pronunciadas con un orden drásticamente menor que su equivalente en un filtro FIR, lo que los hace ideales para procesamientos muy rápidos en tiempo real o para sistemas con pocos recursos.\par
+Su diseño es más complejo porque son condicionalmente estables, lo que implica que una mala ubicación de sus polos puede provocar que el filtro se vuelva inestable y oscile descontroladamente. Además, su respuesta de fase es no lineal, introduciendo una distorsión temporal en la señal y una distorsión de retardo de grupo en el dominio de la frecuencia.\par
+
+\subsection{Filtro de fase cero}
+
+Un filtro de fase cero es una técnica utilizada para eliminar el retraso temporal o desfase que los filtros suelen introducir en la salida de una señal.
+Esta técnica consiste en procesar los datos \enquote{hacia adelante y hacia atrás}. Es decir, primero se filtra la señal original $x(n)$ en el dominio del tiempo, para crear una señal de salida $y(n)$, a la que se le invierten sus puntos de datos en el tiempo, se vuelven a pasar por el filtro, y por último se vuelven a invertir sus puntos de datos en el tiempo, dando como resultado, la salida final alineada en el tiempo con la señal de entrada original.\par
+Dado que la información pasa dos veces por el filtro, se duplica la atenuación de las frecuencias filtradas. Lo que aumenta el costo computacional, ya que el tiempo de cálculo necesario es el doble en comparación con un filtrado estándar.\par
+Es una operación que se realiza fácilmente con señales ya digitalizadas (como en un software de análisis de datos), pero es más difícil de implementar en sistemas con señales analógicas en tiempo real.\par
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\textbf{Lo siguiente va en el marco metodológico.}
+
+Durante la captura de impulsos de alta tensión, la señal suele contaminarse con interferencia electromagnética (EMI) de alta frecuencia originada por el disparo de los espinterómetros (utilizados como interruptores de alta tensión), y el ruido del propio sistema de medida. La aplicación de filtros digitales post-adquisición es fundamental para separar la señal de interés del ruido, pero requiere cuidado de no distorsionar la señal real.\par
+La norma IEC 60060-1 recomienda usar filtros de fase cero cuya respuesta en frecuencia sea igual a la función de tensión de prueba \autoref{Eq:Func_Tension_Ensayo}.\par
+La norma IEC 60060-1 presenta un ejemplo de un filtro de respuesta impulsional infinita (IIR) de fase cero. Aunque también permite utilizar otros filtros, como los de respuesta impulsional finita (FIR), así como otros softwares comerciales.\par
+En este enfoque, la atenuación del filtro es la mitad de la necesaria, pero los datos se procesan dos veces, primero en sentido directo y luego en sentido inverso. De este modo, el filtrado tiene una salida que coincide con la función de tensión de ensayo con un error de amplitud y un desfase prácticamente nulos.\par
+$$y[n] = \frac{1}{M} \sum_{k=0}^{M-1} x[n-k]$$
+En contraste, el uso de filtros IIR (Infinite Impulse Response) como el Butterworth debe ser manejado con extrema cautela. A pesar de su excelente selectividad de frecuencia, su respuesta de fase no lineal introduce distorsión de retardo de grupo, lo cual puede deformar irreversiblemente la morfología del transitorio si no se aplican técnicas de filtrado bidireccional (zero-phase filtering).\par
+
+
+\section{Algoritmos de interpolación y ajuste de curvas (Fitting)}
+
+Para la evaluación del impulso tipo rayo, es mandatorio determinar los instantes temporales $t_{30}$ y $t_{90}$, correspondientes al cruce de la señal por el $\SI{30}{\percent}$ y el $\SI{90}{\percent}$ del valor pico absoluto $U_t$. Al operar en el dominio discreto, es altamente improbable que los valores muestreados $x[n]$ coincidan exactamente con estos umbrales fraccionales. La norma IEC 61083-2 requiere el uso de algoritmos matemáticos para localizar estos puntos de forma unívoca, permitiendo la determinación del origen virtual ($O_1$) y el tiempo de frente ($T_1$) según la formulación:\par
+$$T_1 = \frac{1}{0,6} (t_{90} - t_{30}) = 1,67 (t_{90} - t_{30})$$
+Para reconstruir la señal continua subyacente entre muestras y encontrar dichas intersecciones, se emplean algoritmos de interpolación o ajuste de curvas (fitting). La interpolación lineal es el método más rudimentario, válido únicamente cuando se dispone de un sobremuestreo masivo. Para resolver señales discretizadas a tasas más restrictivas, se imponen métodos numéricamente más robustos, como la interpolación por splines cúbicos. Este método construye polinomios de tercer grado por tramos (piecewise) asegurando continuidad hasta la segunda derivada, minimizando las oscilaciones artificiales (fenómeno de Runge) típicas de los polinomios de orden superior, logrando una representación extremadamente fiel del flanco ascendente.\par
+Adicionalmente, en la vecindad del valor pico, la señal puede presentar ruido o pequeñas oscilaciones. Para determinar un $U_t$ representativo sin el sesgo del quantization error, se recomienda ejecutar un ajuste de regresión polinomial de bajo orden o utilizar los algoritmos de suavizado exigidos por la IEC sobre la cresta del impulso. Esta regresión extrae la componente fundamental eliminando la varianza de alta frecuencia, asegurando que los umbrales derivados del $\SI{30}{\percent}$ y $\SI{90}{\percent}$ estén anclados a un parámetro estadísticamente sólido.\par
+
+\section{Arquitectura de osciloscopios de almacenamiento digital (DSO)}
+
+El proceso de captura en el osciloscopio GW Instek GDS-1102A-U está intrínsecamente ligado a la arquitectura del hardware del DSO (Digital Storage Oscilloscope). Tras pasar por la circuitería analógica de acondicionamiento de entrada, la señal alcanza el bloque del ADC que se encarga de realizar la cuantización a una tasa definida por la base de tiempo. No obstante, el rendimiento del sistema no está gobernado únicamente por el ADC, sino también por el gestor de memoria de adquisición.\par
+El parámetro crítico que interrelaciona la frecuencia de muestreo máxima ($f_s$) disponible con la ventana temporal total de captura es la memoria profunda o longitud de registro (record length). El tiempo total de adquisición de la ventana del osciloscopio ($T_{acq}$) responde a la relación fundamental:\par
+$$T_{acq} = \frac{N_{record}}{f_s}$$
+Donde $N_{record}$ es la cantidad de puntos almacenables en la memoria para una adquisición sencilla. En el análisis de un impulso rayo de \SI[parse-numbers=false]{1,2/50}{\micro\second}, la ventana de captura debe ser suficientemente extensa para englobar el tiempo de cola ($T_2$), el cual decae hasta el $\SI{50}{\percent}$ a los $\SI{50}{\micro\second}$, al mismo tiempo que debe registrar el tiempo de frente ($T_1$) con resolución nanométrica.\par
+Si el DSO posee un record length limitado, el ingeniero se ve forzado a reducir la frecuencia de muestreo $f_s$ para incrementar $T_{acq}$ y poder capturar el impulso en su totalidad. Esta disminución de $f_s$ es inaceptable, ya que reduce la densidad de puntos en el frente de la onda, exacerbando los errores de interpolación en el cálculo de $t_{30}$ y $t_{90}$. Por ende, una arquitectura con memoria profunda permite mantener el ADC operando al límite de su especificación (ej. $\SI{1}{\giga\sample/\second}$), garantizando tanto la cobertura total del fenómeno hasta su amortiguamiento, como la resolución de alta velocidad estipulada por la IEC 61083-2 para asegurar la trazabilidad metrológica del ensayo de alta tensión.\par

@@ -29,6 +29,7 @@
 %\usepackage{multirow, booktabs} % Para texto en varias filas, y Formateo de tablas.
 \usepackage[table, xcdraw]{xcolor}
 \usepackage{siunitx}
+\DeclareSIUnit{\sample}{Sa} % Unidad personalizada: muestra = sample = Sa
 \sisetup{output-decimal-marker={,}}
 
 % --- GRÁFICOS ---
@@ -96,14 +97,15 @@
 
 \newpage
 %\pagenumbering{arabic}
-\pagestyle{normal} % A partir de aquí cambia el estilo de numeración
+\pagestyle{normal} % A partir de aquí cambia el estilo de numeración.
 
 % INTRODUCCIÓN =================================================================================================
 %\input{capitulos/01_introduccion.tex}
 
 % MARCO TEÓRICO ================================================================================================
 %\part{MARCO TEÓRICO}
-\input{capitulos/02_fundamentos_at.tex}
+%\input{capitulos/02_fundamentos_at.tex}
+\input{capitulos/03_procesamiento_senales.tex}
 %\input{capitulos/04_arquitectura_sistema.tex}
 
 % MARCO METODOLÓGICO ===========================================================================================

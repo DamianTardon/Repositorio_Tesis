@@ -8,52 +8,44 @@ El presente capítulo establece el marco normativo y conceptual para el desarrol
 
 Antes de definir la onda de impulso tipo rayo, es necesario establecer una serie de términos relacionados con los ensayos de impulso de tensión, que serán necesarios para entender las magnitudes analizadasen el software y en la interpretación de los resultados. Estos términos están definidos en la norma IEC 60060-1 [X] y se exponen a continuación:\par
 
-\begin{itemize}
-    \item \textbf{Tensión de impulso:} Es una tensión transitoria aperiódica aplicada intencionalmente, que usualmente se eleva rápidamente a un valor de cresta y luego cae más lentamente a cero.
-    \item \textbf{Tensión de impulso tipo rayo:} Es una tensión de impulso con un tiempo de frente inferior a 20 µs.
-    \item \textbf{Tensión de impulso tipo rayo completa:} Es una tensión de impulso tipo rayo, que no es interrumpida por una descarga disruptiva.
-    \item \textbf{Sobreelevación / oscilación (overshoot):} es un incremento de la amplitud de una tensión de impulso debido a una oscilación amortiguada en la cresta, causada por el circuito.
-    \item \textbf{Curva registrada:} Es una representación gráfica o digital de los datos de ensayo de una tensión de impulso.
-    \item \textbf{Nivel de base:} Es el nivel de un registro de un sistema de medición de impulsos cuando hay una entrada cero al instrumento de registro.
-    \item \textbf{Curva base:} Es una estimación de una tensión de impulso tipo rayo completa sin una oscilación superpuesta.
-    \item \textbf{Curva residual $R(t)$:} Es la diferencia entre la curva registrada y la curva base.
-    \item \textbf{Valor extremo $U_e$:} Es el valor máximo de la curva registrada medido desde el nivel de base en el mismo sentido que el impulso aplicado.
-    \item \textbf{Máximo de la curva base $U_b$:} Es el valor máximo de la curva base.
-    \item \textbf{Función de tensión de ensayo:} Es una función de amplitud-frecuencia que se define para representar la respuesta del aislamiento a impulsos con sobreelevación (overshoot), dada por:
-    \begin{equation}
+\textbf{Tensión de impulso:} Es una tensión transitoria aperiódica aplicada intencionalmente, que usualmente se eleva rápidamente a un valor de cresta y luego cae más lentamente a cero.\par
+\textbf{Tensión de impulso tipo rayo:} Es una tensión de impulso con un tiempo de frente inferior a 20 µs.\par
+\textbf{Tensión de impulso tipo rayo completa:} Es una tensión de impulso tipo rayo, que no es interrumpida por una descarga disruptiva.\par
+\textbf{Sobreelevación / oscilación (overshoot):} es un incremento de la amplitud de una tensión de impulso debido a una oscilación amortiguada en la cresta, causada por el circuito.\par
+\textbf{Curva registrada:} Es una representación gráfica o digital de los datos de ensayo de una tensión de impulso.\par
+\textbf{Nivel de base:} Es el nivel de un registro de un sistema de medición de impulsos cuando hay una entrada cero al instrumento de registro.\par
+\textbf{Curva base:} Es una estimación de una tensión de impulso tipo rayo completa sin una oscilación superpuesta.\par
+\textbf{Curva residual $R(t)$:} Es la diferencia entre la curva registrada y la curva base.\par
+\textbf{Valor extremo $U_e$:} Es el valor máximo de la curva registrada medido desde el nivel de base en el mismo sentido que el impulso aplicado.\par
+\textbf{Máximo de la curva base $U_b$:} Es el valor máximo de la curva base.\par
+\textbf{Función de tensión de ensayo:} Es una función de amplitud-frecuencia que se define para representar la respuesta del aislamiento a impulsos con sobreelevación (overshoot), dada por la \autoref{Eq:Func_Tension_Ensayo}, donde $f$ es la frecuencia en \SI{}{\mega\hertz}.\par
+\begin{equation}
         k(f) = \frac{1}{1+2,2 \cdot f^2}
         \label{Eq:Func_Tension_Ensayo}
-    \end{equation}
-    donde $f$ es la frecuencia en \SI{}{\mega\hertz}.\par
-    Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión residual permite el cálculo del valor de la tensión de ensayo de la tensión de impulso tipo rayo completa equivalente (ver Anexo B, Anexo D).
-    \item \textbf{Curva residual filtrada $Rf(t)$:} Es la curva residual filtrada por la función de tensión de ensayo.
-    \item \textbf{Curva de tensión de ensayo:} Es la suma de la curva base y la curva residual filtrada.
-    Nota: La curva de tensión de ensayo es una representación matemática del proceso de filtrado y no es una entidad física o un impulso equivalente.
-    \item \textbf{Valor de la tensión de ensayo $U_t$:} Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.
-    \item \textbf{Magnitud de la sobreelevación $\beta$:} Es la diferencia entre el valor extremo de la curva registrada ($U_e$) y el valor máximo de la curva base ($U_b$).
-    \item \textbf{Magnitud relativa de la sobreelevación $\beta’$:} Es la relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.
-    \item \textbf{Tiempo de frente $T_1$:} Es un parámetro virtual definido como 1/0,6 veces el intervalo $T_{AB}$ entre los instantes en que el impulso es \SI{30}{\percent} y \SI{90}{\percent} del valor de cresta en la curva de tensión de ensayo.
-    \item \textbf{Origen virtual $O_1$:} Es un instante que precede al punto A de la curva de tensión de ensayo en un tiempo $0,3 * T_1$.
-    \item \textbf{Tiempo hasta el semi-valor $T_2$:} Es un parámetro virtual definido como el intervalo de tiempo entre el origen virtual, $O_1$, y el instante en que la curva de tensión de ensayo ha disminuido a la mitad del valor de cresta de la tensión de ensayo.
-    \item \textbf{Tensión de impulso tipo rayo cortada:} Es un impulso tipo rayo que es interrumpido en el frente, cresta o cola por una descarga disruptiva, causando una caída súbita de la tensión.
-    \item \textbf{Instante de corte:} Es el instante en el que la extrapolación de la línea entre los puntos del \SI{70}{\percent} y \SI{10}{\percent} (C y D) en el colapso de la tensión cruza el nivel inmediatamente anterior al colapso.
-    \item \textbf{Tiempo de corte $T_C$:} Es el intervalo de tiempo entre el origen virtual $O_1$ del pulso y el instante relevante.
-\end{itemize}
+\end{equation}
+Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión residual permite el cálculo del valor de la tensión de ensayo de la tensión de impulso tipo rayo completa equivalente.\par
+\textbf{Valor de la tensión de ensayo $U_t$:} Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.\par
+\textbf{Magnitud de la sobreelevación $\beta$:} Es la diferencia entre el valor extremo de la curva registrada ($U_e$) y el valor máximo de la curva base ($U_b$).\par
+\textbf{Magnitud relativa de la sobreelevación $\beta'$:} Es la relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.\par
+\textbf{Tiempo de frente $T_1$:} Es un parámetro virtual definido como 1/0,6 veces el intervalo $T_{AB}$ entre los instantes en que el impulso es \SI{30}{\percent} y \SI{90}{\percent} del valor de cresta en la curva de tensión de ensayo.\par
+\textbf{Origen virtual $O_1$:} Es un instante que precede al punto A de la curva de tensión de ensayo en un tiempo $0,3 * T_1$.\par
+\textbf{Tiempo hasta el semi-valor $T_2$:} Es un parámetro virtual definido como el intervalo de tiempo entre el origen virtual, $O_1$, y el instante en que la curva de tensión de ensayo ha disminuido a la mitad del valor de cresta de la tensión de ensayo.\par
+\textbf{Tensión de impulso tipo rayo cortada:} Es un impulso tipo rayo que es interrumpido en el frente, cresta o cola por una descarga disruptiva, causando una caída súbita de la tensión.\par
+\textbf{Instante de corte:} Es el instante en el que la extrapolación de la línea entre los puntos del \SI{70}{\percent} y \SI{10}{\percent} (C y D) en el colapso de la tensión cruza el nivel inmediatamente anterior al colapso.\par
+\textbf{Tiempo de corte $T_C$:} Es el intervalo de tiempo entre el origen virtual $O_1$ del pulso y el instante relevante.\par
 
 \section{Onda de impulso atmosférico}
 
 \subsection{Onda plena}
 De acuerdo con la norma IEC 60060-1 [X], la tensión de impulso tipo rayo estándar u \enquote{Onda plena} es una tensión de impulso tipo rayo completa y suave, que tiene un tiempo de frente de \SI[parse-numbers=false]{1,2}{\micro\second}, y un tiempo hasta el semi-valor de \SI[parse-numbers=false]{50}{\micro\second}, y se describe como un impulso \SI[parse-numbers=false]{1,2/50}{\micro\second}. Esta onda se caracteriza mediante los siguientes parámetros:\par
 
-\begin{itemize}
-    \item \textbf{Valor pico ($U_t$):} Es el valor máximo absoluto de tensión alcanzado por el impulso registrado. Si existen oscilaciones superpuestas en la cresta, el valor pico se determina a partir de una \enquote{curva base}.
-    \item \textbf{Tiempo de frente ($T_1$):} Es un parámetro virtual definido como $1/0,6$ veces el intervalo de tiempo comprendido entre los instantes en los que la tensión alcanza el $\SI{30}{\percent}$ y el $\SI{90}{\percent}$ del valor pico.
-    \begin{equation}
-        T_1 = \frac{T_{AB}}{0,6} = \frac{t_{90} - t_{30}}{0,6}
-    \end{equation}
-    \item \textbf{Tiempo de cola ($T_2$):} Es un parámetro virtual que representa el intervalo de tiempo transcurrido desde el origen virtual ($O_1$) hasta el instante en que la curva de tensión de ensayo ha disminuido al $\SI{50}{\percent}$ de su valor de cresta ($U_t$).
-    \item \textbf{Magnitud relativa de la sobreelevación ($\beta’$):} La relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.
-\end{itemize}
+\noindent \textbf{Valor pico ($U_t$):} Es el valor máximo absoluto de tensión alcanzado por el impulso registrado. Si existen oscilaciones superpuestas en la cresta, el valor pico se determina a partir de una \enquote{curva base}.\par
+\noindent \textbf{Tiempo de frente ($T_1$):} Es un parámetro virtual definido como $1/0,6$ veces el intervalo de tiempo comprendido entre los instantes en los que la tensión alcanza el $\SI{30}{\percent}$ y el $\SI{90}{\percent}$ del valor pico.\par
+\begin{equation}
+    T_1 = \frac{T_{AB}}{0,6} = \frac{t_{90} - t_{30}}{0,6}
+\end{equation}
+\noindent \textbf{Tiempo de cola ($T_2$):} Es un parámetro virtual que representa el intervalo de tiempo transcurrido desde el origen virtual ($O_1$) hasta el instante en que la curva de tensión de ensayo ha disminuido al $\SI{50}{\percent}$ de su valor de cresta ($U_t$).\par
+\noindent \textbf{Magnitud relativa de la sobreelevación ($\beta'$):} La relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.\par
 
 Para que un impulso sea considerado como \enquote{impulso tipo rayo estándar}, comúnmente denominado como impulso \SI[parse-numbers=false]{1,2/50}{\micro\second}, la norma establece que debe tener un tiempo de frente $(T_1)$ de \SI{1,2}{\micro\second},  y un tiempo hasta el semi-valor $(T_2)$ de \SI{50}{\micro\second}. Adicionalmente, la norma establece las tolerancias que acepta en los parámetros medidos, indicados en la \autoref{Tab:Tolerancias_impulso}:
 
@@ -66,7 +58,7 @@ Para que un impulso sea considerado como \enquote{impulso tipo rayo estándar}, 
         \textbf{Parámetro}                 & \textbf{Tolerancia}                                                                           \\ \midrule
         Tensión de ensayo ($U_t$)          & $\pm \SI{3}{\percent}$                                                                        \\ \midrule
         Tiempo de frente ($T_1$)           & $\pm \SI{30}{\percent}$                                                                       \\
-                                           & y para equipos con $U_m > \SI{800}{\kilo\volt}$: \SI{-30}{\percent} hasta \SI{+100}{\percent} \\ \midrule
+                                           & y para equipos con $U_m > \SI{800}{\kilo\volt}$: $\SI{-30}{\percent}$ hasta $\SI{+100}{\percent}$ \\ \midrule
         Tiempo hasta el semi-valor ($T_2$) & $\pm \SI{20}{\percent}$                                                                       \\ \midrule
         Sobreelevación (OS)                & $\le \SI{10}{\percent}$                                                                       \\ \bottomrule
     \end{tabular}
@@ -85,3 +77,27 @@ El ensayo de impulso, a nivel general, se realiza aplicando un número determina
 El análisis de los parámetros del impulso registrado permite evaluar la capacidad del equipo para soportar sobretensiones transitorias, y determinar su capacidad de aislamiento.\par
 La norma IEC 60060-1, en su Anexo B, describe un método para el cálculo de los parámetros de las ondas de impulso tipo rayo estándar (plenas y cortadas) con o sin sobreelevación u oscilaciones superpuestas. Este método se basa en la estimación de una curva base, que representa la forma idealizada de un impulso tipo rayo sin oscilaciones, y el cálculo de una curva residual, que representa las oscilaciones superpuestas. Posteriormente, se aplica un filtro definido por la función de tensión de ensayo (\autoref{Eq:Func_Tension_Ensayo}) para obtener la curva de tensión de ensayo, de la cual se calculan los parámetros del impulso.\par
 Mientras que, en el Anexo D de la misma norma, contiene una guía de implementación de software para la analizar la onda impulso. Particularmente, sobre el método de ajuste de la curva base, y la aplicación del filtro digital con la función de tensión de ensayo.\par
+
+\section{Estimación de incertidumbre del software}
+
+El software de análisis de impulsos es una parte integral del sistema de medición, por lo que es fundamental evaluar su contribución a la incertidumbre total de la medición. La norma IEC 61083-2 [X] establece los requisitos para la validación del software de evaluación de parámetros de impulso, y proporciona un software generador de datos de prueba (TDG, por sus siglas en inglés) que genera formas de onda de prueba, representativas de formas de onda de impulso tanto sintéticas como grabadas, con sus valores de referencia asociados, para verificar el cumplimiento de los requisitos de incertidumbre del software.\par
+El procedimiento de validación consiste en procesar los impulsos de referencia mediante el software bajo prueba, y los parámetros evaluados a partir de los datos procesados deben estar dentro de los límites de aceptación establecidos en el Anexo A de la norma IEC 61083-2. De esta forma, se puede verificar el rendimiento del software.\par
+En el Anexo B de la misma norma, brinda un método para la estimación de la incertidumbre que consiste en seleccionar el conunto de formas de onda relacionadas con el algoritmo del software que se va a cualificar (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), calcular las diferencias entre los valores de referencia $x_{REF}$ y los valores evaluados por el software bajo prueba. La diferencia máxima observada respecto al valor de referencia se utiliza para obtener el primer componente de la incertidumbre estándar:
+\begin{equation}
+    u_{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i = 1}^{n} \left\lvert \frac{ (x_i - x_{REF,i})}{x_{REF,i}}\right\rvert  
+\end{equation}
+o en el caso de $\beta'$, cuando la incertidumbre se da en términos absolutos:\par
+\begin{equation}
+    u_{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i = 1}^{n} \left\lvert (\beta'_i - \beta'_{REF,i})\right\rvert  
+\end{equation}
+
+Por otro lado, la norma indica la incertidumbre expandida ($U_x$) de cada valor de referencia, en sus tablas Tablas B.1 a B.6. En dichas tablas, la incertidumbre expandida se presenta con un nivel de confianza de aproximadamente el \SI{95}{\percent} (\textit{k} = 2). Este componente para la incertidumbre estándar viene dado por:\par
+\begin{equation}
+    u_{B72} = \frac{1}{2} \cdot \max_{i = 1}^{n} U_{x,i}
+\end{equation}
+donde $U_{x,i}$ son las incertidumbres expandidas para $x_{REF,i}$.
+
+Finalmente, la incertidumbre estándar del software para el grupo de formas de onda evaluadas, resulta:
+\begin{equation}
+    u_{B7} = \sqrt{u_{B71}^2 + u_{B72}^2}
+\end{equation}
