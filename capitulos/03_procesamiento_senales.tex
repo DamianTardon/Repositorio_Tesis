@@ -5,6 +5,14 @@
 Este capítulo detalla los fundamentos teóricos y prácticos del procesamiento digital de señales (DSP) y los sistemas de adquisición de datos (DAQ) en el contexto de ensayos de alta tensión. Se aborda la transición del dominio analógico al digital para la captura de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}) empleando un osciloscopio de almacenamiento digital (DSO).\par
 A lo largo de las siguientes secciones, se analizan los criterios de muestreo y cuantización exigidos para transitorios de alta velocidad, las arquitecturas de hardware subyacentes, las técnicas de filtrado digital orientadas a la mitigación de ruido sin alteración de la morfología del impulso, y los algoritmos de interpolación necesarios para la extracción paramétrica. Toda la metodología de procesamiento matemático y validación algorítmica se fundamenta en los lineamientos establecidos por la norma IEC 61083-2 para software utilizado en la evaluación de ensayos con impulsos de tensión y corriente.\par
 
+\section{Arquitectura de osciloscopios de almacenamiento digital (DSO)}
+
+El proceso de captura en el osciloscopio GW Instek GDS-1102A-U está intrínsecamente ligado a la arquitectura del hardware del DSO (Digital Storage Oscilloscope). Tras pasar por la circuitería analógica de acondicionamiento de entrada, la señal alcanza el bloque del ADC que se encarga de realizar la cuantización a una tasa definida por la base de tiempo. No obstante, el rendimiento del sistema no está gobernado únicamente por el ADC, sino también por el gestor de memoria de adquisición.\par
+El parámetro crítico que interrelaciona la frecuencia de muestreo máxima ($f_s$) disponible con la ventana temporal total de captura es la memoria profunda o longitud de registro (record length). El tiempo total de adquisición de la ventana del osciloscopio ($T_{acq}$) responde a la relación fundamental:\par
+$$T_{acq} = \frac{N_{record}}{f_s}$$
+Donde $N_{record}$ es la cantidad de puntos almacenables en la memoria para una adquisición sencilla. En el análisis de un impulso rayo de \SI[parse-numbers=false]{1,2/50}{\micro\second}, la ventana de captura debe ser suficientemente extensa para englobar el tiempo de cola ($T_2$), el cual decae hasta el $\SI{50}{\percent}$ a los $\SI{50}{\micro\second}$, al mismo tiempo que debe registrar el tiempo de frente ($T_1$) con resolución nanométrica.\par
+Si el DSO posee un record length limitado, el ingeniero se ve forzado a reducir la frecuencia de muestreo $f_s$ para incrementar $T_{acq}$ y poder capturar el impulso en su totalidad. Esta disminución de $f_s$ es inaceptable, ya que reduce la densidad de puntos en el frente de la onda, exacerbando los errores de interpolación en el cálculo de $t_{30}$ y $t_{90}$. Por ende, una arquitectura con memoria profunda permite mantener el ADC operando al límite de su especificación (ej. $\SI{1}{\giga\sample/\second}$), garantizando tanto la cobertura total del fenómeno hasta su amortiguamiento, como la resolución de alta velocidad estipulada por la IEC 61083-2 para asegurar la trazabilidad metrológica del ensayo de alta tensión.\par
+
 \section{Teoría de muestreo y cuantización de señales}
 
 El análisis de impulsos tipo rayo, caracterizados por tiempos de frente ($T_1$) del orden de microsegundos y componentes espectrales de alta frecuencia, exige un tratamiento riguroso en la etapa de digitalización. La conversión analógica-digital (ADC) se rige fundamentalmente por el Teorema de Muestreo de Nyquist-Shannon, el cual establece que la frecuencia de muestreo ($f_s$) debe ser mayor al doble de la componente de máxima frecuencia ($f_{\max}$) presente en la señal para evitar el fenómeno destructivo del aliasing. Matemáticamente, el criterio se define como:\par
@@ -44,6 +52,23 @@ Esta técnica consiste en procesar los datos \enquote{hacia adelante y hacia atr
 Dado que la información pasa dos veces por el filtro, se duplica la atenuación de las frecuencias filtradas. Lo que aumenta el costo computacional, ya que el tiempo de cálculo necesario es el doble en comparación con un filtrado estándar.\par
 Es una operación que se realiza fácilmente con señales ya digitalizadas (como en un software de análisis de datos), pero es más difícil de implementar en sistemas con señales analógicas en tiempo real.\par
 
+\section{Ajuste de curvas e interpolación}
+
+Dado que los datos adquiridos por el osciloscopio, possen ruido electromagnético  y errores de cuantización, es necesario aplicar técnicas de ajuste de curvas e interpolación para extraer los parámetros característicos del impulso tipo rayo.
+
+\subsection{Ajuste de curvas}
+
+El ajuste de curvas es un proceso matemático que busca encontrar la función matemática que mejor se aproxima a un conjunto de datos experimentales. En el caso de los impulsos tipo rayo, la norma IEC 60060-1 establece que la forma de la onda debe ajustarse a una función de doble exponencial, lo que permite caracterizar adecuadamente el comportamiento del impulso en términos de sus parámetros fundamentales (amplitud, tiempos de frente y cola y sobrepasamiento.).\par
+
+
+
+Para la evaluación del impulso tipo rayo, la norma IEC 60060-1 exige luego de capturar la señal digitalizada, se haga una selección de los datos muestreados en el intervalo de tiempo copmrendido entre el \SI{20}{\percent} del valor pico en el frente y el \SI{40}{\percent} del valor pico en la cola. A este intervalo se le debe ajustar la función de doble exponencial de la \autoref{Eq:DobleExponencial}
+\begin{equation}
+    u_d(t) = U \cdot \left( e^{-\frac{t-t_d}{\tau_1}} - e^{-\frac{t-t_d}{\tau_2}} \right)
+    \label{Eq:DobleExponencial}
+\end{equation}
+Donde $t$ es el tiempo, $u_d(t)$ es la función de tensión. $U$, $\tau_1$, $\tau_2$ y $t_d$ son los parámetros a encontrar mediante el ajuste.
+
 
 
 
@@ -73,18 +98,3 @@ En este enfoque, la atenuación del filtro es la mitad de la necesaria, pero los
 $$y[n] = \frac{1}{M} \sum_{k=0}^{M-1} x[n-k]$$
 En contraste, el uso de filtros IIR (Infinite Impulse Response) como el Butterworth debe ser manejado con extrema cautela. A pesar de su excelente selectividad de frecuencia, su respuesta de fase no lineal introduce distorsión de retardo de grupo, lo cual puede deformar irreversiblemente la morfología del transitorio si no se aplican técnicas de filtrado bidireccional (zero-phase filtering).\par
 
-
-\section{Algoritmos de interpolación y ajuste de curvas (Fitting)}
-
-Para la evaluación del impulso tipo rayo, es mandatorio determinar los instantes temporales $t_{30}$ y $t_{90}$, correspondientes al cruce de la señal por el $\SI{30}{\percent}$ y el $\SI{90}{\percent}$ del valor pico absoluto $U_t$. Al operar en el dominio discreto, es altamente improbable que los valores muestreados $x[n]$ coincidan exactamente con estos umbrales fraccionales. La norma IEC 61083-2 requiere el uso de algoritmos matemáticos para localizar estos puntos de forma unívoca, permitiendo la determinación del origen virtual ($O_1$) y el tiempo de frente ($T_1$) según la formulación:\par
-$$T_1 = \frac{1}{0,6} (t_{90} - t_{30}) = 1,67 (t_{90} - t_{30})$$
-Para reconstruir la señal continua subyacente entre muestras y encontrar dichas intersecciones, se emplean algoritmos de interpolación o ajuste de curvas (fitting). La interpolación lineal es el método más rudimentario, válido únicamente cuando se dispone de un sobremuestreo masivo. Para resolver señales discretizadas a tasas más restrictivas, se imponen métodos numéricamente más robustos, como la interpolación por splines cúbicos. Este método construye polinomios de tercer grado por tramos (piecewise) asegurando continuidad hasta la segunda derivada, minimizando las oscilaciones artificiales (fenómeno de Runge) típicas de los polinomios de orden superior, logrando una representación extremadamente fiel del flanco ascendente.\par
-Adicionalmente, en la vecindad del valor pico, la señal puede presentar ruido o pequeñas oscilaciones. Para determinar un $U_t$ representativo sin el sesgo del quantization error, se recomienda ejecutar un ajuste de regresión polinomial de bajo orden o utilizar los algoritmos de suavizado exigidos por la IEC sobre la cresta del impulso. Esta regresión extrae la componente fundamental eliminando la varianza de alta frecuencia, asegurando que los umbrales derivados del $\SI{30}{\percent}$ y $\SI{90}{\percent}$ estén anclados a un parámetro estadísticamente sólido.\par
-
-\section{Arquitectura de osciloscopios de almacenamiento digital (DSO)}
-
-El proceso de captura en el osciloscopio GW Instek GDS-1102A-U está intrínsecamente ligado a la arquitectura del hardware del DSO (Digital Storage Oscilloscope). Tras pasar por la circuitería analógica de acondicionamiento de entrada, la señal alcanza el bloque del ADC que se encarga de realizar la cuantización a una tasa definida por la base de tiempo. No obstante, el rendimiento del sistema no está gobernado únicamente por el ADC, sino también por el gestor de memoria de adquisición.\par
-El parámetro crítico que interrelaciona la frecuencia de muestreo máxima ($f_s$) disponible con la ventana temporal total de captura es la memoria profunda o longitud de registro (record length). El tiempo total de adquisición de la ventana del osciloscopio ($T_{acq}$) responde a la relación fundamental:\par
-$$T_{acq} = \frac{N_{record}}{f_s}$$
-Donde $N_{record}$ es la cantidad de puntos almacenables en la memoria para una adquisición sencilla. En el análisis de un impulso rayo de \SI[parse-numbers=false]{1,2/50}{\micro\second}, la ventana de captura debe ser suficientemente extensa para englobar el tiempo de cola ($T_2$), el cual decae hasta el $\SI{50}{\percent}$ a los $\SI{50}{\micro\second}$, al mismo tiempo que debe registrar el tiempo de frente ($T_1$) con resolución nanométrica.\par
-Si el DSO posee un record length limitado, el ingeniero se ve forzado a reducir la frecuencia de muestreo $f_s$ para incrementar $T_{acq}$ y poder capturar el impulso en su totalidad. Esta disminución de $f_s$ es inaceptable, ya que reduce la densidad de puntos en el frente de la onda, exacerbando los errores de interpolación en el cálculo de $t_{30}$ y $t_{90}$. Por ende, una arquitectura con memoria profunda permite mantener el ADC operando al límite de su especificación (ej. $\SI{1}{\giga\sample/\second}$), garantizando tanto la cobertura total del fenómeno hasta su amortiguamiento, como la resolución de alta velocidad estipulada por la IEC 61083-2 para asegurar la trazabilidad metrológica del ensayo de alta tensión.\par
