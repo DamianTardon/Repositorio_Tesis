@@ -54,23 +54,82 @@ Es una operación que se realiza fácilmente con señales ya digitalizadas (como
 
 \section{Ajuste de curvas e interpolación}
 
-Dado que los datos adquiridos por el osciloscopio, possen ruido electromagnético  y errores de cuantización, es necesario aplicar técnicas de ajuste de curvas e interpolación para extraer los parámetros característicos del impulso tipo rayo.
+Dado que los datos adquiridos por el osciloscopio, por más avanzado que sea, no dejan de ser puntos discretos que representan una señal continua, que además poseen ruido electromagnético y errores de cuantización. Si bien todos estos fenómenos se pueden atenuar, no se pueden eliminar por completo, por lo tanto, es necesario aplicar técnicas de ajuste de curvas (regresión) para obtener la función que mejor modele los datos, e interpolación para luego extraer los parámetros característicos del impulso.\par
 
-\subsection{Ajuste de curvas}
+\subsection{Ajuste de curvas (regresión)}
 
-El ajuste de curvas es un proceso matemático que busca encontrar la función matemática que mejor se aproxima a un conjunto de datos experimentales. En el caso de los impulsos tipo rayo, la norma IEC 60060-1 establece que la forma de la onda debe ajustarse a una función de doble exponencial, lo que permite caracterizar adecuadamente el comportamiento del impulso en términos de sus parámetros fundamentales (amplitud, tiempos de frente y cola y sobrepasamiento.).\par
-
-
-
-Para la evaluación del impulso tipo rayo, la norma IEC 60060-1 exige luego de capturar la señal digitalizada, se haga una selección de los datos muestreados en el intervalo de tiempo copmrendido entre el \SI{20}{\percent} del valor pico en el frente y el \SI{40}{\percent} del valor pico en la cola. A este intervalo se le debe ajustar la función de doble exponencial de la \autoref{Eq:DobleExponencial}
+El ajuste de curvas es un proceso matemático que consiste en encontrar la función matemática que mejor represente la tendencia general de una distribución de datos. Su objetivo es minimizar el error global de las predicciones, lo que significa que la curva pasa cerca de los puntos, pero no necesariamente toca ninguno de ellos. Este método es especialmente útil cuando los datos no son completamente exactos, presentan dispersión o contienen errores de medición, como ocurre con las señales adquiridas en ensayos eléctricos.\par
+Ahora bien, el tipo de función a ajustar debe ser elegido cuidadosamente para que represente adecuadamente la morfología del impulso, ya que este método para su ejecución require que se indique una función de base, sin ella no se puede realizar el ajuste porque no se puede evaluar el error al no tener una función de referencia. En este sentido, la norma IEC 60060-1 establece que la onda debe ajustarse a una función de doble exponencial (\autoref{Eq:DobleExponencial}), para caracterizar adecuadamente el comportamiento del impulso.\par
 \begin{equation}
     u_d(t) = U \cdot \left( e^{-\frac{t-t_d}{\tau_1}} - e^{-\frac{t-t_d}{\tau_2}} \right)
     \label{Eq:DobleExponencial}
 \end{equation}
-Donde $t$ es el tiempo, $u_d(t)$ es la función de tensión. $U$, $\tau_1$, $\tau_2$ y $t_d$ son los parámetros a encontrar mediante el ajuste.
+Donde:
+\begin{singlespace}
+    \setlength{\parskip}{0pt}
+    \noindent $u_d(t)$: función de tensión.\\
+    $t$: tiempo.\\
+    $U$, $\tau_1$, $\tau_2$ y $t_d$: parámetros a encontrar mediante el ajuste.
+\end{singlespace}
 
+Para encontrar los parámetros de la función de doble exponencial, se utiliza el \textbf{método de mínimos cuadrados}, que es ampliamente usado en ingeniería para ajustar modelos a datos experimentales.
+Este método busca minimizar la suma de los cuadrados de los residuos (la distancia vertical entre cada punto de dato observado y el punto correspondiente en la curva calculada). Matemáticamente, esto se expresa como:
+\begin{equation}
+    S_r = \sum_{i=1}^{N} (y_{i,medicion} - y_{i,modelo})^2
+\end{equation}
+Donde $y_{i,medicion}$ son los valores observados, $y_{i,modelo}$ son los valores calculados por la función de doble exponencial, y $N$ es el número total de datos observados.\par
+Se utilizan los errores al cuadrado (en lugar de sumar simplemente los errores o sus valores absolutos) para evitar que las discrepancias positivas y negativas se cancelen entre sí, y también para asegurar que haya una única solución matemática óptima sin darle un peso desmedido a valores atípicos extremos.\par
 
+\subsubsection{Tipos de regresión}
 
+La regresión se clasifica principalmente por la relación matemática que hay entre las variables y el modelo:\par
+\textbf{Regresión Lineal Simple:} Los datos muestran una tendencia constante o proporcional, que se ajusta mediante una línea recta.\par
+\textbf{Regresión Polinomial:} Los datos presentan curvatura, ajustándose con polinomios de grado 2 o superior. Aunque generan curvas, se consideran modelos \enquote{lineales por mínimos cuadrados} porque la relación respecto a sus coeficientes desconocidos sigue siendo lineal.\par
+\textbf{Regresión Múltiple:} La variable dependiente está influenciada por dos o más variables independientes.\par
+\textbf{Regresión No Lineal:} Se utiliza para modelos matemáticos complejos que no son lineales con respecto a sus coeficientes, tales como ecuaciones de crecimiento exponencial o potencias.\par
+
+\subsubsection{Algoritmos de regresión no lineal}
+
+Para resolver los problemas de regresión, especialmente los no lineales, existen diversas técnicas:\par
+\textbf{Linealización:} Es una técnica donde se aplican transformaciones matemáticas (como aplicar logaritmos) a una ecuación no lineal para convertirla en una forma lineal, permitiendo resolverla con los métodos simples de mínimos cuadrados.\par
+\textbf{Métodos de optimización iterativa:} Cuando la ecuación no se puede linealizar, se usan algoritmos numéricos que parten de un valor inicial (semilla) y lo mejoran paso a paso.\par
+Existen muchos algoritmos de optimización disponibles, cada uno con sus ventajas y desventajas, pero debido a que en este trabajo se aplica la recomendación de la norma IEC 60060-1, se describe el modelo más relevante, el \textbf{Algoritmo de Levenberg-Marquardt (LM)}. El cual a su vez es considerado el estándar de la industria para regresiones no lineales. Es una técnica híbrida donde utiliza un factor de amortiguamiento dinámico (λ), que regula la convergencia, cuando los parámetros están lejos de la solución óptima o si el paso falla y el error aumenta, λ crece obligando al algoritmo a comportarse como \textit{Descenso de Gradiente}, de pasos pequeños, seguros y robusto. Mientras que, a medida que se acerca a la solución, y el error disminuye, λ se hace más pequeño de manera que el algoritmo aproveche la velocidad de \textit{Gauss-Newton}. Matemáticamente, esto se expresa como:
+\begin{equation}
+    w_{i+1} = w_i - \left( J^T J + \lambda diag(J^T J) \right)^{-1} (J^T e)
+\end{equation}
+Donde:
+\begin{singlespace}
+    \setlength{\parskip}{0pt}
+    \noindent $w_{i+1}$: vector de parámetros actualizado.\\
+    $w_i$: vector de parámetros actual.\\
+    $\lambda$: factor de amortiguamiento.\\
+    $e$: vector de residuos o errores.\\
+    $J$: matriz Jacobiana, formada por las primeras derivadas parciales de los errores respecto a los parámetros del modelo.\\
+    $J^T J$: matriz de Hessiana aproximada, compuesta por las segundas derivadas, que modelan la curvatura general de la función de error.\\
+    $diag(J^T J)$: matriz diagonal. Escala cada parámetro según la curvatura local de la función.\\
+    $J^T e$: vector gradiente de la función error. Indica la dirección de máxima pendiente.
+\end{singlespace}
+
+\noindent Si $\boldsymbol{\lambda \rightarrow 0}$, el algoritmo se comporta como el \textbf{Método de Gauss-Newton} donde asume que la función de error es localmente cuadrática y utiliza expansiones de series de Taylor para aproximarse al mínimo de forma muy rápida, pero puede ser inestable y fallar si los valores iniciales elegidos están muy lejos del óptimo. Resultando:
+\begin{equation}
+    w_{i+1} = w_i - \left( J^T J \right)^{-1} (J^T e)
+\end{equation}
+Si $\boldsymbol{\lambda \rightarrow \infty}$, se comporta como el \textbf{Descenso del gradiente}, que  actualiza los coeficientes moviéndose en la dirección donde el error desciende más rápido. Es muy robusto, es difícil que diverja, pero su convergencia puede ser muy lenta.
+\begin{equation}
+    w_{i+1} = w_i - \alpha (J^T e)
+\end{equation}
+Donde:
+\begin{singlespace}
+    \setlength{\parskip}{0pt}
+    \noindent $\alpha$: tamaño de paso de avance de la iteración.
+\end{singlespace}
+
+En el metodo de descenso del gradiente $\alpha$ es un escalar, pero en el algoritmo de Levenberg-Marquardt, resulta una matriz diagonal que escala cada parámetro de forma independiente, por lo tanto:
+\begin{equation}
+    \alpha = diag(J^T J)
+\end{equation}
+
+\subsection{Interpolación}
 
 
 
