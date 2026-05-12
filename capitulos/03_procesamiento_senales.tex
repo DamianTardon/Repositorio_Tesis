@@ -61,16 +61,13 @@ Dado que los datos adquiridos por el osciloscopio, por más avanzado que sea, no
 El ajuste de curvas es un proceso matemático que consiste en encontrar la función matemática que mejor represente la tendencia general de una distribución de datos. Su objetivo es minimizar el error global de las predicciones, lo que significa que la curva pasa cerca de los puntos, pero no necesariamente toca ninguno de ellos. Este método es especialmente útil cuando los datos no son completamente exactos, presentan dispersión o contienen errores de medición, como ocurre con las señales adquiridas en ensayos eléctricos.\par
 Ahora bien, el tipo de función a ajustar debe ser elegido cuidadosamente para que represente adecuadamente la morfología del impulso, ya que este método para su ejecución require que se indique una función de base, sin ella no se puede realizar el ajuste porque no se puede evaluar el error al no tener una función de referencia. En este sentido, la norma IEC 60060-1 establece que la onda debe ajustarse a una función de doble exponencial (\autoref{Eq:DobleExponencial}), para caracterizar adecuadamente el comportamiento del impulso.\par
 \begin{equation}
-    u_d(t) = U \cdot \left( e^{-\frac{t-t_d}{\tau_1}} - e^{-\frac{t-t_d}{\tau_2}} \right)
+    u_d(t) = U \cdot \left( e^{-\dfrac{t-t_d}{\tau_1}} - e^{-\dfrac{t-t_d}{\tau_2}} \right)
     \label{Eq:DobleExponencial}
 \end{equation}
-Donde:
-\begin{singlespace}
-    \setlength{\parskip}{0pt}
-    \noindent $u_d(t)$: función de tensión.\\
-    $t$: tiempo.\\
-    $U$, $\tau_1$, $\tau_2$ y $t_d$: parámetros a encontrar mediante el ajuste.
-\end{singlespace}
+Donde:\\$u_d(t)$: función de tensión.\\
+$t$: tiempo.\\
+$U$, $\tau_1$, $\tau_2$ y $t_d$: parámetros a encontrar mediante el ajuste.\\
+
 
 Para encontrar los parámetros de la función de doble exponencial, se utiliza el \textbf{método de mínimos cuadrados}, que es ampliamente usado en ingeniería para ajustar modelos a datos experimentales.
 Este método busca minimizar la suma de los cuadrados de los residuos (la distancia vertical entre cada punto de dato observado y el punto correspondiente en la curva calculada). Matemáticamente, esto se expresa como:
@@ -97,18 +94,15 @@ Existen muchos algoritmos de optimización disponibles, cada uno con sus ventaja
 \begin{equation}
     w_{i+1} = w_i - \left( J^T J + \lambda diag(J^T J) \right)^{-1} (J^T e)
 \end{equation}
-Donde:
-\begin{singlespace}
-    \setlength{\parskip}{0pt}
-    \noindent $w_{i+1}$: vector de parámetros actualizado.\\
-    $w_i$: vector de parámetros actual.\\
-    $\lambda$: factor de amortiguamiento.\\
-    $e$: vector de residuos o errores.\\
-    $J$: matriz Jacobiana, formada por las primeras derivadas parciales de los errores respecto a los parámetros del modelo.\\
-    $J^T J$: matriz de Hessiana aproximada, compuesta por las segundas derivadas, que modelan la curvatura general de la función de error.\\
-    $diag(J^T J)$: matriz diagonal. Escala cada parámetro según la curvatura local de la función.\\
-    $J^T e$: vector gradiente de la función error. Indica la dirección de máxima pendiente.
-\end{singlespace}
+Donde:\\
+$w_{i+1}$: vector de parámetros actualizado.\\
+$w_i$: vector de parámetros actual.\\
+$\lambda$: factor de amortiguamiento.\\
+$e$: vector de residuos o errores.\\
+$J$: matriz Jacobiana, formada por las primeras derivadas parciales de los errores respecto a los parámetros del modelo.\\
+$J^T J$: matriz de Hessiana aproximada, compuesta por las segundas derivadas, que modelan la curvatura general de la función de error.\\
+$diag(J^T J)$: matriz diagonal. Escala cada parámetro según la curvatura local de la función.\\
+$J^T e$: vector gradiente de la función error. Indica la dirección de máxima pendiente.\\
 
 \noindent Si $\boldsymbol{\lambda \rightarrow 0}$, el algoritmo se comporta como el \textbf{Método de Gauss-Newton} donde asume que la función de error es localmente cuadrática y utiliza expansiones de series de Taylor para aproximarse al mínimo de forma muy rápida, pero puede ser inestable y fallar si los valores iniciales elegidos están muy lejos del óptimo. Resultando:
 \begin{equation}
@@ -118,11 +112,8 @@ Si $\boldsymbol{\lambda \rightarrow \infty}$, se comporta como el \textbf{Descen
 \begin{equation}
     w_{i+1} = w_i - \alpha (J^T e)
 \end{equation}
-Donde:
-\begin{singlespace}
-    \setlength{\parskip}{0pt}
-    \noindent $\alpha$: tamaño de paso de avance de la iteración.
-\end{singlespace}
+Donde:\\
+$\alpha$: tamaño de paso de avance de la iteración.
 
 En el metodo de descenso del gradiente $\alpha$ es un escalar, pero en el algoritmo de Levenberg-Marquardt, resulta una matriz diagonal que escala cada parámetro de forma independiente, por lo tanto:
 \begin{equation}
@@ -131,9 +122,33 @@ En el metodo de descenso del gradiente $\alpha$ es un escalar, pero en el algori
 
 \subsection{Interpolación}
 
+Debido a que, como se dijo antes, los datos adquiridos por el osciloscopio son puntos discretos que representan una señal continua, es necesario aplicar técnicas de interpolación para obtener valores intermedios entre los puntos muestreados. Esto es necesario para encontrar puntos como $U_{30}$ y $U_{90}$, que pueden no coincidir exactamente con los datos de datos adquiridos.\par
+La interpolación polinomial es un proceso matemático que consiste en determinar el único polinomio de grado $n$ que pasa por los $n+1$ puntos de datos conocidos, permitiendo así calcular los valores intermedios. Existen varios métodos de interpolación, cada uno con sus propias características y aplicaciones, entre los más comunes se encuentran:\par
+\textbf{Interpolación Lineal:} Es el método más simple, que conecta dos puntos adyacentes mediante un polinomio de primer grado (una recta). Es rápido pero puede introducir errores significativos si la función subyacente es no lineal con gran curvatura, o si los puntos están muy alejados. Matemáticamente, se puede expresar como:\par
+\begin{equation}
+    f_1(x) = f(x_0) + \frac{f(x_1) - f(x_0)}{x_1 - x_0} (x - x_0)
+\end{equation}
+Donde:
+\begin{singlespace}
+    \begin{description}[leftmargin=1.5cm, labelwidth=0.5cm]
+        \item[$f_1(x)$]: polinomio de interpolación de primer grado.
+        \item[$f(x_0)$]: punto de origen.
+        \item[$\dfrac{f(x_1) - f(x_0)}{x_1 - x_0}$]: pendiente de la recta.
+        \item[$(x - x_0)$]: distancia desde el punto de origen hasta el objetivo.
+    \end{description}
+\end{singlespace}
 
-
-
+\textbf{Interpolación Polinomial:} Utiliza un polinomio de grado $n$ para pasar por $n+1$ puntos. Puede proporcionar una aproximación más precisa, pero es propenso a oscilaciones si el grado del polinomio es demasiado alto o si los puntos están mal distribuidos. Matemáticamente puede generalizarse como:\par
+\begin{equation}
+    f_n(x) = b_0 + b_1(x - x_0) + b_2(x - x_0)(x - x_1) + \ldots + b_n(x - x_0)(x - x_1) \ldots (x - x_{n-1})
+\end{equation}
+Donde los coeficientes $b_i$ son las diferencias divididas finitas evaluadas a partir de los datos.\par
+\begin{align*}
+    b_0 &= f(x_0) \\
+    b_1 &= f[x_1, x_0] = \frac{f(x_1) - f(x_0)}{x_1 - x_0} \\
+    b_2 &= f[x_2, x_1, x_0] = \frac{\dfrac{f(x_2) - f(x_1)}{x_2 - x_1} - \dfrac{f(x_1) - f(x_0)}{x_1 - x_0}}{x_2 - x_0} \\
+    b_n &= f[x_n, \ldots, x_1, x_0] = \frac{f[x_n, \ldots, x_1] - f[x_{n-1}, \ldots, x_0]}{x_n - x_0}
+\end{align*}
 
 
 
@@ -156,4 +171,3 @@ La norma IEC 60060-1 presenta un ejemplo de un filtro de respuesta impulsional i
 En este enfoque, la atenuación del filtro es la mitad de la necesaria, pero los datos se procesan dos veces, primero en sentido directo y luego en sentido inverso. De este modo, el filtrado tiene una salida que coincide con la función de tensión de ensayo con un error de amplitud y un desfase prácticamente nulos.\par
 $$y[n] = \frac{1}{M} \sum_{k=0}^{M-1} x[n-k]$$
 En contraste, el uso de filtros IIR (Infinite Impulse Response) como el Butterworth debe ser manejado con extrema cautela. A pesar de su excelente selectividad de frecuencia, su respuesta de fase no lineal introduce distorsión de retardo de grupo, lo cual puede deformar irreversiblemente la morfología del transitorio si no se aplican técnicas de filtrado bidireccional (zero-phase filtering).\par
-
