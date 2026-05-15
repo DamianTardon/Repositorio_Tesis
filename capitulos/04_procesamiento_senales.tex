@@ -1,74 +1,9 @@
 \newpage
-\chapter{Adquisición y procesamiento digital de señales}
+\chapter{Procesamiento digital de señales}
 \vspace{3\baselineskip}
 
-Este capítulo detalla los fundamentos teóricos y prácticos del procesamiento digital de señales (DSP) y los sistemas de adquisición de datos (DAQ) en el contexto de ensayos de alta tensión. Se aborda la transición del dominio analógico al digital para la captura de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}) empleando un osciloscopio de almacenamiento digital (DSO).\par
-A lo largo de las siguientes secciones, se analizan los criterios de muestreo y cuantización exigidos para transitorios de alta velocidad, las arquitecturas de hardware subyacentes, las técnicas de filtrado digital orientadas a la mitigación de ruido sin alteración de la morfología del impulso, y los algoritmos de interpolación necesarios para la extracción paramétrica. Toda la metodología de procesamiento matemático y validación algorítmica se fundamenta en los lineamientos establecidos por la norma IEC 61083-2 para software utilizado en la evaluación de ensayos con impulsos de tensión y corriente.\par
-
-\section{Arquitectura de osciloscopios de almacenamiento digital (DSO)}
-
-Antes de procesar digitalmente las señales, es necesario capturarlas adecuadamente. Para ello se utiliza un instrumento de medición electrónico denominado, osciloscopio de almacenamiento digital (DSO). 
-El cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y análisis posterior. Por esto es útil comprender su arquitectura, ya que su diseño y limitaciones impactan directamente en la calidad de los datos adquiridos y, por ende, en el análisis posterior.\par
-La señal ingresa por un circuito analógico de acondicionamiento de entrada, para dirigirse al bloque del ADC que se encarga de realizar el muestreo y cuantización a una tasa definida por la base de tiempo. Luego, se almacena en la memoria del osciloscopio, para finalmente presentarla en pantalla.\par
-A continuación, se describen los parámetros más relevantes relacionados con la adquisición de señales, que deben ser considerados al momento de configurar el osciloscopio para capturar impulsos de alta tensión.
-
-\subsection{Muestreo de señales}
-La conversión analógica-digital (ADC) se basa en el \textbf{Teorema de Muestreo} de Nyquist-Shannon, el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, para evitar el fenómeno destructivo del aliasing (cuando la velocidad de muestreo es insuficiente, pueden aparecer erróneamente componentes de frecuencia más bajas que la de la señal real, denominadas “Alias”). Matemáticamente, se define como:
-\begin{equation}
-    f_s > 2 f_{max}
-\end{equation}
-
-\subsection{Resolución vertical}
-La resolución del eje vertical de un osciloscopio digital está vinculada con la resolución del ADC que tiene internamente. 
-Mientras que la resolución de un ADC está dada por la cantidad de bits ($N$) del mismo. Consierando que la tensión de entrada varia entre cero y un valor máximo $(V_{max})$, matemáticamente, puede expresarse:
-\begin{equation}
-    V_{res} = \dfrac{V_{max}}{2^N}
-\end{equation}
-Como el valor máximo de la tensión de entrada puede variar dependiendo de la escala vertical del osciloscopio, conviene expresar la resolución como un porcentaje del valor de plena escala.
-\begin{equation}
-    \text{Resolución \%} = \dfrac{100}{2^N}
-\end{equation}
-
-\subsection{Cuantización de señales}
-Mientras que el muestreo discretiza el eje temporal, la \textbf{cuantización} divide el eje de amplitudes. Este proceso introduce un error numérico inherente denominado \textbf{error de cuantización}, ocasionado por la aproximación del valor real al nivel discreto más cercano. El tamaño del paso de cuantización o resolución del LSB (Bit Menos Significativo, por sus siglas en inglés) está dado por:
-\begin{equation}
-    q = \dfrac{V_{FSR}}{2^N}
-\end{equation}
-Donde $V_{FSR}$ representa el rango dinámico de escala completa (FSR) (relación entre el valor máximo y el valor mínimo de la señal que se puede capturar o representar), y $N$ es la resolución en bits del convertidor.
-
-\subsection{Longitud de memoria}
-El DSO como todo sistema de almacenamiento digital, posee una \textbf{longitud de memoria} finita para almacenar datos, que junto con la frecuencia de muestreo, determina la ventana temporal total de captura, es decir, el tiempo que el osciloscopio puede registrar datos a una frecuencia de muestreo dada.
-\begin{equation}
-    T_{acq} = \dfrac{N_{record}}{f_s}
-\end{equation}
-Donde:\\
-$T_{acq}$: tiempo total de adquisición.\\
-$N_{record}$: longitud de registro.\\
-$f_s$: frecuencia de muestreo máxima.
-
-Por lo tanto, al momento de configurar el osciloscopio debe asegurarse de que el tiempo de adquisición sea suficiente para capturar el fenómeno completo. Normalmente, estos tres parámetros se ajustan automáticamente mediante la escala de tiempo, por eso es necesario entender que dicha escala debe configurarse acorde a la duración total del fenómeno a capturar. Luego, hay algunos equipos que permiten modificar manualmente la frecuencia de muestreo, para una misma escala de tiempo, pero son menos comunes de encontrar.
-
-\subsection{Ancho de banda}
-El \textbf{ancho de banda} es un parámetro importante del osciloscopio, que se mide en \SI{}{MHz} o \SI{}{GHz}, e indica la frecuencia máxima a la que puede responder con precisión. Para garantizar una representación fiel de la señal, el ancho de banda debe ser superior a la frecuencia máxima de la señal que se desea medir.
-
-\subsection{Velocidad de muestreo}
-La \textbf{velocidad de muestreo} es una medida de la resolución en el tiempo, que se mide en \SI{}{MSa/s} o \SI{}{GSa/s}, e indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Este capítulo detalla los fundamentos teóricos del procesamiento digital de señales (DSP).\par
+A lo largo de las siguientes secciones, se analizan las técnicas de filtrado digital orientadas a la mitigación de ruido sin alteración de la morfología del impulso, y los algoritmos de interpolación necesarios para la extracción paramétrica. Toda la metodología de procesamiento matemático y validación algorítmica se fundamenta en los lineamientos establecidos por la norma IEC 61083-2 para software utilizado en la evaluación de ensayos con impulsos de tensión y corriente.\par
 
 \section{Filtros digitales}
 Los filtros digitales son algoritmos matemáticos diseñados para modificar selectivamente las componente en frecuencia de una señal, permitiendo el paso de ciertas frecuencias y atenuando otras, tal como ocurre con los filtros analógicos constituídos por componentes electrónicos (resistencias, capacitores e inductores), ya que buscan simular su comportamiento. Estos se clasifican principalmente en dos grandes familias, FIR o IIR, según la duración de su respuesta al impulso.\par

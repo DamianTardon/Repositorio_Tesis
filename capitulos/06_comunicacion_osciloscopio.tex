@@ -1,0 +1,46 @@
+\newpage
+\chapter{Módulo de adquisición y control de instrumento}
+\vspace{3\baselineskip}
+
+
+El presente capítulo expone la implementación práctica de las rutinas de software destinadas a materializar los fundamentos de conversión analógica-digital y almacenamiento de señales definidos en el Capítulo 3. El diseño propuesto se centra en establecer un protocolo de comunicación estable y de baja latencia con el instrumental de laboratorio, garantizando la captura íntegra y precisa de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}).
+
+\section{Implementación de la capa de comunicación VISA}
+
+Para abstraer la complejidad intrínseca del manejo de buses y puertos físicos, el módulo utiliza la arquitectura estándar de software VISA (Virtual Instrument Software Architecture). La instanciación y apertura del gestor de recursos de comunicación se ejecuta a través de la biblioteca \texttt{pyvisa}, operando sobre el \textit{backend} \texttt{@py}.
+
+La vinculación con el hardware de medición se efectúa mapeando unívocamente el instrumento y configurando explícitamente los caracteres de terminación (\texttt{\textbackslash n}) para las secuencias de lectura y escritura. Esto asegura el correcto delimitado de los comandos de E/S, previniendo estados de bloqueo en la sincronización de mensajes entre el controlador computacional y el dispositivo.
+
+\section{Controlador del osciloscopio GW Instek GDS-1102A-U}
+
+El diseño lógico del \textit{driver} obedece a un modelo de Programación Orientada a Objetos, donde la clase \texttt{GWInstekGDS1000AU} encapsula la totalidad de las directivas operativas del equipo. Este enfoque aísla al resto del sistema de los detalles del conjunto de instrucciones de bajo nivel.
+
+El control programático del osciloscopio se ejerce a través de escrituras y consultas (\textit{queries}) basadas en comandos estandarizados IEEE 488.2 y SCPI. La estructura de la clase expone métodos que configuran dinámicamente los parámetros operativos críticos:
+
+\begin{itemize}
+    \item \textbf{Acondicionamiento vertical:} Dimensionamiento de la tensión mediante \texttt{:channelX:scale} y la asignación del \textit{offset}.
+    \item \textbf{Base temporal:} Definición de la ventana de captura utilizando \texttt{:timebase:scale}.
+    \item \textbf{Sincronización trigger:} Parametrización del evento de disparo, fijando su modo y fuente a través de \texttt{:trigger:mode} y \texttt{:trigger:source}.
+\end{itemize}
+
+\section{Procesamiento de transferencia de datos de memoria profunda}
+
+Para ejecutar el análisis matemático y normativo de las ondas de impulso, es indispensable extraer íntegramente las muestras contenidas en la memoria del osciloscopio. El algoritmo que rige este flujo de transferencia consta de cuatro etapas secuenciales:
+
+\textbf{Paso 1: Solicitud de bloque.}
+Se consulta de forma iterada el estado del canal empleando \texttt{:acquireX:state?}. Al confirmar que la adquisición ha concluido y el buffer del dispositivo está listo, se despacha la directiva \texttt{:acquireX:memory?} para iniciar el volcado de datos.
+
+\textbf{Paso 2: Interpretación del encabezado.}
+El flujo de datos inicia con un encabezado de metadatos. Se ejecuta una lectura de los primeros \SI{10}{\byte} para descifrar la estructura del paquete. A partir de estos bytes, se calcula analíticamente la longitud neta (\texttt{pkg\_length}) de la carga útil, definiendo los límites de las iteraciones de lectura requeridas para evitar la pérdida de información durante la transmisión masiva.
+
+\textbf{Paso 3: Desempaquetado algorítmico.}
+La estructura binaria recibida debe ser decodificada. Del preámbulo se extrae el periodo de muestreo ($\Delta t$), desempaquetándolo bajo un formato de punto flotante \textit{big-endian} (\texttt{>f}). Consecuentemente, el vector compuesto por el \textit{raw data} se procesa como una sucesión de enteros cortos de 16 bits \textit{big-endian} (\texttt{>h}).
+
+\textbf{Paso 4: Conversión a magnitud real.}
+Los datos crudos representan niveles discretos de cuantización del convertidor analógico-digital. Para escalarlos a dimensiones físicas de tensión, se aplica una transformación lineal en función de la escala configurada y la constante intrínseca del equipo (\num{25.0} pasos por división). La formulación matemática es la siguiente:
+
+\begin{equation}
+V_{real} = V_{crudo} \cdot \frac{V_{div}}{25.0}
+\end{equation}
+
+Donde $V_{real}$ es el vector de tensiones finales, $V_{crudo}$ denota el arreglo de \textit{raw data} extraído, y $V_{div}$ representa el ajuste de escala vertical activa del canal (\texttt{:channelX:scale}).
