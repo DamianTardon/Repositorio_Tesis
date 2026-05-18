@@ -1,6 +1,7 @@
 % !TeX program = lualatex
-%\documentclass[11pt]{book} % Clase de documento para un informe.
-\documentclass[11pt, draft]{book} % Clase de documento para un informe.
+%\PassOptionsToPackage{table, xcdraw}{xcolor}
+%\documentclass[11pt, draft]{book} % Clase de documento Borrador, agiliza compilación.
+\documentclass[11pt, final]{book} % Clase de documento para un informe.
 \usepackage{fancyhdr}
 
 % --- IDIOMA Y LOCALIZACIÓN ---
@@ -27,7 +28,7 @@
 \usepackage{booktabs} % Formateo de tablas.
 \usepackage{tabularx}
 %\usepackage{multirow, booktabs} % Para texto en varias filas, y Formateo de tablas.
-\usepackage[table, xcdraw]{xcolor}
+%\usepackage[table, xcdraw]{xcolor}
 \usepackage{siunitx}
 \DeclareSIUnit{\sample}{Sa} % Unidad personalizada: muestra = sample = Sa
 \sisetup{output-decimal-marker={,}}
@@ -50,6 +51,7 @@
 % --- HIPERVÍNCULOS ---
 \usepackage[hidelinks]{hyperref} % Hipervínculos transparentes.
 
+\usepackage{pythonhighlight} % Sintaxis de código Python.
 % Redefinición de títulos y etiquetas.
 \addto\captionsspanish{
   \renewcommand{\contentsname}{Índice}

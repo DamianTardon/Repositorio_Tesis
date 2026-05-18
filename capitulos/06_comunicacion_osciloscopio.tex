@@ -1,46 +1,105 @@
 \newpage
-\chapter{Módulo de adquisición y control de instrumento}
+\chapter{Adquisición de datos y control de Instrumentos}
 \vspace{3\baselineskip}
 
+Este capítulo establece la transición entre los fundamentos teóricos del muestreo y retención analizados previamente, y su implementación práctica en el \textit{software} desarrollado. El objetivo principal radica en la captura y el análisis automatizado de ondas de impulso tipo rayo, parametrizadas bajo la relación normalizada de \SI[parse-numbers=false]{1,2/50}{\micro\second}, empleando el \textit{hardware} específico del osciloscopio de almacenamiento digital GW Instek GDS-1102A-U.
 
-El presente capítulo expone la implementación práctica de las rutinas de software destinadas a materializar los fundamentos de conversión analógica-digital y almacenamiento de señales definidos en el Capítulo 3. El diseño propuesto se centra en establecer un protocolo de comunicación estable y de baja latencia con el instrumental de laboratorio, garantizando la captura íntegra y precisa de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}).
+\section{Controlador del osciloscopio}
+La abstracción del \textit{hardware} se diseña bajo el paradigma de Programación Orientada a Objetos (POO), encapsulando la lógica de control del osciloscopio dentro de la clase \texttt{GWInstekGDS1000AU}. Esta estructura modular oculta la complejidad sintáctica del estándar IEEE 488.2 y los comandos SCPI específicos del fabricante. El controlador simplifica y gestiona las operaciones a acciones de consulta (\textit{queries}) y escritura (\textit{writes}) para configurar el instrumento.\par
+De esta forma, tal como se vió en el capítulo \textbf{Arquitectura del sistema}, se logra abtraer el \textit{software} del instrumento físico, por lo que, en otro momento se puede utilizar otro modelo de osciloscopio del mismo u otro fabricante, sin tener que modificar el sistema principal, solamente reescribiendo el código interno de cada función de este módulo.\par
 
-\section{Implementación de la capa de comunicación VISA}
+\section{Comunicación VISA}
+A continuación, se presenta la implementación de la capa de comunicación entre la computadora y el osciloscopio utilizando la biblioteca PyVISA, que proporciona una interfaz de alto nivel para interactuar con instrumentos de medición a través de diversos buses (USB, GPIB, Ethernet, RS-232, COM, etc.). Cabe aclarar que, si bien el equipo utilizado se conecta a través de un puerto USB, la computadora lo detecta como un dispositivo de comunicación serie (COM) mediante el protocolo USB CDC-ACM, tal como indica el fabricante en su manual de programación [X].\par
+Esta implementación asegura la portabilidad multiplataforma del software sin depender de librerías vinculadas a sistemas operativos específicos o drivers propietarios.
 
-Para abstraer la complejidad intrínseca del manejo de buses y puertos físicos, el módulo utiliza la arquitectura estándar de software VISA (Virtual Instrument Software Architecture). La instanciación y apertura del gestor de recursos de comunicación se ejecuta a través de la biblioteca \texttt{pyvisa}, operando sobre el \textit{backend} \texttt{@py}.
+\inputpython{src/gwinstekgds1000au.py}{11}{28}
 
-La vinculación con el hardware de medición se efectúa mapeando unívocamente el instrumento y configurando explícitamente los caracteres de terminación (\texttt{\textbackslash n}) para las secuencias de lectura y escritura. Esto asegura el correcto delimitado de los comandos de E/S, previniendo estados de bloqueo en la sincronización de mensajes entre el controlador computacional y el dispositivo.
-
-\section{Controlador del osciloscopio GW Instek GDS-1102A-U}
-
-El diseño lógico del \textit{driver} obedece a un modelo de Programación Orientada a Objetos, donde la clase \texttt{GWInstekGDS1000AU} encapsula la totalidad de las directivas operativas del equipo. Este enfoque aísla al resto del sistema de los detalles del conjunto de instrucciones de bajo nivel.
-
-El control programático del osciloscopio se ejerce a través de escrituras y consultas (\textit{queries}) basadas en comandos estandarizados IEEE 488.2 y SCPI. La estructura de la clase expone métodos que configuran dinámicamente los parámetros operativos críticos:
+\subsection{Inicialización y gestión de recursos (\texttt{\_\_init\_\_})}
+El método constructor \texttt{\_\_init\_\_} gestiona la inicialización de las variables de estado. Su propósito es definir un estado inicial seguro al administrador del instrumento, y la instanciación del gestor de recursos. Acto seguido, ejecuta un escaneo automatizado para construir un arreglo con los identificadores de los dispositivos presentes en el canal y evalúa su longitud. Si la detección es exitosa y se encuentra al menos un dispositivo direccionable, el método invoca automáticamente la rutina de conexión sobre el primer elemento del vector de recursos.
 
 \begin{itemize}
-    \item \textbf{Acondicionamiento vertical:} Dimensionamiento de la tensión mediante \texttt{:channelX:scale} y la asignación del \textit{offset}.
-    \item \textbf{Base temporal:} Definición de la ventana de captura utilizando \texttt{:timebase:scale}.
-    \item \textbf{Sincronización trigger:} Parametrización del evento de disparo, fijando su modo y fuente a través de \texttt{:trigger:mode} y \texttt{:trigger:source}.
+    \item \textbf{\texttt{.dso = None}:} Inicializa con valor nulo el atributo que contendrá el administrador del dispositivo físico cuando se establezca la conexión.
+    \item \textbf{\texttt{.ResourceManager('@py')}:} Instancia el gestor de recursos de VISA usando el \textit{backend} nativo de Python puro (\texttt{PyVISA-py}).
+    \item \textbf{\texttt{.list\_resources()}:} Escanea los buses del sistema para identificar los recursos físicos direccionables disponibles en el entorno local.
+    \item \textbf{\texttt{.connect(instrument\_list[0])}:} Estructura de control condicional que, ante la presencia de al menos un dispositivo compatible en la lista, toma el primer elemento del arreglo y desvía el flujo hacia el método de conexión.
 \end{itemize}
 
-\section{Procesamiento de transferencia de datos de memoria profunda}
+\subsection{Establecimiento del enlace bidireccional (\texttt{connect})}
+El método \texttt{connect} implementa la apertura de la sesión de comunicación con el instrumento seleccionado. Su función es asociar el identificador del recurso físico al administrador del objeto, y configurar los caracteres de terminación de lectura y escritura mediante la constante de salto de línea, para evitar condiciones de bloqueo por tiempo de espera (\textit{timeout}).\par
+Una vez configurado el canal de entrada y salida, ejecuta una validación de la integridad bidireccional del canal transmitiendo una consulta estándar de identificación, y captura los metadatos devueltos por el \textit{firmware}. Todo el flujo analítico se encapsula en una rutina de control de excepciones que, ante fallos críticos en el bus o pérdidas de sincronismo, aborta la operación y libera los recursos del sistema de forma segura, ya que de lo contrario impediría la reconexión posterior del instrumento, debiendo reiniciar la computadora o el osciloscopio.
 
-Para ejecutar el análisis matemático y normativo de las ondas de impulso, es indispensable extraer íntegramente las muestras contenidas en la memoria del osciloscopio. El algoritmo que rige este flujo de transferencia consta de cuatro etapas secuenciales:
+\begin{itemize}
+    \item \textbf{\texttt{.open\_resource(resource\_name)}}: Abre el recurso VISA especificado y asigna la interfaz de entrada/salida (I/O) al objeto del administrador del instrumento.
+    \item \textbf{\texttt{.read\_termination}} y \textbf{\texttt{.write\_termination}:} Definen la secuencia de salto de línea (\texttt{'\textbackslash n'}) como carácter de terminación de mensajes de la capa de transporte, tal como indica el fabricante en el manual de programación del instrumento [X]. Esto previene condiciones de bloqueo crítico o errores por \textit{timeout}.
+    \item \textbf{\texttt{.query('*IDN?')}:} Envía la consulta de identificación estándar IEEE 488.2 mediante una operación combinada de escritura y lectura. La correcta recepción del \textit{string} de datos (fabricante, modelo, número de serie y versión de \textit{firmware}) actúa como validación funcional del enlace lógico bidireccional.
+    \item \textbf{Bloque de control de excepciones (\texttt{try/except}):} Garantiza el manejo seguro de fallos. Ante un error en la apertura del puerto o incompatibilidad en el protocolo, se intercepta la excepción, se reporta la anomalía en la consola de depuración y se invoca el método \textbf{\texttt{.close()}} para liberar los recursos comprometidos.
+\end{itemize}
 
-\textbf{Paso 1: Solicitud de bloque.}
-Se consulta de forma iterada el estado del canal empleando \texttt{:acquireX:state?}. Al confirmar que la adquisición ha concluido y el buffer del dispositivo está listo, se despacha la directiva \texttt{:acquireX:memory?} para iniciar el volcado de datos.
+\section{Adquisición y decodificación de datos}
+La transferencia de datos de la memoria del osciloscopio hacia la computadora, se realiza mediante un procedimiento secuencial para garantizar la integridad de los datos.
+Este proceso de adquisición se estructura en cuatro etapas fundamentales.\par
+\textbf{Paso 1: Sincronismo y solicitud.} Tras confirmar el disparo, se consulta el estado de disponibilidad del canal. Si la forma de onda está lista en la memoria del instrumento, se emite la petición de transferencia de datos.\par
+\textbf{Paso 2: Decodificación del Encabezado.} El flujo de datos inicia con una cabecera de \SI{10}{bytes}, que el algoritmo decodifica para calcular la longitud neta del paquete de datos, permitiendo un control preciso del bucle de lectura secuencial por bloques y previniendo el truncamiento de la información.\par
+\textbf{Paso 3: Desempaquetado.} Los datos binarios almacenados en la memoria RAM del sistema se decodifican para obtener el periodo de muestreo y los datos crudos (\textit{raw data}) de la forma de onda.\par
+\textbf{Paso 4: Conversión a magnitud real.} Se realiza una transformación lineal para convertir los niveles discretos del ADC a magnitudes de tensión reales, aplicando la escala vertical del canal y la constante de cuantización del instrumento.
 
-\textbf{Paso 2: Interpretación del encabezado.}
-El flujo de datos inicia con un encabezado de metadatos. Se ejecuta una lectura de los primeros \SI{10}{\byte} para descifrar la estructura del paquete. A partir de estos bytes, se calcula analíticamente la longitud neta (\texttt{pkg\_length}) de la carga útil, definiendo los límites de las iteraciones de lectura requeridas para evitar la pérdida de información durante la transmisión masiva.
+\inputpython{src/gwinstekgds1000au.py}{30}{79}
 
-\textbf{Paso 3: Desempaquetado algorítmico.}
-La estructura binaria recibida debe ser decodificada. Del preámbulo se extrae el periodo de muestreo ($\Delta t$), desempaquetándolo bajo un formato de punto flotante \textit{big-endian} (\texttt{>f}). Consecuentemente, el vector compuesto por el \textit{raw data} se procesa como una sucesión de enteros cortos de 16 bits \textit{big-endian} (\texttt{>h}).
+\subsection{Adquisición de datos (\texttt{get\_block\_data})}
+El método \texttt{get\_block\_data} tiene como función principal coordinar y ejecutar la adquisición completa del flujo binario de datos correspondiente a la memoria del canal seleccionado del osciloscopio. Su función es verificar el estado de preparación de la señal en el instrumento, solicitar la transferencia del bloque de memoria, interpretar las dimensiones físicas del paquete mediante la lectura de su cabecera estándar e implementar un ciclo de lectura iterativo y fragmentado en bloques de \textit{bytes} para reconstruir la trama binaria total en la memoria RAM del ordenador de forma segura.
 
-\textbf{Paso 4: Conversión a magnitud real.}
-Los datos crudos representan niveles discretos de cuantización del convertidor analógico-digital. Para escalarlos a dimensiones físicas de tensión, se aplica una transformación lineal en función de la escala configurada y la constante intrínseca del equipo (\num{25.0} pasos por división). La formulación matemática es la siguiente:
+
+\begin{itemize}
+    \item \textbf{\texttt{.get\_channel\_scale(channel)}:} Consulta la escala vertical del canal seleccionado.
+    \item \textbf{\texttt{.write(f':acquire\{channel\}:state?')}:} Consulta el estado de adquisición del canal específicado. Si el primer carácter del \textit{string} devuelto equivale a \texttt{'1'}, se confirma que el osciloscopio ha finalizado la captura, y que los datos en memoria se encuentran listos para su transferencia.
+    \item \textbf{\texttt{time.sleep(0.1)}:} Introduce un retardo de \SI{0.1}{\second} para estabilizar las transferencias del bus USB, tras la confirmación del estado operativo.
+    \item \textbf{\texttt{.write(f':acquire\{channel\}:memory?')}:} Solicita la transferencia de datos para el canal seleccionado.
+    \item \textbf{\texttt{.read\_bytes(10)}:} Ejecuta una lectura binaria de los primeros \SI{10}{bytes} para procesar el encabezado.
+    \item \textbf{\texttt{headerlen}:} Calcula la longitud de la cabecera.
+    \item \textbf{\texttt{inBuffer[1]}:} Indica cuántos dígitos representan el tamaño del paquete.
+    \item \textbf{\texttt{pkg\_length}:} Declara la cantidad neta de \textit{bytes} de la forma de onda.
+    \item \textbf{Ciclo \texttt{while}:} Se ejecuta mientras el valor residual de \texttt{pkg\_length} sea mayor a cero. Para evitar la saturación de las colas de comunicación del \textit{backend} y controlar el uso de memoria, se limita el tamaño de cada lectura a \SI{100000}{bytes} por ciclo. Los datos parciales leídos mediante \textbf{\texttt{.read\_bytes(length)}} se concatenan secuencialmente en el contenedor binario \texttt{inBuffer}, disminuyendo el valor de \texttt{pkg\_length} de acuerdo a la longitud del bloque recibido, hasta vaciar el \textit{buffer} del osciloscopio. En caso de producirse un error de lectura, se captura la excepción, se interrumpe el proceso mediante \textbf{\texttt{sys.exit(0)}} y se liberan las sesiones activas del bus.
+\end{itemize}
+
+\subsection{Decodificación de datos (\texttt{unpack\_waveform})}
+El método \texttt{unpack\_waveform} cumple la función de decodificar el \textit{buffer} de bytes brutos acumulados, transformándolos en arreglos numéricos de magnitud física real. Este método procesa secuencialmente los segmentos del bloque binario mediante operaciones de desempaquetado (\textit{unpacking}) bajo formatos de ordenación de \textit{bytes} específicos, aislando el periodo de muestreo y el arreglo de datos crudos (\textit{raw data}) del ADC, para finalmente aplicar la constante de discretización vertical del instrumento y retornar la forma de onda expresada directamente en Volts.
+
+\begin{itemize}
+    \item \textbf{Desempaquetado del periodo de muestreo (\texttt{dt}):} La función \texttt{unpack} analiza los cuatro \textit{bytes} posteriores a la cabecera como un número de coma flotante de precisión simple de \SI{4}{bytes} (\SI{32}{bits}) en formato (\textit{big-endian}) (expresado como: \texttt{'>f'}), el cual representa el periodo de muestreo en segundos.
+    \item \textbf{Desempaquetado de la señal cruda (\texttt{waveform\_raw}):} La cantidad (\texttt{s}) de \textit{bytes} restantes componen la señal digitalizada, como números enteros cortos con signo en formato \textit{big-endian} (expresado como: \texttt{'>\%sh'}). Dado que cada muestra ocupa \SI{2}{bytes} (\SI{16}{bits}), la cantidad (\texttt{s}) a desempaquetar se calcula como la mitad de la longitud del bloque binario.
+    \item \textbf{\texttt{np.array(waveform\_raw)}:} Convierte el arreglo bruto (\texttt{waveform\_raw}) en un arreglo optimizado de \texttt{NumPy}, para facilitar su manipulación.
+    \item \textbf{Escalado de la señal:} Se aplica la \autoref{eq:conversion_adc}, multiplicando el arreglo crudo por la escala vertical (V/div), y dividiéndolo por la constante de \SI{25}{} pasos discretos por división vertical, para transformar los niveles discretos del ADC a magnitudes de tensión reales.
+\end{itemize}
 
 \begin{equation}
-V_{real} = V_{crudo} \cdot \frac{V_{div}}{25.0}
+    \text{waveform}(i) = \frac{\text{waveform\_raw}(i) \cdot {\text{V/div}}}{\text{ADC\_STEPS\_PER\_DIV}}
+    \label{eq:conversion_adc}
 \end{equation}
 
-Donde $V_{real}$ es el vector de tensiones finales, $V_{crudo}$ denota el arreglo de \textit{raw data} extraído, y $V_{div}$ representa el ajuste de escala vertical activa del canal (\texttt{:channelX:scale}).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Configuración del instrumento}
+A nivel de sistema, se utiliza el comando \texttt{*RST} para el restablecimiento a valores de fábrica. La configuración analógica se comanda mediante las instrucciones
+
+\texttt{:channel:scale}, \texttt{:channel:offset} y \texttt{:channel:display} para las escalas verticales, el \textit{offset} y la habilitación de los canales, respectivamente. El control horizontal se ajusta a través de \texttt{:timebase:scale} y \texttt{:timebase:delay}.\par
+El sistema de disparo (\textit{trigger}) se configura para capturar eventos transitorios rápidos. Se envían los comandos \texttt{:single} para armar el disparo único, \texttt{:trigger:level} para definir el umbral de tensión y \texttt{:trigger:slope} para establecer el flanco de adquisición. Para evitar el bloqueo de la interfaz gráfica durante la espera del impulso, el estado del equipo se consulta periódicamente (\texttt{:trigger:state?}) desde un hilo de ejecución secundario (\texttt{WaitWaveformThread}) hasta detectar el estado de disparo efectivo.
