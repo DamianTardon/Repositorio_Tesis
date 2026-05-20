@@ -12,10 +12,18 @@ De esta forma, tal como se vió en el capítulo \textbf{Arquitectura del sistema
 A continuación, se presenta la implementación de la capa de comunicación entre la computadora y el osciloscopio utilizando la biblioteca PyVISA, que proporciona una interfaz de alto nivel para interactuar con instrumentos de medición a través de diversos buses (USB, GPIB, Ethernet, RS-232, COM, etc.). Cabe aclarar que, si bien el equipo utilizado se conecta a través de un puerto USB, la computadora lo detecta como un dispositivo de comunicación serie (COM) mediante el protocolo USB CDC-ACM, tal como indica el fabricante en su manual de programación [X].\par
 Esta implementación asegura la portabilidad multiplataforma del software sin depender de librerías vinculadas a sistemas operativos específicos o drivers propietarios.
 
-\inputpython{src/gwinstekgds1000au.py}{11}{28}
-
 \subsection{Inicialización y gestión de recursos (\texttt{\_\_init\_\_})}
 El método constructor \texttt{\_\_init\_\_} gestiona la inicialización de las variables de estado. Su propósito es definir un estado inicial seguro al administrador del instrumento, y la instanciación del gestor de recursos. Acto seguido, ejecuta un escaneo automatizado para construir un arreglo con los identificadores de los dispositivos presentes en el canal y evalúa su longitud. Si la detección es exitosa y se encuentra al menos un dispositivo direccionable, el método invoca automáticamente la rutina de conexión sobre el primer elemento del vector de recursos.
+
+\begin{python}
+def __init__(self):
+    self.dso = None
+    self.rm = pyvisa.ResourceManager('@py')
+    instrument_list = self.rm.list_resources()
+    print("Instrumentos encontrados:", instrument_list)
+    if instrument_list:
+        self.connect(instrument_list[0])
+\end{python}
 
 \begin{itemize}
     \item \textbf{\texttt{.dso = None}:} Inicializa con valor nulo el atributo que contendrá el administrador del dispositivo físico cuando se establezca la conexión.
@@ -27,6 +35,19 @@ El método constructor \texttt{\_\_init\_\_} gestiona la inicialización de las 
 \subsection{Establecimiento del enlace bidireccional (\texttt{connect})}
 El método \texttt{connect} implementa la apertura de la sesión de comunicación con el instrumento seleccionado. Su función es asociar el identificador del recurso físico al administrador del objeto, y configurar los caracteres de terminación de lectura y escritura mediante la constante de salto de línea, para evitar condiciones de bloqueo por tiempo de espera (\textit{timeout}).\par
 Una vez configurado el canal de entrada y salida, ejecuta una validación de la integridad bidireccional del canal transmitiendo una consulta estándar de identificación, y captura los metadatos devueltos por el \textit{firmware}. Todo el flujo analítico se encapsula en una rutina de control de excepciones que, ante fallos críticos en el bus o pérdidas de sincronismo, aborta la operación y libera los recursos del sistema de forma segura, ya que de lo contrario impediría la reconexión posterior del instrumento, debiendo reiniciar la computadora o el osciloscopio.
+
+\begin{python}
+def connect(self, resource_name):
+    try:
+        self.dso = self.rm.open_resource(resource_name)
+        self.dso.read_termination = '\n'
+        self.dso.write_termination = '\n'
+        idn = self.dso.query('*IDN?')
+        print("Instrumento conectado satisfactoriamente:", idn)
+    except Exception as e:
+        print("Error al iniciar con el instrumento:", e)
+        self.close()
+\end{python}
 
 \begin{itemize}
     \item \textbf{\texttt{.open\_resource(resource\_name)}}: Abre el recurso VISA especificado y asigna la interfaz de entrada/salida (I/O) al objeto del administrador del instrumento.
@@ -43,11 +64,50 @@ Este proceso de adquisición se estructura en cuatro etapas fundamentales.\par
 \textbf{Paso 3: Desempaquetado.} Los datos binarios almacenados en la memoria RAM del sistema se decodifican para obtener el periodo de muestreo y los datos crudos (\textit{raw data}) de la forma de onda.\par
 \textbf{Paso 4: Conversión a magnitud real.} Se realiza una transformación lineal para convertir los niveles discretos del ADC a magnitudes de tensión reales, aplicando la escala vertical del canal y la constante de cuantización del instrumento.
 
-\inputpython{src/gwinstekgds1000au.py}{30}{79}
-
 \subsection{Adquisición de datos (\texttt{get\_block\_data})}
 El método \texttt{get\_block\_data} tiene como función principal coordinar y ejecutar la adquisición completa del flujo binario de datos correspondiente a la memoria del canal seleccionado del osciloscopio. Su función es verificar el estado de preparación de la señal en el instrumento, solicitar la transferencia del bloque de memoria, interpretar las dimensiones físicas del paquete mediante la lectura de su cabecera estándar e implementar un ciclo de lectura iterativo y fragmentado en bloques de \textit{bytes} para reconstruir la trama binaria total en la memoria RAM del ordenador de forma segura.
 
+\begin{python}
+def get_block_data(self, channel):
+    try:
+        v_div = self.get_channel_scale(channel)
+        self.dso.write(f':acquire{channel}:state?')
+        state = self.dso.read()
+        if state[0] == '1':
+            time.sleep(0.1)
+            self.dso.write(f':acquire{channel}:memory?')
+            inBuffer = self.dso.read_bytes(10)
+            length = len(inBuffer)
+            headerlen = 2 + int(chr(inBuffer[1]))
+            pkg_length = int(inBuffer[2:headerlen]) + headerlen
+            pkg_length = pkg_length - length
+            while True:
+                if pkg_length == 0:
+                    break
+                else:
+                    if pkg_length > 100000:
+                        length = 100000
+                    else:
+                        length = pkg_length
+                    try:
+                        buf = self.dso.read_bytes(length)
+                    except:
+                        print('Error al recibir datos del instrumento!')
+                        self.close()
+                        sys.exit(0)
+                    num = len(buf)
+                    inBuffer += buf
+                    pkg_length = pkg_length - num
+            waveform, dt = self.unpack_waveform(inBuffer, headerlen, v_div)
+            return inBuffer, waveform, dt
+        else:
+            print('Error: Forma de onda aún no está lista.')
+            return None, None, None
+    except Exception as e:
+        print("Error al obtener datos:", e)
+        self.close()
+        return None, None, None
+\end{python}
 
 \begin{itemize}
     \item \textbf{\texttt{.get\_channel\_scale(channel)}:} Consulta la escala vertical del canal seleccionado.
@@ -64,6 +124,20 @@ El método \texttt{get\_block\_data} tiene como función principal coordinar y e
 \subsection{Decodificación de datos (\texttt{unpack\_waveform})}
 El método \texttt{unpack\_waveform} cumple la función de decodificar el \textit{buffer} de bytes brutos acumulados, transformándolos en arreglos numéricos de magnitud física real. Este método procesa secuencialmente los segmentos del bloque binario mediante operaciones de desempaquetado (\textit{unpacking}) bajo formatos de ordenación de \textit{bytes} específicos, aislando el periodo de muestreo y el arreglo de datos crudos (\textit{raw data}) del ADC, para finalmente aplicar la constante de discretización vertical del instrumento y retornar la forma de onda expresada directamente en Volts.
 
+\begin{python}
+ADC_STEPS_PER_DIV = 25.0
+def unpack_waveform(self, inBuffer, headerlen, vdiv):
+    print(inBuffer[:headerlen])
+    dt = unpack('>f', inBuffer[headerlen : headerlen + 4])[0]
+    print(f'Periodo de muestreo = {dt*1e9:.0f} [ns]')
+    waveform_raw = unpack('>%sh' % (int(len(inBuffer[headerlen + 8:]) / 2)), inBuffer[headerlen + 8:])
+    waveform_raw = np.array(waveform_raw)
+    num = len(waveform_raw)
+    print(f'Cantidad de muestras = {num}')
+    waveform = waveform_raw * vdiv / self.ADC_STEPS_PER_DIV
+    return waveform, dt
+\end{python}
+
 \begin{itemize}
     \item \textbf{Desempaquetado del periodo de muestreo (\texttt{dt}):} La función \texttt{unpack} analiza los cuatro \textit{bytes} posteriores a la cabecera como un número de coma flotante de precisión simple de \SI{4}{bytes} (\SI{32}{bits}) en formato (\textit{big-endian}) (expresado como: \texttt{'>f'}), el cual representa el periodo de muestreo en segundos.
     \item \textbf{Desempaquetado de la señal cruda (\texttt{waveform\_raw}):} La cantidad (\texttt{s}) de \textit{bytes} restantes componen la señal digitalizada, como números enteros cortos con signo en formato \textit{big-endian} (expresado como: \texttt{'>\%sh'}). Dado que cada muestra ocupa \SI{2}{bytes} (\SI{16}{bits}), la cantidad (\texttt{s}) a desempaquetar se calcula como la mitad de la longitud del bloque binario.
@@ -76,30 +150,130 @@ El método \texttt{unpack\_waveform} cumple la función de decodificar el \texti
     \label{eq:conversion_adc}
 \end{equation}
 
+\section{Configuración del instrumento} \label{sec:configuracion_instrumento}
+Además de las rutinas de inicialización y transferencia de datos, el módulo integra diversas funciones específicas utilizadas por el presentador del \textit{software} para sincronizar la interfaz gráfica con el osciloscopio. A continuación, se listan los métodos empleados y su propósito en el programa:
 
+\begin{itemize}
+\item \textbf{\texttt{default\_settings}:} Transmite el comando estándar \textbf{\texttt{*RST}} para restablecer el instrumento a su configuración de fábrica, garantizando un estado inicial conocido antes de aplicar los nuevos parámetros del ensayo.
+\item \textbf{\texttt{set\_channel\_scale}} / \textbf{\texttt{get\_channel\_scale}:} Modifican y consultan la escala de tensión por división del canal indicado.
+\item \textbf{\texttt{set\_channel\_offset}} / \textbf{\texttt{get\_channel\_offset}:} Controlan el nivel de tensión continua de referencia (\textit{offset}) sobre el cual se centra la señal en la pantalla para el canal indicado.
+\item \textbf{\texttt{set\_timebase\_scale}} / \textbf{\texttt{get\_timebase\_scale}:} Ajustan y leen la escala horizontal de tiempo por división. Implícitamente define la frecuencia de muestreo.
+\item \textbf{\texttt{set\_timebase\_position}} / \textbf{\texttt{get\_timebase\_position}:} Mueve el origen temporal de la señal respecto a la posición central de la pantalla.
+\item \textbf{\texttt{set\_trigger\_level}} / \textbf{\texttt{get\_trigger\_level}:} Configuran el umbral de tensión que la señal debe cruzar para iniciar a "dibujar" o sincronizar la onda en la pantalla.
+\item \textbf{\texttt{set\_trigger\_slope}} / \textbf{\texttt{get\_trigger\_slope}:} Definen la polaridad del flanco de disparo, determinando si la captura se activa en la rampa ascendente o descendente del impulso.
+\item \textbf{\texttt{set\_single\_trigger}:} Arma el osciloscopio en modo de adquisición de un único evento, dejándolo en espera hasta que aparezca la señal.
+\item \textbf{\texttt{get\_trigger\_state}:} Consulta el estado interno del barrido para detectar cuándo el instrumento pasa de estar \enquote{No disparado} a estar \enquote{Disparado}.
+\end{itemize}
 
+Al analizar el código fuente de este módulo, se puede observar que hay otros métodos implementados, pero que no se utilizan en el programa principal. Esto se debe a que fueron desarrollados para futuras funcionalidades, pero no forman parte del flujo actual de adquisición y visualización de datos. Sin embargo, su presencia en el código no afecta el funcionamiento del sistema, ya que no son invocados por ningún proceso activo.
 
+\subsection{Métodos de acceso y modificación}
+Para gestionar la configuración del osciloscopio de manera robusta, los métodos recién mencionados en la sección \ref{sec:configuracion_instrumento} implementan una arquitectura estandarizada, basada en métodos de acceso (\textit{getters}) y métodos de modificación (\textit{setters}), en la clase \textbf{\texttt{GWInstekGDS1000AU}}.\par
+Los métodos \textit{getters} encapsulan la directiva SCPI de consulta mediante la instrucción \textbf{\texttt{.query()}}. Su función es interrogar al instrumento sobre su estado actual, recibir la cadena de caracteres devuelta por el \textit{firmware}, convertirla al tipo de dato correspondiente (flotante, entero o cadena) y retornar dicho valor a la interfaz, como se observa en el siguiente ejemplo para leer la escala vertical de un canal.\par
 
+\begin{python}
+def get_channel_scale(self, channel):
+    try:
+        scale = self.dso.query(f':channel{channel}:scale?')
+        v_scale = float(scale)
+        print(f'Escala vertical canal {channel}: {v_scale:.2f} [V/div]')
+        return v_scale
+    except Exception as e:
+        print("Error al obtener la escala vertical:", e)
+        self.close()
+\end{python}
 
+Por su parte, los métodos \textit{setters} son los responsables de modificar los parámetros del equipo. Para garantizar la consistencia entre el \textit{software} y el \textit{hardware}, operan bajo un esquema de lazo cerrado:
 
+\begin{enumerate}
+    \item Transmiten el comando de configuración mediante la instrucción \textbf{\texttt{.write()}}.
+    \item Invocan internamente al método \textit{getter} asociado para leer el valor que el osciloscopio efectivamente adoptó.
+    \item Comparan el valor deseado con el valor leído e informan si la acción se concretó con éxito o si el instrumento rechazó la configuración.
+\end{enumerate}
 
+Tal como se muestra en el siguiente ejemplo para configurar la escala vertical de un canal.\par
 
+\begin{python}
+def set_channel_scale(self, channel, value):
+    try:
+        self.dso.write(f':channel{channel}:scale {value}')
+        v_scale = self.get_channel_scale(channel)
+        if v_scale == value:
+            print(f'Escala vertical canal {channel} configurada a: {v_scale:.2f} [V/div]')
+        else:
+            print('No se pudo configurar la escala vertical.')
+    except Exception as e:
+        print("Error al configurar la escala vertical:", e)
+        self.close()
+\end{python}
 
+Ambas familias de métodos se encuentran encapsuladas dentro de bloques de control de excepciones (\textbf{\texttt{try/except}}), que ante cualquier pérdida de comunicación, desbordamiento del \textit{buffer} o error de sintaxis, el algoritmo captura la anomalía, notifica el fallo e invoca inmediatamente al método \textbf{\texttt{.close()}}, para asegurar que los recursos del sistema operativo y los administradores del bus USB se liberen de forma segura, previniendo el bloqueo lógico del puerto y evitando fugas de memoria o congelamientos del instrumento.
 
+\section{Cierre de conexiones y liberación de recursos (\texttt{close})}
+El método \textbf{\texttt{close}} tiene como función principal centralizar la desasignación y el cierre formal de las sesiones lógicas y físicas abiertas en el bus de comunicación con el osciloscopio. Su propósito es mitigar fallos por bloqueo de puertos o saturación de \textit{buffers} en el \textit{hardware} mediante la terminación explícita del enlace con el instrumento y la posterior destrucción de la instancia del administrador de recursos de \texttt{VISA}, garantizando que el sistema operativo recupere los descriptores de archivos lógicos asociados al puerto USB independientemente de si el programa finalizó con éxito o por una interrupción abrupta.\par
 
+\begin{python}
+def close(self):
+    if self.dso:
+        try:
+            self.dso.close()
+            print("Conexión con el instrumento cerrada exitosamente.")
+        except Exception as e:
+            print("Error al cerrar la conexión con el instrumento:", e)
+        finally:
+            self.dso = None
+    if hasattr(self, 'rm') and self.rm is not None:
+        try:
+            self.rm.close()
+            print("Gestor de recursos cerrado exitosamente.")
+        except Exception as e:
+            print("Error al cerrar el gestor de recursos:", e)
+\end{python}
 
+\begin{itemize}
+\item \textbf{Evaluación y cierre del instrumento (\texttt{if self.dso}):} Se verifica si el atributo \textbf{\texttt{.dso}} contiene un recurso abierto. De ser así, se introduce un bloque de seguridad \textbf{\texttt{try/except/finally}} donde se invoca explícitamente a \textbf{\texttt{.dso.close()}} para enviar la directiva de desconexión al bus. El bloque \textbf{\texttt{finally}} fuerza la reasignación de \textbf{\texttt{.dso}} a un estado nulo (\texttt{None}), asegurando que el canal se encuentre cerrado.
+\item \textbf{Destrucción del gestor de recursos (\texttt{hasattr(self, 'rm')}):} Se comprueba de forma segura si el objeto posee asignado el atributo del gestor de recursos lógicos y que este no es nulo. Bajo una estructura protegida \textbf{\texttt{try/except}}, se invoca al método \textbf{\texttt{.rm.close()}}, lo que destruye la instancia del gestor de recursos PyVISA y libera por completo el direccionamiento de los buses.
+\end{itemize}
 
+\section{Destructor de la instancia (\texttt{\_\_del\_\_})}
+El método especial \textbf{\texttt{\_\_del\_\_}} actúa como el destructor de la clase, teniendo como función principal asegurar la ejecución automática de las rutinas de limpieza cuando el ciclo de vida del objeto llega a su fin o la instancia es removida de la memoria RAM por el recolector de basura (\textit{garbage collector}) de Python. Su única instrucción consiste en invocar directamente al método \textbf{\texttt{self.close()}} (perteneciente a la biblioteca PyVISA), lo que constituye un mecanismo de seguridad redundante frente a fallos lógicos o descuidos de programación, garantizando de forma determinista que ningún canal físico o puerto lógico USB permanezca bloqueado o inaccesible tras la finalización del proceso analítico.
 
+\begin{python}
+def __del__(self):
+    self.close()
+\end{python}
 
+Al destruirse la instancia por pérdida de ámbito o finalización del \textit{script} principal, el entorno de ejecución de Python llama a esta función. Al ejecutar \textbf{\texttt{self.close()}}, se garantiza de forma transparente para el programador la desconexión segura del enlace de datos.
 
+\section{Conversor de unidades (\texttt{process\_multipliers})}
+El método estático \textbf{\texttt{process\_multipliers}} tiene como función realizar la conversión de parámetros ingresados desde la interfaz gráfica, asociando una magnitud numérica a su correspondiente prefijo del Sistema Internacional de Unidades (SI). Su propósito es actuar como una capa analítica que procesa cadenas de texto provenientes de selectores, obteniendo el factor multiplicador correspondiente para estandarizar las magnitudes en variables de coma flotante con unidades base (volts y segundos), tal como requiere la sintaxis gramatical SCPI del osciloscopio.\par
+A diferencia de los otros métodos, este se define como \textit{estático} (\texttt{@staticmethod}), lo que implica que no depende del estado interno de la clase ni de sus instancias. Esto permite que pueda ser invocado directamente desde la clase sin necesidad de crear un objeto, facilitando su uso en cualquier parte del programa para convertir unidades de forma rápida.
 
+\begin{python}
+@staticmethod
+def process_multipliers(value, unit):
+    multipliers = {
+        "V": 1.0,        # Volt.
+        "mV": 1e-3,      # Milivolt.
+        "uV": 1e-6,      # Microvolt.
+        "s": 1.0,        # Segundo.
+        "ms": 1e-3,      # Milisegundo.
+        "µs": 1e-6,      # Microsegundo.
+        "ns": 1e-9       # Nanosegundo.
+    }
+    try:
+        numerical_value = float(value)
+        factor = multipliers.get(unit, 1.0)
+        scale = numerical_value * factor
+        return scale
+    except ValueError:
+        return None
+\end{python}
 
-
-
-
-
-\section{Configuración del instrumento}
-A nivel de sistema, se utiliza el comando \texttt{*RST} para el restablecimiento a valores de fábrica. La configuración analógica se comanda mediante las instrucciones
-
-\texttt{:channel:scale}, \texttt{:channel:offset} y \texttt{:channel:display} para las escalas verticales, el \textit{offset} y la habilitación de los canales, respectivamente. El control horizontal se ajusta a través de \texttt{:timebase:scale} y \texttt{:timebase:delay}.\par
-El sistema de disparo (\textit{trigger}) se configura para capturar eventos transitorios rápidos. Se envían los comandos \texttt{:single} para armar el disparo único, \texttt{:trigger:level} para definir el umbral de tensión y \texttt{:trigger:slope} para establecer el flanco de adquisición. Para evitar el bloqueo de la interfaz gráfica durante la espera del impulso, el estado del equipo se consulta periódicamente (\texttt{:trigger:state?}) desde un hilo de ejecución secundario (\texttt{WaitWaveformThread}) hasta detectar el estado de disparo efectivo.
+\begin{itemize}
+\item \textbf{Diccionario de submúltiplos (\texttt{multipliers}):} Define un mapa de constantes técnicas indexado por cadenas de texto que representan las unidades de medida y sus prefijos normalizados. Almacena las relaciones escalares para volt (V: $1.0$), milivolt (mV: $10^{-3}$), segundo (s: $1.0$), milisegundo (ms: $10^{-3}$), microsegundo (\textmu s: $10^{-6}$) y nanosegundo (ns: $10^{-9}$).
+\item \textbf{Conversión numérica (\texttt{float(value)}):} Convierte (\textit{casting}) la cadena de texto de entrada (recibida de la interfaz gráfica) a un tipo de dato numérico de coma flotante.
+\item \textbf{Determinación del factor de escala (\texttt{multipliers.get(unit, 1.0)}):} Recupera del diccionario la constante matemática asociada a la unidad de entrada mediante el método \texttt{get}; en caso de recibir una unidad no indexada, adopta de manera predeterminada un factor neutro unitario ($1.0$).
+\item \textbf{Cálculo de magnitud final:} Multiplica el valor flotante obtenido, por su factor de escala para obtener el parámetro real final, retornando el resultado para su posterior inyección en la cadena del comando SCPI.
+\item \textbf{Manejo de excepciones:} Todo el bloque se encapsula en una estructura \textbf{\texttt{try/}} \textbf{\texttt{except ValueError}}. Intenta realizar el \textit{casting} explícito de la cadena de texto de entrada a un tipo de dato flotante numérico. Si la entrada de texto no corresponde a un formato numérico válido, se captura la excepción \texttt{ValueError}, y se retorna un puntero nulo (\texttt{None}) para detener de forma segura la transmisión hacia el bus.
+\end{itemize}
