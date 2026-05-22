@@ -1,0 +1,334 @@
+\newpage
+\chapter{Implementación del motor de procesamiento (DSP)}
+\vspace{3\baselineskip}
+
+\section{Algoritmo de cálculo de parámetros}
+El motor de cálculo implementado determina los parámetros característicos de la onda de impulso atmosférico tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}) bajo los lineamientos de la norma IEC 60060-1. El procesamiento se ejecuta sobre la curva de tensión de ensayo $u_t(t)$, definida como la suma de la curva base $u_m(t)$ y la curva residual filtrada $r_f(t)$.\par
+El valor cresta de la tensión de ensayo ($U_t$) se determina como el máximo valor absoluto del vector resultante $u_t(t)$, conservando el signo correspondiente a la polaridad del impulso analizado.
+\begin{equation}
+    U_t = \max(|u_m(t) + r_f(t)|) \cdot \text{sgn}(U_e)
+    \label{eq:Ut_calculation}
+\end{equation}
+Donde:\\
+$U_t$: valor cresta de la tensión de ensayo.\\
+$u_m(t)$: vector de la curva base ajustada.\\
+$r_f(t)$: vector de la curva residual filtrada.\\
+$U_e$: valor extremo de la curva registrada compensada en \textit{offset}.
+
+La norma define el tiempo de frente ($T_1$) a partir de una recta virtual que cruza los puntos correspondientes al \SI{30}{\percent} y \SI{90}{\percent} del valor cresta en la zona de ascenso de la señal.
+\begin{equation}
+    T_1 = \frac{t_{90} - t_{30}}{0,6}
+    \label{eq:T1_calculation}
+\end{equation}
+Donde:\\
+$T_1$: tiempo de frente.\\
+$t_{90}$: instante de tiempo en el que la tensión alcanza el \SI{90}{\percent} de $U_t$.\\
+$t_{30}$: instante de tiempo en el que la tensión alcanza el \SI{30}{\percent} de $U_t$.
+
+Para establecer el origen temporal de la onda, se calcula el origen virtual ($O_1$), proyectando la recta definida anteriormente hasta su intersección con el eje de abscisas ($U=0$).
+\begin{equation}
+    O_1 = t_{30} - 0,5 \cdot (t_{90} - t_{30})
+    \label{eq:O1_calculation}
+\end{equation}
+Donde:\
+$O_1$: origen virtual de la onda de impulso.
+
+El tiempo de cola ($T_2$) se define como el intervalo temporal entre el origen virtual y el instante en que la tensión en la cola de la onda decrece al \SI{50}{\percent} del valor cresta.
+\begin{equation}
+    T_2 = t_{50} - O_1
+    \label{eq:T2_calculation}
+\end{equation}
+Donde:\
+$T_2$: tiempo de cola.\
+$t_{50}$: instante de tiempo en la caída de la señal donde la amplitud equivale al \SI{50}{\percent} de $U_t$.
+
+La sobreoscilación de alta frecuencia en el pico de la señal (\textit{overshoot}), si se encuentra presente, se cuantifica relacionando el pico de la curva de tensión de ensayo con el máximo de la curva base.
+\begin{equation}
+    OS = \left( \frac{U_e - U_b}{U_e} \right) \cdot \SI{100}{\percent}
+    \label{eq:OS_calculation}
+\end{equation}
+Donde:\\
+$OS$: magnitud de la sobreoscilación en porcentaje.\\
+$U_e$: valor pico absoluto de la curva de tensión de ensayo.\\
+$U_b$: valor máximo absoluto de la curva base $u_m(t)$.
+
+\section{Filtrado de señales adquiridas}
+El tratamiento de los datos crudos inicia con la remoción del \textit{offset} de corriente continua propio del sistema de medición. El algoritmo extrae un bloque de muestras previas al evento de disparo (\textit{pre-trigger}) para calcular la media aritmética del ruido de fondo, restando esta constante a la totalidad de las muestras de la curva registrada.
+
+Para la remoción del ruido electromagnético de alta frecuencia inherente al ensayo, se implementa un filtro digital de respuesta impulsional infinita (IIR) con coeficientes calculados paramétricamente según las indicaciones que prescribe la norma IEC 60060-1 [X]. La función de transferencia del filtro se define por la siguiente ecuación de diferencia:
+\begin{equation}
+    y[i] = b_0 \cdot x[i] + b_1 \cdot x[i-1] + a_1 \cdot y[i-1]
+\end{equation}
+\begin{align*}
+    b_0 = b_1 &= \frac{c}{1+c}\\
+    a_1 &= \frac{1-c}{1+c}\\
+    c &= \tan\left(\frac{\pi \cdot T_S}{\sqrt{d}}\right)
+\end{align*}
+
+\noindent Donde:\\
+d = \SI{2.2e-12}{}\\
+$T_S$: Intervalo de muestreo usado al registrar la señal.\\
+$x[i]$: Arreglo de muestras de entrada al filtro.\\
+$y[i]$: Arreglo de muestras de salida del filtro.
+
+
+A fines de evitar la distorsión del retardo de grupo (fase no lineal) que introducen los filtros IIR estándar, se emplea la técnica de filtrado de fase cero mediante la función \texttt{scipy.signal.filtfilt} de la biblioteca SciPy. Este método procesa el vector de la curva residual bidireccionalmente (hacia adelante y hacia atrás), anulando el corrimiento de fase temporal y garantizando la fidelidad morfológica de la onda.
+
+\section{Interpolación de datos}
+Como se vio anteriormente, el osciloscopio digital discretiza verticalmente la señal. Esta cuantización, sumada a la frecuencia de muestreo finita, imposibilita que los umbrales de tensión (\SI{30}{\percent}, \SI{50}{\percent} y \SI{90}{\percent}) coincidan exactamente con las muestras discretas de la matriz extraída. Para sortear esta limitación, el motor DSP implementa un algoritmo de interpolación lineal que aproxima el cruce de umbrales entre dos muestras subyacentes.
+\begin{equation}
+    t_x = t_1 + (V_x - V_1) \cdot \frac{t_2 - t_1}{V_2 - V_1}
+    \label{eq:linear_interp}
+\end{equation}
+Donde:\\
+$t_x$: instante de tiempo interpolado correspondiente al umbral de tensión buscado ($V_x$).\\
+$(t_1, V_1)$ y $(t_2, V_2)$: coordenadas de tiempo y tensión de las muestras discretas inmediatamente anterior y posterior al umbral $V_x$.
+
+\section{Validación algorítmica mediante patrón TDG (IEC 61083-2)}
+La validación técnica del motor matemático se realiza inyectando vectores de datos de prueba (TDG - \textit{Test Data Generator}) certificados bajo la norma de validación de software IEC 61083-2.
+
+El programa procesa estos archivos de datos crudos estandarizados, ejecutando de forma ciega las rutinas de \textit{fitting}, filtrado IIR bidireccional, interpolación y detección de umbrales. Los parámetros calculados ($U_t$, $T_1$, $T_2$ y $OS$) se contrastan algorítmicamente contra los valores nominales y los límites de aceptación exigidos por la norma.
+
+Para certificar el correcto funcionamiento de la implementación DSP en Python, la matriz de comparación debe arrojar un error relativo porcentual inferior a los márgenes tolerados para equipos de medición e instrumentación clase 1 y clase 2.
+
+\begin{table}[H]
+    \centering
+    \caption{Comparativa de variables de validación para TDG IEC 61083-2}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \textbf{Parámetro} & \textbf{Símbolo} & \textbf{Tolerancia máxima admitida} \\ \hline
+        Tensión de ensayo & $U_t$ & $\pm \SI{1}{\percent}$ \\ \hline
+        Tiempo de frente & $T_1$ & $\pm \SI{5}{\percent}$ \\ \hline
+        Tiempo de cola & $T_2$ & $\pm \SI{5}{\percent}$ \\ \hline
+        Sobreoscilación & $OS$ & $\pm \SI{2}{\percent}$ \\ \hline
+    \end{tabular}
+    \label{tab:tolerancias_TDG}
+\end{table}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Descripción funcional del software de procesamiento}
+
+\subsection{Clase \texttt{LightningImpulseAnalyzer}}
+La clase \texttt{LightningImpulseAnalyzer} constituye el núcleo del motor de procesamiento digital de señales (DSP) del software. Su función principal es encapsular el vector unidimensional de \textit{raw data} adquirido por el osciloscopio y ejecutar secuencialmente las rutinas matemáticas para la extracción paramétrica bajo la norma IEC 60060-1 y la normativa de validación IEC 61083-2. Maneja internamente atributos de estado para almacenar las matrices procesadas en cada etapa (señal con eliminación de \textit{offset}, curva normalizada, curva base teórica, residuo de alta frecuencia y señal filtrada), así como los hiperparámetros de regresión no lineal y el diccionario contenedor de los resultados finales.
+\begin{itemize}
+\item Define la estructura de datos que soporta las operaciones vectorizadas mediante la librería NumPy.
+\item Gestiona la memoria almacenando vectores intermedios para evitar el recálculo durante la ejecución secuencial.
+\item Orquesta la ejecución de tuberías de procesamiento (\textit{pipelines}) diferenciadas según el tipo de impulso (completo o cortado en la cola).
+\end{itemize}
+
+\subsubsection{Método \texttt{\_\_init\_\_}}
+Inicializa la instancia de análisis, configurando el entorno matemático y validando las magnitudes de entrada fundamentales para la discretización temporal.
+\begin{itemize}
+\item Ejecuta validaciones de control sobre el periodo de muestreo y el factor de peso de la regresión (\texttt{sigma\_fit}), lanzando excepciones si los valores son inválidos.
+\item Convierte la lista de datos crudos en un vector de tipo \texttt{numpy.ndarray}.
+\item Construye el eje temporal discretizado (\texttt{time\_axis}) multiplicando los índices del vector por el periodo de muestreo.
+\item Declara e inicializa en un estado nulo (\texttt{None}) los atributos de clase y el diccionario de resultados.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_remove\_offset}}
+Remueve el componente de corriente continua (ruido de fondo u \textit{offset}) de la señal registrada mediante el análisis probabilístico de la ventana de \textit{pre-trigger}.
+\begin{itemize}
+\item Identifica el índice del valor máximo absoluto de la señal.
+\item Extrae el \SI{30}{\percent} inicial de las muestras del frente de onda para calcular su media aritmética y desviación estándar.
+\item Identifica la muestra exacta donde la señal supera el ruido de fondo (umbral de 5 desviaciones estándar).
+\item Aísla el vector de ruido de fondo puro, calcula su valor medio y lo resta a la totalidad de la curva cruda para generar el vector \texttt{zeroed\_curve}.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_polarity\_normalization}}
+Establece la polaridad de la onda de impulso y genera un vector de trabajo en valores absolutos para simplificar el procesamiento matemático posterior.
+\begin{itemize}
+\item Evalúa el signo de la amplitud máxima (\texttt{Ue}) sobre la curva sin \textit{offset}.
+\item Define un factor multiplicador (\num{1.0} o \num{-1.0}) según la polaridad detectada.
+\item Multiplica la curva por dicho factor para obtener el vector absoluto \texttt{zeroed\_curve\_abs} y extrae el valor pico real.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_normalize\_waveform}}
+Escala la magnitud vertical del vector absoluto al rango paramétrico de \num{0} a \num{1}.
+\begin{itemize}
+\item Divide todos los elementos del vector \texttt{zeroed\_curve\_abs} por su valor pico máximo.
+\item Almacena el resultado en el atributo \texttt{norm\_voltage}, utilizado posteriormente para comparaciones relativas entre impulsos.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_find\_limit\_index}}
+Método estático de búsqueda de índices diseñado para identificar la intersección de la señal con un umbral de tensión específico, iterando en direcciones opuestas según la región de la onda.
+\begin{itemize}
+\item En modo \textit{front}: invierte el arreglo y busca la primera muestra que caiga por debajo del umbral, corrigiendo el índice al sistema de referencia original.
+\item En modo \textit{tail}: busca progresivamente desde el pico hacia adelante la primera muestra inferior al umbral.
+\item Implementa manejo de excepciones en caso de que la señal no alcance los umbrales exigidos.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_cutting\_signal}}
+Segmenta la curva de impulso, aislando exclusivamente la región de interés morfológico requerida para la regresión matemática.
+\begin{itemize}
+\item Llama al método de búsqueda de índices para localizar el nivel del \SI{20}{\percent} de tensión en el frente y el \SI{40}{\percent} en la cola.
+\item Genera vectores recortados (\textit{slices}) de tensión y tiempo comprendidos estrictamente entre estos dos límites.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_double\_exponential\_func}}
+Método estático que define el modelo matemático no lineal de la curva base de tensión, de acuerdo a la ecuación paramétrica de doble exponencial.
+\begin{itemize}
+\item Recibe el vector de tiempo discreto y los parámetros independientes ($U$, $\tau\_1$, $\tau\_2$, $t\_d$).
+\item Implementa una máscara lógica ($dt \ge 0$) para evitar divergencias matemáticas y números complejos en la función exponencial.
+\item Evalúa la ecuación y retorna el vector numérico resultante.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_fit\_base\_curve}}
+Ejecuta el algoritmo de regresión no lineal de optimización iterativa para encontrar los parámetros óptimos de la doble exponencial que mejor representen la señal adquirida.
+\begin{itemize}
+\item Define las semillas iniciales (\textit{initial guesses}) para los parámetros matemáticos.
+\item Construye un vector de pesos (\texttt{sigma}), asignando el factor \texttt{sigma\_fit} en las proximidades del pico para forzar al algoritmo a reducir el error de \textit{fitting} en dicha zona crítica.
+\item Ejecuta la función \texttt{scipy.optimize.curve\_fit} (basada en el algoritmo de Levenberg-Marquardt).
+\item Almacena los parámetros óptimos convergentes en el diccionario \texttt{fitted\_params}.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_construct\_base\_curve}}
+Reconstruye la curva base analítica completa ($u\_m(t)$) evaluada sobre todo el eje temporal del ensayo.
+\begin{itemize}
+\item Invoca al método \texttt{\_double\_exponential\_func} pasando el eje temporal original completo y los parámetros optimizados.
+\item Extrae y almacena el valor máximo absoluto del modelo matemático ajustado (\texttt{Ub}).
+\end{itemize}
+
+\subsubsection{Método \texttt{\_calculate\_residual\_curve}}
+Aísla la sobreoscilación y el ruido de alta frecuencia electromagnética inherentes a la medición.
+\begin{itemize}
+\item Ejecuta la sustracción vectorial restando la curva teórica (\texttt{base\_curve}) a la curva empírica registrada en valor absoluto (\texttt{zeroed\_curve\_abs}).
+\end{itemize}
+
+\subsubsection{Método \texttt{\_create\_digital\_filter}}
+Sintetiza los coeficientes recursivos para un filtro digital de respuesta impulsional infinita (IIR) diseñado según la ecuación de diferencia de la norma IEC 60060-1.
+\begin{itemize}
+\item Inicializa la constante temporal del filtro en $d = \SI{2.2e-12}{\second\squared}$.
+\item Calcula la constante intermedia $c$ basada en el periodo de muestreo.
+\item Determina los coeficientes analíticos de transferencia $b\_0$, $b\_1$ y $a\_1$, retornando las matrices de numerador y denominador requeridas por SciPy.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_filter\_to\_residual}}
+Aplica el filtro digital de amortiguamiento a la curva residual aislada en el paso anterior.
+\begin{itemize}
+\item Obtiene los coeficientes del filtro IIR.
+\item Implementa un filtrado bidireccional (\textit{zero-phase filtering}) mediante la función \texttt{scipy.signal.filtfilt}, anulando el retraso de fase de la curva residual.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_construct\_test\_voltage\_curve}}
+Sintetiza la curva de tensión de ensayo definitiva sobre la cual se medirán los parámetros temporales y de amplitud.
+\begin{itemize}
+\item Suma la curva base teórica (\texttt{base\_curve}) a la curva residual filtrada (\texttt{filtered\_residual}).
+\item Restaura el signo algebraico original de la onda aplicando el factor de polaridad.
+\item Extrae el valor cresta definitivo de la onda de ensayo ($U\_t$) y normaliza la curva final.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_linear\_interpolation}}
+Método estático que implementa el algoritmo de interpolación lineal para aumentar la precisión en la detección del cruce de umbrales sobre el eje de tiempo continuo.
+\begin{itemize}
+\item Determina los pares de coordenadas bidimensionales de las muestras adyacentes al índice discreto más cercano al nivel de tensión objetivo.
+\item Evalúa la ecuación de la recta para calcular y retornar el instante temporal subyacente de alta resolución.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_calc\_front\_parameters}}
+Determina los parámetros característicos de la zona de ascenso de la onda (Tiempo de frente y origen virtual).
+\begin{itemize}
+\item Localiza los índices discretos correspondientes a los umbrales del \SI{30}{\percent} y \SI{90}{\percent} de $U\_t$.
+\item Interpola los tiempos exactos $t\_{30}$ y $t\_{90}$.
+\item Calcula el tiempo de frente ($T\_1$) aplicando la constante de \num{0.6} (inversa de \num{1.67}) normativa.
+\item Proyecta el origen virtual ($O\_1$) extrapolando linealmente la recta de frente hasta tensión nula.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_calc\_tail\_parameter}}
+Determina el parámetro característico de la zona de descenso de la onda (Tiempo de cola).
+\begin{itemize}
+\item Localiza el índice discreto y el tiempo interpolado correspondiente a la caída del \SI{50}{\percent} de $U\_t$ ($t\_{50}$).
+\item Resta el origen virtual $O\_1$ al instante $t\_{50}$ calculado para obtener el valor definitivo de $T\_2$.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_calculate\_parameters}}
+Orquesta la extracción de parámetros paramétricos globales e inyecta los resultados en el diccionario de la clase.
+\begin{itemize}
+\item Extrae el instante del pico máximo de la tensión de ensayo.
+\item Cuantifica porcentualmente la sobreoscilación de alta frecuencia ($OS$) comparando el valor pico discreto frente al máximo de la curva matemática de ajuste.
+\item Ejecuta los métodos de cálculo de frente y evalúa la variable \texttt{impulse\_type} para bifurcar la lógica de cálculo del tiempo de cola, dependiendo de si el transitorio decae de forma natural o fue cortado por un espinterómetro.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_find\_time\_lag}}
+[Específico para impulsos cortados] Analiza la desviación temporal entre la captura de una onda cortada y una onda completa de referencia capturada previamente.
+\begin{itemize}
+\item Interpola los instantes exactos en los que ambas ondas normalizadas cruzan los umbrales del \SI{30}{\percent}, \SI{50}{\percent} y \SI{80}{\percent}.
+\item Calcula la diferencia de tiempo punto a punto y determina el desfase medio (\texttt{t\_L}).
+\end{itemize}
+
+\subsubsection{Método \texttt{\_adjust\_time\_lag}}
+[Específico para impulsos cortados] Desplaza rígidamente el eje temporal de la onda capturada para sincronizar su frente geométrico con el impulso de referencia.
+\begin{itemize}
+\item Suma escalarmente el desfase calculado (\texttt{t\_L}) al vector de eje de tiempo original.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_find\_deviation\_point}}
+[Específico para impulsos cortados] Detecta algorítmicamente el punto morfológico en el cual la onda sometida a evaluación colapsa y se desvía de su trayectoria natural.
+\begin{itemize}
+\item Interpola el frente de la señal analizada mapeándolo sobre el eje temporal sincronizado de la señal de referencia.
+\item Ejecuta una sustracción punto a punto en la región posterior al pico y evalúa contra un umbral de tolerancia del \SI{2}{\percent}.
+\item Actualiza la bandera de estado \texttt{impulse\_type} y almacena el índice exacto de la bifurcación.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_select\_data\_up\_to\_deviation}}
+[Específico para impulsos cortados] Purga la información de alta frecuencia posterior al corte del aislamiento.
+\begin{itemize}
+\item Realiza un \textit{slicing} de los vectores de tensión y tiempo utilizando el índice de desviación.
+\item Obliga a realizar copias en memoria profunda (\texttt{.copy()}) para aislar la porción válida del frente de onda de cualquier alteración en los vectores originales.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_find\_amplitude\_ratio}}
+[Específico para impulsos cortados] Determina la relación de escala en amplitud entre el ensayo a tensión plena (cortado) y el ensayo a tensión reducida (referencia).
+\begin{itemize}
+\item Promedia la tensión real contenida en el intervalo de mayor linealidad (entre el \SI{30}{\percent} y el \SI{80}{\percent} del frente).
+\item Calcula la división entre la media de la señal bajo ensayo y la media de la señal de referencia, obteniendo el escalar $E$.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_scale\_base\_curve}}
+[Específico para impulsos cortados] Evita el algoritmo de Levenberg-Marquardt al no disponer de una cola de onda válida, generando la curva teórica a partir del modelo de la onda de referencia.
+\begin{itemize}
+\item Extrae los parámetros matemáticos temporales ($\tau\_1$, $\tau\_2$, $t\_d$) del objeto de referencia.
+\item Multiplica la amplitud paramétrica de referencia ($U\_{ref}$) por el factor de escala ($E$).
+\item Reconstruye el vector base del impulso cortado evaluando la ecuación exponencial con los parámetros clonados.
+\end{itemize}
+
+\subsubsection{Método \texttt{\_find\_chopping\_instant}}
+[Específico para impulsos cortados] Estima el instante analítico del corte del impulso de forma análoga al cálculo del tiempo de frente de un impulso estándar.
+\begin{itemize}
+\item Calcula la derivada discreta (gradiente) del colapso post-pico para encontrar el punto de máxima pendiente.
+\item Identifica el voltaje de colapso de aislamiento (\texttt{U\_collapse}).
+\item Extrae los tiempos correspondientes al nivel del \SI{70}{\percent} y el \SI{10}{\percent} referidos al voltaje de colapso, aplicándoles regresión lineal para extrapolar el momento virtual de corte (\texttt{Tcutting\_moment}).
+\end{itemize}
+
+\subsubsection{Método \texttt{ref\_lightning\_impulse}}
+Orquesta el \textit{pipeline} de procesamiento integral diseñado para aislar los parámetros de una onda de impulso completo (ensayo a tensión reducida de calibración).
+\begin{itemize}
+\item Ejecuta de manera secuencial los trece métodos privados necesarios para llevar el transitorio desde formato \textit{raw data} hasta la extracción de los indicadores paramétricos.
+\end{itemize}
+
+\subsubsection{Método \texttt{lightning\_impulse}}
+Orquesta el \textit{pipeline} de procesamiento adaptativo diseñado para transitorios capturados durante el ensayo a tensión plena de la máquina o aislador.
+\begin{itemize}
+\item Requiere y valida la inyección de la instancia del analizador de referencia calculada previamente.
+\item Ejecuta los métodos de sincronización y alineamiento temporal.
+\item Determina en tiempo de ejecución si el transitorio es de tipo completo o cortado, bifurcando el flujo lógico de construcción de la curva base.
+\item Finaliza ejecutando la sustracción del residuo, filtrado pasabajos y cálculo paramétrico final en función del tipo de onda.
+\end{itemize}

@@ -52,6 +52,105 @@ El \textbf{ancho de banda} es un parámetro importante del osciloscopio, que se 
 \subsection{Velocidad de muestreo}
 La \textbf{velocidad de muestreo} es una medida de la resolución en el tiempo, que se mide en \SI{}{MSa/s} o \SI{}{GSa/s}, e indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas.
 
+\section{Estándares de comunicación de instrumentos y protocolo VISA}
 
+En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos desde la memoria del osciloscopio hacia la computadora requiere de interfaces físicas estandarizadas, y protocolos lógicos de control.\par
+Actualmente, la comunicación entre instrumentos de medida y sistemas de adquisición se rige por los siguientes estándares físicos:
 
-\textbf{FALTA: Estándares de comunicación de instrumentos y protocolo VISA.}
+\begin{itemize}
+    \item \textbf{GPIB (General Purpose Interface Bus / IEEE-488):} Es un estándar de bus de datos digital de corto rango diseñado específicamente para interconectar y controlar dispositivos de prueba y medida, tales como osciloscopios, multímetros y generadores de señal, mediante un controlador central.
+    \item \textbf{Comunicaciones Serie (RS-232 y USB):} Los datos resultantes del muestreo y la digitalización suelen transmitirse a la computadora personal empleando el puerto USB o el puerto Serie (utilizando el protocolo RS-232). Estas interfaces son de adopción masiva debido a la arquitectura abierta de las computadoras modernas.
+    \item \textbf{LXI (LAN eXtensions for Instrumentation) / Ethernet:} Permite la integración del instrumento en redes de área local, facilitando tasas de transferencia de datos significativamente mayores y posibilitando el control y monitoreo remoto a largas distancias.
+\end{itemize}
+
+\subsection{Arquitectura de Software de Instrumentos Virtuales (Protocolo VISA)}
+
+La diversidad de buses físicos (GPIB, RS-232, USB, Ethernet) presenta un desafío a nivel de desarrollo de software, ya que tradicionalmente cada puerto requería llamadas al sistema y controladores (\textit{drivers}) de bajo nivel completamente distintos. Para mitigar este problema, la industria adoptó el protocolo \textbf{VISA (Virtual Instrument Software Architecture)}.\par
+VISA es una Interfaz de Programación de Aplicaciones (API) estándar que funciona como una capa de abstracción de Entrada/Salida (E/S). Su objetivo es proporcionar una interfaz de software unificada que encapsula y oculta los detalles de implementación del hardware subyacente.\par
+Las características fundamentales del protocolo VISA en la adquisición de señales incluyen:\par
+
+\begin{itemize}
+    \item \textbf{Independencia del bus de hardware:} VISA permite que el software de control envíe comandos al osciloscopio sin necesidad de especificar cómo se gestionan eléctricamente los bits. Si el diseño del sistema migra de una conexión USB a una LAN, el código fuente de control de nivel superior no requiere modificaciones sustanciales.
+    \item \textbf{Integración con comandos SCPI:} VISA actúa como el canal de transporte para los comandos SCPI (\textit{Standard Commands for Programmable Instruments}). SCPI es un lenguaje basado en cadenas de texto ASCII estandarizadas (por ejemplo, \texttt{MEASure:VOLTage:DC?} o \texttt{TIMebase:SCALe?}) que los instrumentos interpretan para ajustar su escala de tiempo, resolución vertical, o para enviar el contenido de su memoria hacia la computadora.
+    \item \textbf{Gestión de recursos:} La arquitectura asigna descriptores unificados a cada instrumento detectado, centralizando la inicialización, la lectura de las muestras adquiridas, la escritura de comandos de configuración y el cierre de las sesiones de comunicación.
+\end{itemize}
+
+Los descriptores de recursos VISA por lo general, tienen la siguiente gramática estructural:
+
+Interfaz[Controlador]::Dirección\_del\_Dispositivo::[Clase\_de\_Recurso]
+
+\textbf{El parámetro [Controlador]:} Es un índice numérico (por ejemplo, el 0 en USB0). Permite diferenciar cuando existen múltiples tarjetas controladoras del mismo tipo instaladas en la misma computadora (por ejemplo, dos placas PCI para GPIB distintas). Si se omite, la API de VISA asume el valor cero por defecto.\par
+\textbf{La clase de recurso [INSTR] vs [SOCKET]:} El sufijo INSTR (Instrumento) es el más utilizado e indica a la API que debe gestionar la sesión utilizando los mecanismos completos de VISA (por ejemplo, permitiendo el uso de comandos de aserción de eventos y lectura de estado). El sufijo SOCKET indica que VISA simplemente actuará como un puente datos de bajo nivel sin enviar comandos de control propios del protocolo de instrumentación (cabeceras del protocolo VXI-11).
+
+A continuación, se presentan ejemplos de descriptores de recursos VISA para cada tipo de interfaz física comúnmente utilizada en la adquisición de señales:
+
+\begin{table}[H]
+    \centering
+    \caption{Ejemplo de descriptor para ASRL (Asynchronous Serial Line)}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \multicolumn{2}{c}{\textbf{\texttt{ASRL1::INSTR}}} \\ \midrule
+        \texttt{ASRL1} & Controlador lógico RS-232 o UART.                  \\
+                       & Mapeado por el sistema al puerto físico (ej. COM1) \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Ejemplo de descriptor para USB (Universal Serial Bus)}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \multicolumn{2}{c}{\textbf{\texttt{USB0::0x0957::0x17A6::MY503::INSTR}}} \\ \midrule
+        \texttt{USB0}   & Controlador lógico USB. \\
+        \texttt{0x0957} & ID del fabricante.      \\
+        \texttt{0x17A6} & ID del producto.        \\
+        \texttt{MY503}  & Número de serie único.  \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Ejemplo de descriptor para GPIB (General Purpose Interface Bus)}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \multicolumn{2}{c}{\textbf{\texttt{GPIB0::14::INSTR}}}         \\ \midrule
+        \texttt{GPIB0} & Controlador lógico GPIB.             \\
+        \texttt{14}    & Dirección primaria. Rango de 0 a 30. \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Ejemplo de descriptor para TCPIP (LXI - VXI-11)}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \multicolumn{2}{c}{\textbf{\texttt{TCPIP0::192.168.1.100::inst0::INSTR}}} \\ \midrule
+        \texttt{TCPIP0}        & Controlador lógico TCPIP.       \\
+        \texttt{192.168.1.100} & Dirección IPv4 del instrumento. \\
+        \texttt{inst0}         & Nombre lógico de dispositivo.   \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Ejemplo de descriptor para TCPIP (Socket - Raw)}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \multicolumn{2}{c}{\textbf{\texttt{TCPIP0::192.168.1.100::5025::SOCKET}}} \\ \midrule
+        \texttt{TCPIP0}        & Controlador lógico *Sockets* TCP. \\
+        \texttt{192.168.1.100} & Dirección IPv4 del instrumento.   \\
+        \texttt{5025}          & Puerto TCP específico.            \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Ejemplo de descriptor para PXI (PCI eXtensions for Instrumentation)}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \multicolumn{2}{c}{\textbf{\texttt{PXI0::15::0::INSTR}}} \\ \midrule
+        \texttt{PXI0} & Controlador lógico PXI.                   \\
+        \texttt{15}   & Bus PCI                                   \\
+        \texttt{0}    & Posición física o lógica del dispositivo. \\ \bottomrule
+    \end{tabular}
+\end{table}

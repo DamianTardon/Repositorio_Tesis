@@ -1,5 +1,5 @@
 \newpage
-\chapter{Fundamentos del Ensayo de impulso (\SI[parse-numbers=false]{1,2/50}{\micro\second})}
+\chapter{Fundamentos del Ensayo de impulso (1,2/50\textmu s)}
 \vspace{3\baselineskip}
 
 El presente capítulo establece el marco normativo y conceptual para el desarrollo del software de adquisición y análisis de impulsos de alta tensión. En primera instancia, se definen los conceptos básicos, y los parámetros de la onda de impulso atmosférico tipo rayo \SI[parse-numbers=false]{1,2/50}{\micro\second}, tomando como base la norma IEC 60060-1 [X]. Posteriormente, se detallan los procedimientos algorítmicos para el cálculo de dichos parámetros temporales y de amplitud. Finalmente, se exponen los requisitos técnicos exigidos por la norma IEC 61083-2 [X] para la validación de software de evaluación y los principios fundamentales para la estimación de la incertidumbre en sistemas de medición digital.\par
@@ -24,6 +24,8 @@ Antes de definir la onda de impulso tipo rayo, es necesario establecer una serie
         \label{Eq:Func_Tension_Ensayo}
 \end{equation}
 Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión residual permite el cálculo del valor de la tensión de ensayo de la tensión de impulso tipo rayo completa equivalente.\par
+\textbf{Curva residual filtrada (Rf(t)):} Es la curva residual filtrada por la función de tensión de ensayo.\par
+\textbf{Curva de tensión de ensayo $u_t(t)$:} Es la suma de la curva base con la curva residual filtrada. Es una representación matemática del proceso de filtrado y no es una entidad física o un impulso equivalente.\par
 \textbf{Valor de la tensión de ensayo $U_t$:} Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.\par
 \textbf{Magnitud de la sobreelevación $\beta$:} Es la diferencia entre el valor extremo de la curva registrada ($U_e$) y el valor máximo de la curva base ($U_b$).\par
 \textbf{Magnitud relativa de la sobreelevación $\beta'$:} Es la relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.\par
