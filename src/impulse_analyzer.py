@@ -11,6 +11,19 @@ __algorithms_supported__ = ["Full Lightning Impulse (LI)", "Chopped Lightning Im
 __parameters_validated__ = ["Valor Pico (Ut)", "Tiempo de Frente (T1)", "Tiempo de Cola (T2)", "Sobrepasamiento (OS)"]
 # -----------------------------------------------------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------------------------------------------------
+# Corregir variables Ue y peak_value. Ue debe ser general, peak_value debe ser local.
+# En _cutting_signal ¿Tiene sentido el manejo de excepciones para _find_limit_index? Ya que internamente tiene su propio manejo de excepciones.
+# En _double_exponential_func ¿Es necesario aplicar 2 veces la máscara? valid_dt = dt[mask] y result[mask] = val
+# En _construct_test_voltage_curve, ¿Sería mejor restaurar el signo a la onda y luego obtener el valor máximo?
+#   .Ut = np.max(self.test_voltage_curve_abs) * self.factor
+#   .test_voltage_curve = self.test_voltage_curve_abs * self.factor
+# ¿Es necesario que existan self.results["Ut"] y self.Ut?
+# En _calculate_parameters ¿Es necesario Ut = np.abs(self.Ut)?
+# En _find_deviation_point hay que reducir sensibilidad a threshold=0.02, porque indica falsos positivos.
+
+# -----------------------------------------------------------------------------------------------------------------------
+
 class LightningImpulseAnalyzer:
     def __init__(self, voltage_data, sampling_period, sigma_fit):
         # Validaciones de seguridad:
@@ -244,7 +257,7 @@ class LightningImpulseAnalyzer:
         except RuntimeError as e:
             raise ValueError("Falló el ajuste matemático de la curva base. La forma de onda puede estar muy distorsionada o cortada prematuramente.")
 
-        # Generar la función ajustada con los parámetros encontrados.
+        # Generar la función ajustada con los parámetros encontrados. Válido solo para desarrollo.
         self.fitted_curve = self._double_exponential_func(self.fit_time,
                                                           self.fitted_params['U'],
                                                           self.fitted_params['tau1'],

@@ -30,7 +30,7 @@ Para establecer el origen temporal de la onda, se calcula el origen virtual ($O_
     O_1 = t_{30} - 0,5 \cdot (t_{90} - t_{30})
     \label{eq:O1_calculation}
 \end{equation}
-Donde:\
+Donde:\\
 $O_1$: origen virtual de la onda de impulso.
 
 El tiempo de cola ($T_2$) se define como el intervalo temporal entre el origen virtual y el instante en que la tensión en la cola de la onda decrece al \SI{50}{\percent} del valor cresta.
@@ -38,9 +38,9 @@ El tiempo de cola ($T_2$) se define como el intervalo temporal entre el origen v
     T_2 = t_{50} - O_1
     \label{eq:T2_calculation}
 \end{equation}
-Donde:\
-$T_2$: tiempo de cola.\
-$t_{50}$: instante de tiempo en la caída de la señal donde la amplitud equivale al \SI{50}{\percent} de $U_t$.
+Donde:\\
+$T_2$: tiempo de cola.\\
+$t_{50}$: instante de tiempo donde la amplitud de la señal decrece al \SI{50}{\percent} de $U_t$.
 
 La sobreoscilación de alta frecuencia en el pico de la señal (\textit{overshoot}), si se encuentra presente, se cuantifica relacionando el pico de la curva de tensión de ensayo con el máximo de la curva base.
 \begin{equation}
@@ -48,16 +48,17 @@ La sobreoscilación de alta frecuencia en el pico de la señal (\textit{overshoo
     \label{eq:OS_calculation}
 \end{equation}
 Donde:\\
-$OS$: magnitud de la sobreoscilación en porcentaje.\\
+$OS$: magnitud de la sobreoscilación porcentual.\\
 $U_e$: valor pico absoluto de la curva de tensión de ensayo.\\
-$U_b$: valor máximo absoluto de la curva base $u_m(t)$.
+$U_b$: valor máximo absoluto de la curva base.
 
 \section{Filtrado de señales adquiridas}
 El tratamiento de los datos crudos inicia con la remoción del \textit{offset} de corriente continua propio del sistema de medición. El algoritmo extrae un bloque de muestras previas al evento de disparo (\textit{pre-trigger}) para calcular la media aritmética del ruido de fondo, restando esta constante a la totalidad de las muestras de la curva registrada.
 
-Para la remoción del ruido electromagnético de alta frecuencia inherente al ensayo, se implementa un filtro digital de respuesta impulsional infinita (IIR) con coeficientes calculados paramétricamente según las indicaciones que prescribe la norma IEC 60060-1 [X]. La función de transferencia del filtro se define por la siguiente ecuación de diferencia:
+Para la remoción del ruido electromagnético de alta frecuencia inherente al ensayo, se implementa un filtro digital de respuesta impulsional infinita (IIR) con coeficientes calculados paramétricamente según las indicaciones que prescribe la norma IEC 60060-1 [X]. La función de transferencia del filtro está definida por la siguiente ecuación de diferencias:
 \begin{equation}
     y[i] = b_0 \cdot x[i] + b_1 \cdot x[i-1] + a_1 \cdot y[i-1]
+    \label{eq:ecuacion_filtro}
 \end{equation}
 \begin{align*}
     b_0 = b_1 &= \frac{c}{1+c}\\
@@ -84,27 +85,15 @@ Donde:\\
 $t_x$: instante de tiempo interpolado correspondiente al umbral de tensión buscado ($V_x$).\\
 $(t_1, V_1)$ y $(t_2, V_2)$: coordenadas de tiempo y tensión de las muestras discretas inmediatamente anterior y posterior al umbral $V_x$.
 
-\section{Validación algorítmica mediante patrón TDG (IEC 61083-2)}
-La validación técnica del motor matemático se realiza inyectando vectores de datos de prueba (TDG - \textit{Test Data Generator}) certificados bajo la norma de validación de software IEC 61083-2.
+\textbf{INSERTAR IMAGEN PARA MOSTRAR EL CONCEPTO DE INTERPOLACION.}
 
-El programa procesa estos archivos de datos crudos estandarizados, ejecutando de forma ciega las rutinas de \textit{fitting}, filtrado IIR bidireccional, interpolación y detección de umbrales. Los parámetros calculados ($U_t$, $T_1$, $T_2$ y $OS$) se contrastan algorítmicamente contra los valores nominales y los límites de aceptación exigidos por la norma.
+\section{Validación algorítmica con patrón TDG (IEC 61083-2)}
 
-Para certificar el correcto funcionamiento de la implementación DSP en Python, la matriz de comparación debe arrojar un error relativo porcentual inferior a los márgenes tolerados para equipos de medición e instrumentación clase 1 y clase 2.
+La validación del motor matemático se realiza inyectando vectores de datos de prueba, generados por el \textit{software} \textit{Test Data Generator} certificado por la norma IEC 61083-2, que establece los requisitos de los \textit{software} para ensayos de impulso de tensión y corriente.
 
-\begin{table}[H]
-    \centering
-    \caption{Comparativa de variables de validación para TDG IEC 61083-2}
-    \begin{tabular}{|l|c|c|}
-        \hline
-        \textbf{Parámetro} & \textbf{Símbolo} & \textbf{Tolerancia máxima admitida} \\ \hline
-        Tensión de ensayo & $U_t$ & $\pm \SI{1}{\percent}$ \\ \hline
-        Tiempo de frente & $T_1$ & $\pm \SI{5}{\percent}$ \\ \hline
-        Tiempo de cola & $T_2$ & $\pm \SI{5}{\percent}$ \\ \hline
-        Sobreoscilación & $OS$ & $\pm \SI{2}{\percent}$ \\ \hline
-    \end{tabular}
-    \label{tab:tolerancias_TDG}
-\end{table}
+El programa procesa estos archivos de datos estandarizados, ejecutando de forma ciega las rutinas de, corrección de \textit{offset}, ajuste de curva, filtrado bidireccional, interpolación y detección de umbrales. Luego, los parámetros calculados en cada onda ($U_t$, $T_1$, $T_2$ y $OS$) se contrastan contra los valores nominales y los límites de aceptación establecidos por la norma.
 
+Para certificar el correcto funcionamiento de la implementación DSP en Python, el grupo de ondas analizadas debe arrojar un error relativo porcentual inferior a los límites indicados para ese grupo.
 
 
 
@@ -128,207 +117,675 @@ Para certificar el correcto funcionamiento de la implementación DSP en Python, 
 \section{Descripción funcional del software de procesamiento}
 
 \subsection{Clase \texttt{LightningImpulseAnalyzer}}
-La clase \texttt{LightningImpulseAnalyzer} constituye el núcleo del motor de procesamiento digital de señales (DSP) del software. Su función principal es encapsular el vector unidimensional de \textit{raw data} adquirido por el osciloscopio y ejecutar secuencialmente las rutinas matemáticas para la extracción paramétrica bajo la norma IEC 60060-1 y la normativa de validación IEC 61083-2. Maneja internamente atributos de estado para almacenar las matrices procesadas en cada etapa (señal con eliminación de \textit{offset}, curva normalizada, curva base teórica, residuo de alta frecuencia y señal filtrada), así como los hiperparámetros de regresión no lineal y el diccionario contenedor de los resultados finales.
+El motor de procesamiento digital de señales (DSP) del \textit{software} está constituído por la clase \textbf{\texttt{LightningImpulseAnalyzer}}. Su función principal es encapsular el vector unidimensional de \textit{raw data} adquirido por el osciloscopio, y ejecutar secuencialmente las rutinas matemáticas para la determinación de los parámetros del impulso según la norma IEC 60060-1, cumpliendo con la validación de la norma IEC 61083-2. Internamente maneja atributos de estado para almacenar los vectores procesados en cada etapa (señal sin \textit{offset}, curva base, curva residual, curva residual filtrada y curva de ensayo), así como los parámetros de ajuste de la regresión no lineal, y el diccionario contenedor de los resultados finales.
+
 \begin{itemize}
-\item Define la estructura de datos que soporta las operaciones vectorizadas mediante la librería NumPy.
-\item Gestiona la memoria almacenando vectores intermedios para evitar el recálculo durante la ejecución secuencial.
-\item Orquesta la ejecución de tuberías de procesamiento (\textit{pipelines}) diferenciadas según el tipo de impulso (completo o cortado en la cola).
+    \item Define la estructura de datos que soporta las operaciones vectorizadas mediante la biblioteca \textbf{\texttt{NumPy}}.
+    \item Gestiona la memoria almacenando vectores intermedios para evitar el recálculo durante la ejecución secuencial.
+    \item Orquesta la ejecución de tuberías de procesamiento (\textit{pipelines}) diferenciadas según el tipo de impulso (completo o cortado en la cola).
 \end{itemize}
 
 \subsubsection{Método \texttt{\_\_init\_\_}}
 Inicializa la instancia de análisis, configurando el entorno matemático y validando las magnitudes de entrada fundamentales para la discretización temporal.
-\begin{itemize}
-\item Ejecuta validaciones de control sobre el periodo de muestreo y el factor de peso de la regresión (\texttt{sigma\_fit}), lanzando excepciones si los valores son inválidos.
-\item Convierte la lista de datos crudos en un vector de tipo \texttt{numpy.ndarray}.
-\item Construye el eje temporal discretizado (\texttt{time\_axis}) multiplicando los índices del vector por el periodo de muestreo.
-\item Declara e inicializa en un estado nulo (\texttt{None}) los atributos de clase y el diccionario de resultados.
-\end{itemize}
+\begin{enumerate}
+    \item Ejecuta validaciones de control sobre el periodo de muestreo y el factor de peso de la regresión (\texttt{sigma\_fit}), lanzando excepciones si los valores son inválidos.
+    \item Convierte la lista de datos crudos en un vector de tipo \texttt{numpy.ndarray}.
+    \item Construye el eje temporal discretizado (\texttt{time\_axis}) multiplicando los índices del vector por el periodo de muestreo.
+    \item Declara e inicializa en un estado nulo (\texttt{None}) los atributos de clase y el diccionario de resultados.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_remove\_offset}}
-Remueve el componente de corriente continua (ruido de fondo u \textit{offset}) de la señal registrada mediante el análisis probabilístico de la ventana de \textit{pre-trigger}.
-\begin{itemize}
-\item Identifica el índice del valor máximo absoluto de la señal.
-\item Extrae el \SI{30}{\percent} inicial de las muestras del frente de onda para calcular su media aritmética y desviación estándar.
-\item Identifica la muestra exacta donde la señal supera el ruido de fondo (umbral de 5 desviaciones estándar).
-\item Aísla el vector de ruido de fondo puro, calcula su valor medio y lo resta a la totalidad de la curva cruda para generar el vector \texttt{zeroed\_curve}.
-\end{itemize}
+Remueve la componente de corriente continua (ruido de fondo u \textit{offset}) de la señal registrada mediante el análisis probabilístico de la ventana de \textit{pre-trigger}.
+
+\begin{python}
+def _remove_offset(self):
+    self.idx_peak = np.argmax(np.abs(self.raw_voltage))
+    front = self.raw_voltage[:self.idx_peak]
+    n = int(self.idx_peak * 0.3)
+    if n < 1:
+        raise ValueError("Error: ...")
+    pre_trigger = self.raw_voltage[:n]
+    mean = np.mean(pre_trigger)
+    std = np.std(pre_trigger)
+    diff = np.abs(front - mean)
+    max_index = np.flatnonzero(diff >= 5 * std)[0]
+    diff_2 = np.abs(front[:max_index] - mean)
+    valid_index = np.flatnonzero(diff_2 <= std)
+    if valid_index.size > 0:
+        idx = valid_index[-1]
+        background_noise = self.raw_voltage[:idx]
+    else:
+        idx = 0
+        background_noise = self.raw_voltage[0:1]
+    self.time_star_impulse = self.time_axis[idx]
+    self.offset_value = np.mean(background_noise)
+    self.zeroed_curve = self.raw_voltage - self.offset_value
+\end{python}
+
+\begin{enumerate}
+    \item Identifica el índice del valor máximo absoluto de la señal. Y toma las muestras hasta dicho índice para analizar el \textit{pre-trigger}.
+    \item Extrae el \SI{30}{\percent} inicial de las muestras del frente de onda para calcular su media aritmética y desviación estándar.
+    \item Identifica la muestra exacta donde la señal supera el ruido de fondo, mediante un doble análisis, primero busca hacia adelante la primera muestra que supere el umbral de 5 desviaciones estándar (determinado empirícamente usando señales reales capturadas en el laboratorio), luego busca hacia atrás la última muestra inferior a 1 desvío estándar.
+    \item Aísla el vector de ruido de fondo puro (\texttt{background\_noise}), calcula su valor medio y lo resta a la totalidad de la curva cruda para generar el vector compensado en \textit{offset} (\texttt{zeroed\_curve}).
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_polarity\_normalization}}
-Establece la polaridad de la onda de impulso y genera un vector de trabajo en valores absolutos para simplificar el procesamiento matemático posterior.
-\begin{itemize}
-\item Evalúa el signo de la amplitud máxima (\texttt{Ue}) sobre la curva sin \textit{offset}.
-\item Define un factor multiplicador (\num{1.0} o \num{-1.0}) según la polaridad detectada.
-\item Multiplica la curva por dicho factor para obtener el vector absoluto \texttt{zeroed\_curve\_abs} y extrae el valor pico real.
-\end{itemize}
+Analiza la polaridad de la onda de impulso, y genera un vector equivalente positivo para simplificar el procesamiento matemático posterior.
+
+\begin{python}
+def _polarity_normalization(self):
+    if self.zeroed_curve is None:
+        raise ValueError("Error: ...")
+    self.Ue = self.zeroed_curve[self.idx_peak]
+    if self.Ue >= 0:
+        self.polarity = "Positiva"
+        self.factor = 1.0
+    else:
+        self.polarity = "Negativa"
+        self.factor = -1.0
+    self.zeroed_curve_abs = self.zeroed_curve * self.factor
+    self.peak_value = self.zeroed_curve_abs[self.idx_peak]
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la curva compensada en \textit{offset} haya sido calculada previamente.
+    \item Evalúa el signo de la amplitud máxima en la curva sin \textit{offset}  $(\hat{U} _0)$, y define un factor multiplicador (\num{1.0} o \num{-1.0}) según la polaridad detectada.
+    \item Multiplica la curva compensada en \textit{offset} por dicho factor para obtener el vector positivo \texttt{zeroed\_curve\_abs} y extrae el valor extremo, $U_e$.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_normalize\_waveform}}
-Escala la magnitud vertical del vector absoluto al rango paramétrico de \num{0} a \num{1}.
-\begin{itemize}
-\item Divide todos los elementos del vector \texttt{zeroed\_curve\_abs} por su valor pico máximo.
-\item Almacena el resultado en el atributo \texttt{norm\_voltage}, utilizado posteriormente para comparaciones relativas entre impulsos.
-\end{itemize}
+Escala la magnitud vertical del vector positivo al rango paramétrico de \num{0} a \num{1}, acorde a la recomendación de la norma IEC 60060-1 [X], ya que esto mejora la convergencia del algoritmo de ajuste para obtener la curva base.
+
+\begin{python}
+def _normalize_waveform(self):
+    if self.zeroed_curve_abs is None:
+        raise ValueError("Error: ...")
+    self.norm_voltage = self.zeroed_curve_abs / self.peak_value
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la curva compensada en \textit{offset} positiva haya sido calculada previamente.
+    \item Divide todos los elementos del vector \texttt{zeroed\_curve\_abs} por el valor extremo, $U_e$.
+    \item Almacena el resultado en el atributo \texttt{norm\_voltage}.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_find\_limit\_index}}
-Método estático de búsqueda de índices diseñado para identificar la intersección de la señal con un umbral de tensión específico, iterando en direcciones opuestas según la región de la onda.
+Método estático de búsqueda de índices diseñado para identificar la intersección de la señal con un umbral de tensión específico, buscando en direcciones opuestas según la región de la onda (frente o cola).
+
+\begin{python}
+@staticmethod
+def _find_limit_index(v_array, threshold, mode):
+    if mode == "front":
+        front_reversed = v_array[::-1]
+        idx_reversed = np.argmax(front_reversed < threshold)
+        if idx_reversed == 0 and front_reversed[0] >= threshold:
+            raise ValueError("Error: ...")
+        idx = (len(v_array) - 1) - idx_reversed
+    elif mode == "tail":
+        idx = np.argmax(v_array < threshold)
+        if not np.any(v_array < threshold):
+            raise ValueError("Error: ...")
+    else:
+        raise ValueError("Modo desconocido.")
+    return idx
+\end{python}
+
 \begin{itemize}
-\item En modo \textit{front}: invierte el arreglo y busca la primera muestra que caiga por debajo del umbral, corrigiendo el índice al sistema de referencia original.
-\item En modo \textit{tail}: busca progresivamente desde el pico hacia adelante la primera muestra inferior al umbral.
-\item Implementa manejo de excepciones en caso de que la señal no alcance los umbrales exigidos.
+\item En modo \textit{front}:
+\begin{enumerate}
+    \item Invierte el orden del arreglo, para descender desde el pico hacia el inicio de la onda.
+    \item Busca la primera muestra que caiga por debajo del umbral, obteniendo el índice invertido.
+    \item Corrige el índice al sistema de referencia original.
+\end{enumerate}
+\item En modo \textit{tail}:
+\begin{enumerate}
+    \item Busca la primera muestra inferior al umbral, desde el pico hacia adelante.
+\end{enumerate}
+\item Implementa manejo de excepciones en caso de que la señal no alcance los umbrales exigidos, o que no se indique correctamente el modo de búsqueda.
 \end{itemize}
 
 \subsubsection{Método \texttt{\_cutting\_signal}}
-Segmenta la curva de impulso, aislando exclusivamente la región de interés morfológico requerida para la regresión matemática.
-\begin{itemize}
-\item Llama al método de búsqueda de índices para localizar el nivel del \SI{20}{\percent} de tensión en el frente y el \SI{40}{\percent} en la cola.
-\item Genera vectores recortados (\textit{slices}) de tensión y tiempo comprendidos estrictamente entre estos dos límites.
-\end{itemize}
+Segmenta la curva de impulso registrada, aislando exclusivamente la región requerida para luego aplicar la regresión matemática.
+
+\begin{python}
+def _cutting_signal(self):
+    if self.impulse_type == "chopped":
+        raise RuntimeError("Error: ...")
+    if self.peak_value is None:
+        raise ValueError("Error: ...")
+    front_data = self.zeroed_curve_abs[:self.idx_peak]
+    tail_data = self.zeroed_curve_abs[self.idx_peak:]
+    threshold_20 = 0.2 * self.peak_value
+    threshold_40 = 0.4 * self.peak_value
+    try:
+        idx_20 = self._find_limit_index(front_data, threshold_20, mode="front")
+    except ValueError:
+        raise ValueError("Error: ...")
+    try:
+        idx_40_local = self._find_limit_index(tail_data, threshold_40, mode="tail")
+    except ValueError:
+        raise ValueError("Error: ...")
+    idx_40 = self.idx_peak + idx_40_local
+    self.start_slice = idx_20 + 1
+    self.end_slice = idx_40 + 1
+    self.fit_voltage = self.zeroed_curve_abs[self.start_slice:self.end_slice]
+    self.fit_time = self.time_axis[self.start_slice:self.end_slice]
+\end{python}
+
+\begin{enumerate}
+    \item Valida que el impulso no sea del tipo cortado, ya que este método es exclusivo para impulsos completos, y que el valor extremo de la señal haya sido calculado previamente.
+    \item Define los vectores de tensión correspondientes al frente y a la cola, segmentando en función del índice del valor extremo.
+    \item Calcula los umbrales del \SI{20}{\percent} y el \SI{40}{\percent} de la amplitud máxima, para luego localizar los índices correspondientes a dichos niveles en el frente y la cola, respectivamente. Implementa manejo de excepciones en caso de que la señal no alcance los umbrales exigidos, o que no se indique correctamente el modo de búsqueda.
+    \item Corrige el índice del \SI{40}{\percent} al sistema de referencia original.
+    \item Almacena los índices de corte y genera los vectores recortados de tensión y tiempo, \texttt{.fit\_voltage} y \texttt{.fit\_time} respectivamente, para el ajuste de la curva base.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_double\_exponential\_func}}
-Método estático que define el modelo matemático no lineal de la curva base de tensión, de acuerdo a la ecuación paramétrica de doble exponencial.
+Método estático que define el modelo matemático no lineal de la curva base de tensión, de acuerdo a la ecuación paramétrica de doble exponencial indicada en la norma IEC 60060-1.
+
+\begin{python}
+@staticmethod
+def _double_exponential_func(t, U, tau1, tau2, td):
+    dt = t - td
+    mask = dt >= 0
+    result = np.zeros_like(dt, dtype=np.float64)
+    valid_dt = dt[mask]
+    val = U * (np.exp(-valid_dt / tau1) - np.exp(-valid_dt / tau2))
+    result[mask] = val
+    return result
+\end{python}
+
 \begin{itemize}
-\item Recibe el vector de tiempo discreto y los parámetros independientes ($U$, $\tau\_1$, $\tau\_2$, $t\_d$).
+\item Recibe el vector de tiempo (\texttt{t}) y la estimación inicial de los parámetros de ajuste ($U$, $\tau_1$, $\tau_2$, $t_d$).
 \item Implementa una máscara lógica ($dt \ge 0$) para evitar divergencias matemáticas y números complejos en la función exponencial.
-\item Evalúa la ecuación y retorna el vector numérico resultante.
+\item Crea un arreglo lleno de ceros con la misma longitud que el vector \texttt{dt}, con tipo de datos de coma flotante de precisión doble (\SI{64}{\bit}).
+\item Aplica la máscara para calcular la función solo en los puntos válidos.
+\item Evalúa la ecuación y retorna el vector numérico resultante, dando cero en los puntos no válidos.
 \end{itemize}
 
 \subsubsection{Método \texttt{\_fit\_base\_curve}}
-Ejecuta el algoritmo de regresión no lineal de optimización iterativa para encontrar los parámetros óptimos de la doble exponencial que mejor representen la señal adquirida.
-\begin{itemize}
-\item Define las semillas iniciales (\textit{initial guesses}) para los parámetros matemáticos.
-\item Construye un vector de pesos (\texttt{sigma}), asignando el factor \texttt{sigma\_fit} en las proximidades del pico para forzar al algoritmo a reducir el error de \textit{fitting} en dicha zona crítica.
-\item Ejecuta la función \texttt{scipy.optimize.curve\_fit} (basada en el algoritmo de Levenberg-Marquardt).
-\item Almacena los parámetros óptimos convergentes en el diccionario \texttt{fitted\_params}.
-\end{itemize}
+Ejecuta el algoritmo de regresión no lineal de optimización iterativa para encontrar los parámetros óptimos de la doble exponencial que mejor representen la curva base.
+
+\begin{python}
+def _fit_base_curve(self):
+    if self.impulse_type == "chopped":
+        raise RuntimeError("Error: ...")
+    if self.fit_voltage is None or self.fit_time is None:
+        raise ValueError("Error: ...")
+    p0_U = self.peak_value
+    p0_tau1 = 70e-6
+    p0_tau2 = 0.4e-6
+    p0_td = self.fit_time[0]
+    initial_guess = [p0_U, p0_tau1, p0_tau2, p0_td]
+    idx_peak_in_slice = np.argmax(np.abs(self.fit_voltage))
+    sigma = np.ones_like(self.fit_voltage)
+    sigma[:idx_peak_in_slice + 5] = self.sigma_fit
+    try:
+        popt, pcov = curve_fit(
+            self._double_exponential_func,
+            self.fit_time,
+            self.fit_voltage,
+            p0 = initial_guess,
+            sigma = sigma,
+            absolute_sigma = False,
+            maxfev = 100000)
+        self.fitted_params = {
+            'U': popt[0],
+            'tau1': popt[1],
+            'tau2': popt[2],
+            'td': popt[3]}
+    except RuntimeError as e:
+        raise ValueError("Error: ...")
+\end{python}
+
+\begin{enumerate}
+    \item Valida que el impulso no sea del tipo cortado, ya que este método es exclusivo para impulsos completos, y que los vectores recortados de tensión y tiempo hayan sido calculados previamente.
+    \item Define las semillas iniciales (\texttt{initial\_guess}) para el ajuste de los parámetros de la función doble exponencial.
+    \item Construye un vector de pesos (\texttt{sigma}), asignando el factor \texttt{sigma\_fit} en el frente de la onda hasta el pico para forzar al algoritmo a reducir el error de ajuste en dicha zona crítica. Esto es útil cuando la señal crece muy rápido ya que el algoritmo tiene a priorizar la zona de la cola, por tener una mayor cantidad de muestras.
+    \item Ejecuta la función \texttt{scipy.optimize.curve\_fit}, implementando el algoritmo de Levenberg-Marquardt, para obtener los parámetros óptimos que mejor ajustan la curva base.
+    \item Almacena los parámetros óptimos convergentes en el diccionario \texttt{fitted\_params}.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_construct\_base\_curve}}
-Reconstruye la curva base analítica completa ($u\_m(t)$) evaluada sobre todo el eje temporal del ensayo.
-\begin{itemize}
-\item Invoca al método \texttt{\_double\_exponential\_func} pasando el eje temporal original completo y los parámetros optimizados.
-\item Extrae y almacena el valor máximo absoluto del modelo matemático ajustado (\texttt{Ub}).
-\end{itemize}
+Reconstruye la curva base analítica completa $(u_m(t))$ con los parámetros óptimos encontrados en el paso anterior.
+
+\begin{python}
+def _construct_base_curve(self):
+    if self.impulse_type == "chopped":
+        raise RuntimeError("Error: ...")
+    if self.fitted_params is None:
+        raise ValueError("Error: ...")
+    self.base_curve = self._double_exponential_func(self.time_axis,
+                                                    self.fitted_params['U'],
+                                                    self.fitted_params['tau1'],
+                                                    self.fitted_params['tau2'],
+                                                    self.fitted_params['td'])
+    self.Ub = np.max(self.base_curve)
+\end{python}
+
+\begin{enumerate}
+    \item Valida que el impulso no sea del tipo cortado, ya que este método es exclusivo para impulsos completos, y que los parámetros óptimos de ajuste hayan sido calculados previamente.
+    \item Genera la curva base completa evaluando la función de doble exponencial con los parámetros óptimos sobre el eje temporal original completo.
+    \item Extrae y almacena el valor máximo absoluto de la curva base ajustada (\texttt{Ub}).
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_calculate\_residual\_curve}}
-Aísla la sobreoscilación y el ruido de alta frecuencia electromagnética inherentes a la medición.
-\begin{itemize}
-\item Ejecuta la sustracción vectorial restando la curva teórica (\texttt{base\_curve}) a la curva empírica registrada en valor absoluto (\texttt{zeroed\_curve\_abs}).
-\end{itemize}
+Calcula la curva residual que aísla la sobreoscilación y el ruido de alta frecuencia inherentes a la medición.
+
+\begin{python}
+def _calculate_residual_curve(self):
+    if self.zeroed_curve_abs is None:
+        raise ValueError("Error: ...")
+    if self.base_curve is None:
+        raise ValueError("Error: ...")
+    self.residual_curve = self.zeroed_curve_abs - self.base_curve
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la curva compensada en \textit{offset} positiva y la curva base ajustada, hayan sido calculadas previamente.
+    \item Calcula la curva residual restando la curva base a la curva compensada en \textit{offset} positiva.
+    \item Almacena el resultado en el atributo \texttt{residual\_curve}.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_create\_digital\_filter}}
-Sintetiza los coeficientes recursivos para un filtro digital de respuesta impulsional infinita (IIR) diseñado según la ecuación de diferencia de la norma IEC 60060-1.
-\begin{itemize}
-\item Inicializa la constante temporal del filtro en $d = \SI{2.2e-12}{\second\squared}$.
-\item Calcula la constante intermedia $c$ basada en el periodo de muestreo.
-\item Determina los coeficientes analíticos de transferencia $b\_0$, $b\_1$ y $a\_1$, retornando las matrices de numerador y denominador requeridas por SciPy.
-\end{itemize}
+Sintetiza los coeficientes para un filtro digital de respuesta impulsional infinita (IIR) diseñado según la ecuación de diferencia expuestas en la ecuación \ref{eq:ecuacion_filtro}.
+
+\begin{python}
+def _create_digital_filter(self):
+    d = 2.2e-12
+    c = np.tan((np.pi * self.sampling_period) / np.sqrt(d))
+    b0 = c / (1 + c)
+    b1 = b0
+    a1 = (1 - c) / (1 + c)
+    b = np.array([b0, b1])
+    a = np.array([1.0, -a1])
+    return b, a
+\end{python}
+
+\begin{enumerate}
+    \item Inicializa la constante del filtro: $d = \num{2,2e-12}$.
+    \item Calcula la constante intermedia $(c)$ basada en el periodo de muestreo.
+    \item Determina los coeficientes analíticos de transferencia $b_0$, $b_1$ y $a_1$, retornando las matrices de numerador y denominador requeridas por SciPy.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_filter\_to\_residual}}
-Aplica el filtro digital de amortiguamiento a la curva residual aislada en el paso anterior.
-\begin{itemize}
-\item Obtiene los coeficientes del filtro IIR.
-\item Implementa un filtrado bidireccional (\textit{zero-phase filtering}) mediante la función \texttt{scipy.signal.filtfilt}, anulando el retraso de fase de la curva residual.
-\end{itemize}
+Aplica el filtro digital definido en la ecuación \ref{eq:ecuacion_filtro} a la curva residual aislada en el paso anterior.
+
+\begin{python}
+def _filter_to_residual(self):
+    if self.residual_curve is None:
+        raise ValueError("Error: ...")
+    b, a = self._create_digital_filter()
+    self.filtered_residual = signal.filtfilt(b, a, self.residual_curve)
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la curva residual haya sido calculada previamente.
+    \item Obtiene los coeficientes del filtro IIR.
+    \item Implementa un filtrado bidireccional (\textit{zero-phase filtering}) mediante la función \texttt{scipy.signal.filtfilt}, anulando el retraso de fase de la curva residual.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_construct\_test\_voltage\_curve}}
-Sintetiza la curva de tensión de ensayo definitiva sobre la cual se medirán los parámetros temporales y de amplitud.
-\begin{itemize}
-\item Suma la curva base teórica (\texttt{base\_curve}) a la curva residual filtrada (\texttt{filtered\_residual}).
-\item Restaura el signo algebraico original de la onda aplicando el factor de polaridad.
-\item Extrae el valor cresta definitivo de la onda de ensayo ($U\_t$) y normaliza la curva final.
-\end{itemize}
+Sintetiza la curva de tensión de ensayo definitiva sobre la cual se calcularán los parámetros temporales y de amplitud, de la onda de impulso.
+
+\begin{python}
+def _construct_test_voltage_curve(self):
+    if self.base_curve is None:
+        raise ValueError("Error: ...")
+    if self.filtered_residual is None:
+        raise ValueError("Error: ...")
+    self.test_voltage_curve_abs = self.base_curve + self.filtered_residual
+    self.Ut = np.max(self.test_voltage_curve_abs) * self.factor
+    self.test_voltage_curve = self.test_voltage_curve_abs * self.factor
+    self.results["Ut"] = self.Ut
+    self.test_voltage_curve_norm = self.test_voltage_curve / np.abs(self.Ut)
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la curva base y la curva residual filtrada hayan sido calculadas previamente.
+    \item Suma la curva base con la curva residual filtrada.
+    \item Restaura el signo original de la onda aplicando el factor de polaridad.
+    \item Extrae el valor cresta de la curva de ensayo ($U_t$) y calcula una versión normalizada de la curva de ensayo.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_linear\_interpolation}}
-Método estático que implementa el algoritmo de interpolación lineal para aumentar la precisión en la detección del cruce de umbrales sobre el eje de tiempo continuo.
-\begin{itemize}
-\item Determina los pares de coordenadas bidimensionales de las muestras adyacentes al índice discreto más cercano al nivel de tensión objetivo.
-\item Evalúa la ecuación de la recta para calcular y retornar el instante temporal subyacente de alta resolución.
-\end{itemize}
+Método estático que implementa el algoritmo de interpolación lineal para encontrar con mayor precisión el cruce de umbrales sobre el eje de tiempo.
+
+\begin{python}
+@staticmethod
+def _linear_interpolation(t_array, v_array, idx_low, target_voltage):
+    v1 = v_array[idx_low]
+    t1 = t_array[idx_low]
+    if idx_low + 1 < len(v_array) and v_array[idx_low + 1] > v1:
+        idx_high = idx_low + 1
+    elif idx_low - 1 >= 0 and v_array[idx_low - 1] > v1:
+        idx_high = idx_low - 1
+    else:
+        return t1
+    v2 = v_array[idx_high]
+    t2 = t_array[idx_high]
+    return t1 + (target_voltage - v1) * ((t2 - t1) / (v2 - v1))
+\end{python}
+
+\begin{enumerate}
+    \item Determina el par de coordenadas bidimensional de las muestra pasada como referencia.
+    \item Busca si el umbral objetivo es anterior o posterior a la referencia.
+    \item Calcula el par de coordenadas bidimensional del segundo punto para determinar la recta que pasa por el umbral objetivo.
+    \item Evalúa la ecuación de la recta para calcular y retornar el instante de tiempo correspondiente al umbral buscado.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_calc\_front\_parameters}}
-Determina los parámetros característicos de la zona de ascenso de la onda (Tiempo de frente y origen virtual).
-\begin{itemize}
-\item Localiza los índices discretos correspondientes a los umbrales del \SI{30}{\percent} y \SI{90}{\percent} de $U\_t$.
-\item Interpola los tiempos exactos $t\_{30}$ y $t\_{90}$.
-\item Calcula el tiempo de frente ($T\_1$) aplicando la constante de \num{0.6} (inversa de \num{1.67}) normativa.
-\item Proyecta el origen virtual ($O\_1$) extrapolando linealmente la recta de frente hasta tensión nula.
-\end{itemize}
+Determina el tiempo de frente y el origen virtual en la zona de ascenso de la onda.
+
+\begin{python}
+def _calc_front_parameters(self, Ut):
+    front_v = self.test_voltage_curve_abs[:self.idx_peak_Ut]
+    front_t = self.time_axis[:self.idx_peak_Ut]
+    v30 = 0.3 * Ut
+    v90 = 0.9 * Ut
+    idx_30 = self._find_limit_index(front_v, v30, mode="front")
+    idx_90 = self._find_limit_index(front_v, v90, mode="front")
+    t30 = self._linear_interpolation(front_t, front_v, idx_30, v30)
+    t90 = self._linear_interpolation(front_t, front_v, idx_90, v90)
+    Tab = t90 - t30
+    T1 = Tab / 0.6
+    O1 = t30 - 0.5 * Tab
+    return O1, T1
+\end{python}
+
+\begin{enumerate}
+    \item Localiza los índices discretos correspondientes a los umbrales del \SI{30}{\percent} y \SI{90}{\percent} de $U_t$.
+    \item Interpola los tiempos exactos $t_{30}$ y $t_{90}$.
+    \item Calcula el tiempo de frente ($T_1$).
+    \item Proyecta el origen virtual ($O_1$) extrapolando linealmente la recta de frente hasta tensión nula.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_calc\_tail\_parameter}}
-Determina el parámetro característico de la zona de descenso de la onda (Tiempo de cola).
-\begin{itemize}
-\item Localiza el índice discreto y el tiempo interpolado correspondiente a la caída del \SI{50}{\percent} de $U\_t$ ($t\_{50}$).
-\item Resta el origen virtual $O\_1$ al instante $t\_{50}$ calculado para obtener el valor definitivo de $T\_2$.
-\end{itemize}
+Determina el tiempo de cola en la zona de descenso de la onda.
+
+\begin{python}
+def _calc_tail_parameter(self, Ut, O1):
+    tail_v = self.test_voltage_curve_abs[self.idx_peak_Ut:]
+    tail_t = self.time_axis[self.idx_peak_Ut:]
+    v50 = 0.5 * Ut
+    idx_50 = self._find_limit_index(tail_v, v50, mode="tail")
+    t50 = self._linear_interpolation(tail_t, tail_v, idx_50, v50)
+    T2 = t50 - O1
+    return T2
+\end{python}
+
+\begin{enumerate}
+    \item Localiza el índice discreto y el tiempo interpolado correspondiente a la caída del \SI{50}{\percent} de $U_t$ ($t_{50}$).
+    \item Resta el origen virtual $O_1$ al instante $t_{50}$ calculado para obtener el valor de $T_2$.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_calculate\_parameters}}
-Orquesta la extracción de parámetros paramétricos globales e inyecta los resultados en el diccionario de la clase.
-\begin{itemize}
-\item Extrae el instante del pico máximo de la tensión de ensayo.
-\item Cuantifica porcentualmente la sobreoscilación de alta frecuencia ($OS$) comparando el valor pico discreto frente al máximo de la curva matemática de ajuste.
-\item Ejecuta los métodos de cálculo de frente y evalúa la variable \texttt{impulse\_type} para bifurcar la lógica de cálculo del tiempo de cola, dependiendo de si el transitorio decae de forma natural o fue cortado por un espinterómetro.
-\end{itemize}
+Dirige el cálculo de los parámetros de la onda de impulso ($U_t$, $T_1$, $T_2$ y $OS$).
+
+\begin{python}
+def _calculate_parameters(self):
+    if self.test_voltage_curve_abs is None:
+        raise ValueError("Error: ...")
+    Ut = np.abs(self.Ut)
+    self.idx_peak_Ut = np.argmax(self.test_voltage_curve_abs)
+    self.results["OS"] = 100 * (self.peak_value - self.Ub) / self.peak_value
+    try:
+        O1, T1 = self._calc_front_parameters(Ut)
+        self.results["T1"] = T1
+    except ValueError:
+        raise ValueError("Error: ...")
+    try:
+        if self.impulse_type == "full":
+            T2 = self._calc_tail_parameter(Ut, O1)
+        elif self.impulse_type == "chopped":
+            T2 = self.Tcutting_moment - O1
+        else:
+            raise ValueError("Error: ...")
+        self.results["T2"] = T2
+    except ValueError:
+        raise ValueError("Error: ...")
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la curva de tensión de ensayo positiva haya sido calculada previamente.
+    \item Extrae el instante del pico máximo de la tensión de ensayo.
+    \item Calcula la sobreoscilación de alta frecuencia ($OS$) comparando el valor máximo de la curva de tensión de ensayo y de la curva base.
+    \item Ejecuta los métodos de cálculo de frente y evalúa la variable \texttt{impulse\_type} para bifurcar la lógica de cálculo del tiempo de cola, dependiendo de si el transitorio decae de forma natural o fue cortado por una descarga disruptiva.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_find\_time\_lag}}
-[Específico para impulsos cortados] Analiza la desviación temporal entre la captura de una onda cortada y una onda completa de referencia capturada previamente.
-\begin{itemize}
-\item Interpola los instantes exactos en los que ambas ondas normalizadas cruzan los umbrales del \SI{30}{\percent}, \SI{50}{\percent} y \SI{80}{\percent}.
-\item Calcula la diferencia de tiempo punto a punto y determina el desfase medio (\texttt{t\_L}).
-\end{itemize}
+Analiza la desviación temporal entre la última onda captura y una onda completa de referencia capturada inicialmente.
+
+\begin{python}
+def _find_time_lag(self, ref_analyzer):
+    levels = [0.3, 0.5, 0.8]
+    t_diffs = []
+    for level in levels:
+        front_self = self.norm_voltage[:self.idx_peak]
+        idx_self = self._find_limit_index(front_self, level, mode="front")
+        t_self = self._linear_interpolation(self.time_axis, self.norm_voltage, idx_self, level)
+        front_ref = ref_analyzer.norm_voltage[:ref_analyzer.idx_peak]
+        idx_ref = self._find_limit_index(front_ref, level, mode="front")
+        t_ref = self._linear_interpolation(ref_analyzer.time_axis, ref_analyzer.norm_voltage, idx_ref, level)
+        t_diffs.append(t_ref - t_self)
+    self.t_L = np.mean(t_diffs)
+\end{python}
+
+\begin{enumerate}
+    \item Interpola los instantes exactos en los que ambas ondas normalizadas (actual y referencia) cruzan los umbrales del \SI{30}{\percent}, \SI{50}{\percent} y \SI{80}{\percent}.
+    \item Calcula la diferencia de tiempo punto a punto y determina el desfase medio ($t_L$).
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_adjust\_time\_lag}}
-[Específico para impulsos cortados] Desplaza rígidamente el eje temporal de la onda capturada para sincronizar su frente geométrico con el impulso de referencia.
-\begin{itemize}
-\item Suma escalarmente el desfase calculado (\texttt{t\_L}) al vector de eje de tiempo original.
-\end{itemize}
+Desplaza el eje temporal de la última onda capturada para sincronizar su frente de onda con el impulso de referencia.
+
+\begin{python}
+def _adjust_time_lag(self):
+    if self.t_L is None:
+        raise ValueError("Error: ...")
+    self.aligned_time_axis = self.time_axis + self.t_L
+\end{python}
+
+\begin{enumerate}
+    \item Valida que desfase medio ($t_L$) haya sido calculada previamente.
+    \item Suma escalarmente el desfase calculado ($t_L$) al vector de eje de tiempo original.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_find\_deviation\_point}}
-[Específico para impulsos cortados] Detecta algorítmicamente el punto morfológico en el cual la onda sometida a evaluación colapsa y se desvía de su trayectoria natural.
-\begin{itemize}
-\item Interpola el frente de la señal analizada mapeándolo sobre el eje temporal sincronizado de la señal de referencia.
-\item Ejecuta una sustracción punto a punto en la región posterior al pico y evalúa contra un umbral de tolerancia del \SI{2}{\percent}.
-\item Actualiza la bandera de estado \texttt{impulse\_type} y almacena el índice exacto de la bifurcación.
-\end{itemize}
+[Específico para impulsos cortados] Detecta algorítmicamente el punto en el cual la onda evaluada colapsa antes de tiempo debido a una descarga disruptiva.
+
+\begin{python}
+def _find_deviation_point(self, ref_analyzer, threshold=0.02):
+    if self.norm_voltage is None or ref_analyzer.norm_voltage is None:
+        raise ValueError("Error: ...")
+    if self.aligned_time_axis is None:
+        raise ValueError("Error: ...")
+    chopped_norm_interp = np.interp(
+        ref_analyzer.time_axis,
+        self.aligned_time_axis,
+        self.norm_voltage,
+        left=0.0, right=0.0)
+    tail_self = chopped_norm_interp[ref_analyzer.idx_peak:]
+    tail_ref = ref_analyzer.norm_voltage[ref_analyzer.idx_peak:]
+    diff = np.abs(tail_self - tail_ref)
+    mask_dev = diff > threshold
+    if mask_dev.any():
+        self.impulse_type = "chopped"
+    else:
+        self.impulse_type = "full"
+        return
+    idx_dev_local = np.argmax(mask_dev)
+    self.idx_deviation = ref_analyzer.idx_peak + idx_dev_local
+\end{python}
+
+\begin{enumerate}
+    \item Valida que las ondas normalizadas (actual y referencia) hayan sido calculadas previamente, y que el tiempo de la onda actual haya sido alineado con la referencia.
+    \item Interpola la señal analizada mapeándola sobre el eje temporal sincronizado de la señal de referencia.
+    \item Calcula la diferencia punto a punto en la región posterior al pico y la evalúa contra un umbral de tolerancia del \SI{2}{\percent} (hay que aumentarlo).
+    \item Actualiza la bandera de estado, indicando si la onda es completa o cortada.
+    \item Almacena el índice exacto de la bifurcación.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_select\_data\_up\_to\_deviation}}
 [Específico para impulsos cortados] Purga la información de alta frecuencia posterior al corte del aislamiento.
-\begin{itemize}
-\item Realiza un \textit{slicing} de los vectores de tensión y tiempo utilizando el índice de desviación.
-\item Obliga a realizar copias en memoria profunda (\texttt{.copy()}) para aislar la porción válida del frente de onda de cualquier alteración en los vectores originales.
-\end{itemize}
+
+\begin{python}
+def _select_data_up_to_deviation(self):
+    if self.idx_deviation is None:
+        raise ValueError("Error: ...")
+    idx_end = self.idx_deviation + 1
+    self.chopped_front_voltage = self.norm_voltage[:idx_end].copy()
+    self.chopped_front_time = self.time_axis[:idx_end].copy()
+\end{python}
+
+\begin{enumerate}
+    \item Valida que índice de la bifurcación haya sido calculado previamente.
+    \item Realiza un seccionamiento de los vectores de tensión y tiempo utilizando el índice de desviación.
+    \item Realiza copias de los segmentos para aislar los vectores originales de cualquier alteración.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_find\_amplitude\_ratio}}
 [Específico para impulsos cortados] Determina la relación de escala en amplitud entre el ensayo a tensión plena (cortado) y el ensayo a tensión reducida (referencia).
-\begin{itemize}
-\item Promedia la tensión real contenida en el intervalo de mayor linealidad (entre el \SI{30}{\percent} y el \SI{80}{\percent} del frente).
-\item Calcula la división entre la media de la señal bajo ensayo y la media de la señal de referencia, obteniendo el escalar $E$.
-\end{itemize}
+
+\begin{python}
+    def _find_amplitude_ratio(self, ref_analyzer):
+        if self.aligned_time_axis is None:
+            raise ValueError("Error: ...")
+        front_self_norm = self.norm_voltage[:self.idx_peak]
+        idx_30 = self._find_limit_index(front_self_norm, 0.3, mode="front")
+        idx_80 = self._find_limit_index(front_self_norm, 0.8, mode="front")
+        vals_self = self.zeroed_curve_abs[idx_30:idx_80]
+        t_interval = self.aligned_time_axis[idx_30:idx_80]
+        vals_ref = np.interp(
+            t_interval,
+            ref_analyzer.time_axis,
+            ref_analyzer.zeroed_curve_abs)
+        self.E = np.mean(vals_self) / np.mean(vals_ref)
+\end{python}
+
+\begin{enumerate}
+    \item Valida que el eje de tiempo alineado haya sido calculado previamente.
+    \item Promedia la tensión real contenida en el intervalo de mayor linealidad (entre el \SI{30}{\percent} y el \SI{80}{\percent} del frente).
+    \item Calcula la división entre la media de la señal bajo ensayo y la media de la señal de referencia, obteniendo el escalar $E$.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_scale\_base\_curve}}
 [Específico para impulsos cortados] Evita el algoritmo de Levenberg-Marquardt al no disponer de una cola de onda válida, generando la curva teórica a partir del modelo de la onda de referencia.
-\begin{itemize}
-\item Extrae los parámetros matemáticos temporales ($\tau\_1$, $\tau\_2$, $t\_d$) del objeto de referencia.
-\item Multiplica la amplitud paramétrica de referencia ($U\_{ref}$) por el factor de escala ($E$).
-\item Reconstruye el vector base del impulso cortado evaluando la ecuación exponencial con los parámetros clonados.
-\end{itemize}
+
+\begin{python}
+def _scale_base_curve(self, ref_analyzer):
+    U_ref = ref_analyzer.fitted_params['U']
+    tau1 = ref_analyzer.fitted_params['tau1']
+    tau2 = ref_analyzer.fitted_params['tau2']
+    td = ref_analyzer.fitted_params['td']
+    U_scaled = U_ref * self.E
+    self.base_curve = self._double_exponential_func(
+        self.aligned_time_axis,
+        U_scaled,
+        tau1,
+        tau2,
+        td)
+    self.Ub = np.max(self.base_curve)
+\end{python}
+
+\begin{enumerate}
+    \item Extrae los parámetros de ajuste ($U$ ,$\tau_1$ , $\tau_2$ , $t_d$) de la onda de referencia.
+    \item Multiplica la amplitud máxima del impulso de referencia ($U_{ref}$) por el factor de escala ($E$), para que tenga la misma magnitud que la onda a evaluar.
+    \item Reconstruye la curva base del impulso cortado evaluando la ecuación exponencial con los parámetros de la referencia.
+\end{enumerate}
 
 \subsubsection{Método \texttt{\_find\_chopping\_instant}}
 [Específico para impulsos cortados] Estima el instante analítico del corte del impulso de forma análoga al cálculo del tiempo de frente de un impulso estándar.
-\begin{itemize}
-\item Calcula la derivada discreta (gradiente) del colapso post-pico para encontrar el punto de máxima pendiente.
-\item Identifica el voltaje de colapso de aislamiento (\texttt{U\_collapse}).
-\item Extrae los tiempos correspondientes al nivel del \SI{70}{\percent} y el \SI{10}{\percent} referidos al voltaje de colapso, aplicándoles regresión lineal para extrapolar el momento virtual de corte (\texttt{Tcutting\_moment}).
-\end{itemize}
+
+\begin{python}
+def _find_chopping_instant(self):
+    if self.norm_voltage is None:
+        raise ValueError("Error: ...")
+    tail_vals = self.norm_voltage[self.idx_peak:]
+    gradient = np.gradient(tail_vals)
+    idx_steepest_local = np.argmin(gradient)
+    grad_2 = np.gradient(gradient[:idx_steepest_local])
+    idx_knee_local = np.argmin(grad_2)
+    idx_collapse = self.idx_peak + idx_knee_local
+    U_collapse = self.zeroed_curve_abs[idx_collapse]
+    v70 = 0.7 * U_collapse
+    v10 = 0.1 * U_collapse
+    fall_segment = self.zeroed_curve_abs[idx_collapse:]
+    idx_70_local = np.argmax(fall_segment < v70)
+    idx_10_local = np.argmax(fall_segment < v10)
+    if idx_70_local == 0 or idx_10_local == 0:
+        raise ValueError("Error: ...")
+    idx_C = idx_collapse + idx_70_local
+    idx_D = idx_collapse + idx_10_local
+    t_C, v_C = self.time_axis[idx_C], self.zeroed_curve_abs[idx_C]
+    t_D, v_D = self.time_axis[idx_D], self.zeroed_curve_abs[idx_D]
+    if t_D == t_C:
+        raise ValueError("Error: ...")
+    slope = (v_D - v_C) / (t_D - t_C)
+    self.Tcutting_moment = t_C + (U_collapse - v_C) / slope
+    self.U_collapse = U_collapse
+\end{python}
+
+\begin{enumerate}
+    \item Valida que la versión normalizada de la onda bajo análisis haya sido calculada previamente.
+    \item Calcula el gradiente de los valores posteriores al pico para encontrar el punto de máxima pendiente negativa, donde se produjo el colapso de la onda.
+    \item Determina la tensión inmediatamente antes del colapso, usando el mínimo de la segunda derivada.
+    \item Calcula los valores del \SI{70}{\percent} y el \SI{10}{\percent} referidos la tensión de colapso, y determina los índices locales de las muestras discretas inmediatamente inferiores.
+    \item Corrige los índices al sistema de referencia original.
+    \item Obtiene el par de coordenadas bidimensional del \SI{70}{\percent} y el \SI{10}{\percent} de la tensión de colapso, para para extrapolar el momento virtual de corte (\texttt{Tcutting\_moment}).
+\end{enumerate}
 
 \subsubsection{Método \texttt{ref\_lightning\_impulse}}
-Orquesta el \textit{pipeline} de procesamiento integral diseñado para aislar los parámetros de una onda de impulso completo (ensayo a tensión reducida de calibración).
-\begin{itemize}
-\item Ejecuta de manera secuencial los trece métodos privados necesarios para llevar el transitorio desde formato \textit{raw data} hasta la extracción de los indicadores paramétricos.
-\end{itemize}
+Ejecuta de manera secuencial los métodos privados de procesamiento integral para calcular los parámetros de una onda de impulso completo a tensión reducida (referencia).
+
+\begin{python}
+def ref_lightning_impulse(self):
+    self.impulse_type = "full"
+    # Ejecutar pipeline completo.
+    self._remove_offset()
+    self._polarity_normalization()
+    self._normalize_waveform()
+    #-----------------------------------------------------
+    self._cutting_signal()
+    self._fit_base_curve()
+    self._construct_base_curve()
+    #-----------------------------------------------------
+    self._calculate_residual_curve()
+    self._filter_to_residual()
+    self._construct_test_voltage_curve()
+    self._calculate_parameters()
+\end{python}
 
 \subsubsection{Método \texttt{lightning\_impulse}}
 Orquesta el \textit{pipeline} de procesamiento adaptativo diseñado para transitorios capturados durante el ensayo a tensión plena de la máquina o aislador.
-\begin{itemize}
-\item Requiere y valida la inyección de la instancia del analizador de referencia calculada previamente.
-\item Ejecuta los métodos de sincronización y alineamiento temporal.
-\item Determina en tiempo de ejecución si el transitorio es de tipo completo o cortado, bifurcando el flujo lógico de construcción de la curva base.
-\item Finaliza ejecutando la sustracción del residuo, filtrado pasabajos y cálculo paramétrico final en función del tipo de onda.
-\end{itemize}
+
+Ejecuta de manera secuencial los métodos privados de procesamiento adaptativo para calcular los parámetros de los impulsos capturados durante el ensayo a tensión plena (completo o cortados).
+
+Requiere y valida la inyección de la instancia del analizador de referencia calculada previamente.
+
+\begin{python}
+def lightning_impulse(self, ref_analyzer):
+    if ref_analyzer is None:
+        raise ValueError("Error: ...")
+    self._remove_offset()
+    self._polarity_normalization()
+    self._normalize_waveform()
+    #-----------------------------------------------------
+    self._find_time_lag(ref_analyzer)
+    self._adjust_time_lag()
+    self._find_deviation_point(ref_analyzer)
+    if self.impulse_type == "full":
+        self._cutting_signal()
+        self._fit_base_curve()
+        self._construct_base_curve()
+    elif self.impulse_type == "chopped":
+        self._select_data_up_to_deviation()
+        self._find_amplitude_ratio(ref_analyzer)
+        self._scale_base_curve(ref_analyzer)
+        self._find_chopping_instant()
+    #-----------------------------------------------------
+    self._calculate_residual_curve()
+    self._filter_to_residual()
+    self._construct_test_voltage_curve()
+    self._calculate_parameters()
+\end{python}
