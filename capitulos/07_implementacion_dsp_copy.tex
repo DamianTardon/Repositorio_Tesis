@@ -1,0 +1,295 @@
+\newpage
+\chapter{Implementación del motor de procesamiento (DSP)}
+\vspace{3\baselineskip}
+
+\section{Arquitectura General del Sistema y UI}
+El sistema está estructurado bajo el patrón de diseño Model-View-Presenter (MVP) en su variante Passive View. Esta topología garantiza la separación estricta entre la interfaz gráfica (UI) y la lógica de negocio, el procesamiento digital de señales (acorde a la norma IEC 60060-1 \cite{iec60060_1}) y el control de instrumentos.
+
+\begin{table}[h]
+    \centering
+    \caption{Capas del patrón MVP y sus responsabilidades técnicas.}
+    \label{tab:arquitectura_mvp}
+    \begin{tabular}{@{}llp{8.5cm}@{}}
+        \toprule
+        \textbf{Capa (MVP)} & \textbf{Componente Python} & \textbf{Responsabilidad Técnica} \\ \midrule
+        Model & \texttt{LightningImpulseAnalyzer}, & Encapsulan la lógica de procesamiento matemático, comunicación VISA/SCPI con el hardware y la persistencia de datos (HDF5/CSV). Desconocen por completo la existencia de la vista o el controlador. \\ \midrule
+        View & \texttt{Ui\_MainWindow} & Componentes visuales generados a partir de PySide6. Es una vista estrictamente pasiva; no procesa datos ni se comunica con los Modelos. Su único propósito es exponer los elementos gráficos. \\ \midrule
+        Presenter & \texttt{MainController} & Actúa como orquestador central. Intercepta los eventos generados en la View, ya que actualiza y consulta los Models, gestiona los hilos de ejecución asíncronos y refresca la View con los resultados. \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Adquisición y Control de Hardware SCPI}
+La interacción con el osciloscopio digital GW Instek serie GDS se implementa mediante la librería \texttt{pyvisa}. El diseño utiliza comandos SCPI (Standard Commands for Programmable Instruments) para gobernar las escalas de tiempo, tensión, niveles de disparo y para ejecutar la extracción de la memoria de adquisición profunda del instrumento en formato binario estructurado (Big Endian).
+
+\begin{table}[h]
+    \centering
+    \caption{Comandos SCPI principales utilizados en el control del hardware.}
+    \label{tab:comandos_scpi}
+    \begin{tabular}{@{}lp{10cm}@{}}
+        \toprule
+        \textbf{Comando SCPI Clave} & \textbf{Función dentro de la Máquina de Estados} \\ \midrule
+        \texttt{*IDN? / *RST} & Interrogación de identidad y reinicio de fábrica para garantizar la limpieza de los registros antes de sincronizar la parametrización de la UI. \\ \midrule
+        \texttt{:single} & Armando del instrumento para captura única (Single Shot) en el nivel de trigger establecido. \\ \midrule
+        \texttt{:trigger:state?} & Consulta cíclica del estado del trigger. Devuelve el estado actual para determinar si el instrumento capturó el transitorio. \\ \midrule
+        \texttt{:acquire:memory?} & Comando crítico de extracción de datos del canal específico \texttt{}. Devuelve la cabecera de calibración temporal seguida de los datos crudos cuantizados. \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Procesamiento Digital de Señales (DSP)}
+El núcleo de procesamiento numérico cumple de manera estricta con las exigencias funcionales de las normas IEC 61083-2 \cite{iec61083_2} e IEC 60060-1 \cite{iec60060_1}, implementando el método analítico para la remoción de componentes oscilatorios y el cálculo riguroso de los parámetros fundamentales de impulsos atmosféricos tipo rayo ($\SI[parse-numbers=false]{1,2/50}{\micro\second}$).
+
+\subsection{Validaciones Paramétricas bajo IEC 61083-2}
+El software ejecuta la validación de la función de transferencia de los algoritmos mediante el procesamiento de vectores digitales de referencia. El objetivo de este procedimiento DSP es aislar la curva base del impulso de cualquier perturbación de alta frecuencia (\textit{overshoot} o ruidos de conmutación) para construir la curva de tensión de ensayo de manera reproducible. La norma define diferencias máximas aceptables entre los valores verdaderos del generador de datos de prueba (TDG) y los calculados por el algoritmo bajo evaluación. El procesamiento se divide de acuerdo a la topología de la señal bajo análisis:
+
+\begin{table}[H]
+    \centering
+    \caption{Tolerancias de aceptación paramétricas según la norma IEC 61083-2.}
+    \label{tab:tolerancias_iec61083}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Tipo de Impulso} & \textbf{Parámetro Físico} & \textbf{Tolerancia Máxima}           \\ \midrule
+        Completo (LI)            & Valor Pico ($U_t$)        & $\pm\SI{0,10}{\percent}$             \\ \cmidrule(l){2-3} 
+                                 & Tiempo de Frente ($T_1$)  & $\pm\SI{2,0}{\percent}$              \\ \cmidrule(l){2-3} 
+                                 & Tiempo de Cola ($T_2$)    & $\pm\SI{1,0}{\percent}$              \\ \cmidrule(l){2-3} 
+                                 & Sobrepasamiento ($\beta$) & $\pm\SI{1,0}{\percent}$ (Absoluto)   \\ \midrule
+        Cortado (LIC)            & Tiempo de Corte ($T_c$)   & $\pm\SI{2,0}{\percent}$              \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Justificación Matemática de $\text{sigma\_fit}$}
+La determinación de la curva base $U_m(t)$ exige el ajuste no lineal de una función doble exponencial teórica mediante el algoritmo de optimización de Levenberg-Marquardt:
+
+\begin{equation}
+u_d(t) = U \cdot \left( e^{-\dfrac{t-t_d}{\tau_1}} - e^{-\dfrac{t-t_d}{\tau_2}} \right)
+\label{eq:DobleExponencial}
+\end{equation}
+
+Donde:\\
+$U$ es la constante de amplitud escalar.\\
+$\tau_1$ es la constante de tiempo asociada a la cola del impulso ($\approx \SI{70}{\micro\second}$).\\
+$\tau_2$ es la constante de tiempo asociada al frente de la onda ($\approx \SI{0,4}{\micro\second}$).\\
+$t_d$ representa el retraso temporal del origen respecto al disparo físico.\vspace{1\baselineskip}
+
+Debido a que la tasa de muestreo del ADC genera una densidad de puntos significativamente mayor en la zona de la cola que en el frente de la onda (donde los gradientes de tensión son extremadamente elevados y transcurren en escala de nanosegundos), un ajuste de mínimos cuadrados ordinario converge erróneamente. El optimizador tiende de forma natural a minimizar el error residual en el segmento denso de la cola, provocando desviaciones inaceptables o divergencia matemática en la reconstrucción del frente ($T_1$).
+
+Para forzar la convergencia y garantizar el rigor metrológico en la zona crítica de elevación, se introduce la matriz de pesos diagonales inversos a través del parámetro $\text{sigma\_fit}$. El vector de varianza estimada $\sigma_i$ se parametriza de la siguiente manera:
+
+\begin{equation}
+    \sigma_i = \begin{cases} 
+        \text{sigma\_fit} & \text{si } i \le \text{idx\_peak} + 5 \\ 
+        1.0 & \text{si } i > \text{idx\_peak} + 5 
+    \end{cases}
+    \label{eq:varianza_estimada}
+\end{equation}
+
+Al configurar un valor de $\text{sigma\_fit} \le 0,1$, el algoritmo LM penaliza severamente cualquier residuo matemático en la zona del frente. Esto obliga al lazo numérico a converger de forma prioritaria en las muestras que definen a $\tau_2$, estabilizando el cálculo de los parámetros de tiempo e impidiendo que las oscilaciones de alta frecuencia distorsionen la estimación de la amplitud teórica del impulso.
+
+\subsection{Ecuaciones Matemáticas Principales del Filtro K-Factor}
+Una vez calculada la curva residual $R(t)$, se aplica un filtro digital de respuesta al impulso infinita (IIR) diseñado de manera que su respuesta en frecuencia equivalga exactamente a la función de la tensión de ensayo normada:
+
+\begin{equation}
+k(f) = \frac{1}{1 + 2,2 \cdot f^2}
+\end{equation}
+
+Donde $f$ se expresa en $\text{MHz}$. La constante empírica de atenuación de la norma corresponde a $d = 2,2 \times 10^{-12}$. El algoritmo discretiza la ecuación mediante el cálculo del parámetro de mapeo bilineal $c$:
+
+\begin{equation}
+c = \tan\left(\frac{\pi \cdot T_S}{\sqrt{d}}\right)
+\end{equation}
+
+Donde $T_s$ representa el periodo de muestreo real del osciloscopio extraído del encabezado binario. Los coeficientes del filtro directo se calculan mediante:
+
+\begin{align*}
+    b_0 &= b_1 = \frac{c}{1+c}\\
+    a_1 &= \frac{1-c}{1+c}
+\end{align*}
+
+La señal se procesa mediante una técnica de filtrado de fase cero (zero-phase filtering), ejecutando la ecuación de diferencias recursiva en sentido directo y posteriormente en sentido reverso para anular el desplazamiento de fase introducido por la topología del filtro IIR:
+
+\begin{equation}
+    y[i] = b_0 \cdot x[i] + b_1 \cdot x[i-1] + a_1 \cdot y[i-1]
+    \label{eq:ecuacion_filtro}
+\end{equation}
+
+La adición de la curva residual filtrada resultante $R_f(t)$ a la curva base matemática $U_m(t)$ restituye la tensión de ensayo libre de perturbaciones espurias de acoplamiento:
+
+\begin{equation}
+    U_t(t) = U_m(t)+ R_f(t)
+\end{equation}
+
+\section{Persistencia y Gestión de Archivos (file\_manager.py)}
+La arquitectura de persistencia implementa una estrategia de aislamiento crítico de datos para mitigar el riesgo de pérdida de registros metrológicos durante los ensayos de alta tensión. La gestión de los sistemas de archivos está diseñada bajo un principio de tolerancia a fallos numéricos, asegurando la inmutabilidad de los datos crudos frente a errores de convergencia del procesador DSP.
+
+\subsection{Estrategia de Almacenamiento Dual}
+El flujo de persistencia es gobernado por el Presenter (\texttt{MainController}), el cual bifurca las operaciones de escritura inmediatamente después de finalizar la transferencia DMA/USB del buffer del osciloscopio digital.
+
+\begin{enumerate}
+    \item \textbf{Persistencia Estructurada (HDF5):} Almacena de forma jerárquica las condiciones del laboratorio, coeficientes de atenuación de los divisores resistivos y los vectores temporales y de amplitud indexados en grupos (\texttt{Time}, \texttt{CH1\_Voltage}, \texttt{CH2\_Current}).
+    \item \textbf{Respaldo de Seguridad Crudo (.bin / .csv):} En paralelo e independientemente del estado de éxito del pipeline DSP, el buffer nativo de cuantización del ADC se vuelca a un archivo plano de respaldo en el directorio de respaldo físico (\texttt{01 Respaldo}). Si el algoritmo Levenberg-Marquardt diverge o el análisis de la señal genera una excepción de tipo \texttt{ValueError} (debido a ruidos extremos o truncamiento de la onda física), la GUI captura la falla, notifica al operador, pero garantiza la inmutabilidad y almacenamiento del registro crudo original para su posterior análisis offline.
+\end{enumerate}
+
+\subsection{Prevención de Modificación de Datos Originales}
+La inmutabilidad de la traza de calibración se implementa mediante métodos estáticos especializados en \texttt{FileManager}. El método de lectura binaria deserializa el flujo Big Endian (\texttt{>i2}) convirtiendo los enteros del ADC a magnitudes físicas de tensión sin alterar el archivo origen:
+
+\begin{equation}
+    \text{Waveform [\unit{\volt}]} = \frac{\text{Raw\_Bits} \times \text{Escala vertical [\unit{\volt\per div}]}}{\text{ADC [\text{pasos}/div]}}
+\end{equation}
+
+Para auditorías metrológicas y compatibilidad con sistemas externos de procesamiento de datos, se expone una función de exportación que convierte los arreglos internos a estructuras planas de tipo Comma-Separated Values (.csv). Este proceso escribe exclusivamente en modo de adición forzada (append-only o creación limpia) bloqueando los punteros de escritura del archivo fuente, impidiendo la manipulación accidental o la sobrescritura del histórico de ensayos almacenado en el volumen HDF5 del ítem bajo calibración.
+
+\section{Validación y Reportes (report.py y Testing)}
+El proceso de aseguramiento de la calidad del software se ejecuta mediante una suite de pruebas automatizadas que inyectan las formas de onda sintéticas y grabadas definidas en la norma IEC 61083-2 \cite{iec61083_2}. El objetivo de este procedimiento es cuantificar el sesgo del algoritmo respecto a las magnitudes de referencia metrológica.
+
+\subsection{Flujo de Validación del Software contra TDG}
+La validación implementa el protocolo de ensayos de desempeño (performance tests) estipulado en la sección 6.2 de la norma. Se cargan los casos de prueba del generador de datos de prueba (TDG) correspondientes al grupo Full Lightning Impulse (LI-A1 a LI-A12 y LI-M1 a LI-M17) e impulsos cortados en la cola (LIC-M4 y LIC-M5). El sistema procesa los archivos ASCII de dos columnas en segundos y voltios, ejecuta el pipeline algorítmico de filtrado y remoción de componentes continuas, y contrasta los resultados con los límites normativos.
+
+\subsection{Estimación de Incertidumbre del Software (Anexo B.3.3)}
+En lugar de adoptar los límites simplificados fijos, el módulo de pruebas calcula las incertidumbres combinadas del software basándose en las desviaciones analíticas reales encontradas frente al TDG, siguiendo de forma estricta las directrices matemáticas del Anexo B de la norma IEC 61083-2 \cite{iec61083_2}.
+
+La primera componente del cálculo representa la incertidumbre estándar tipo B del software ($u_{B71}$), calculada a partir de la máxima desviación relativa observada en el conjunto de datos analizados ($n$ ondas evaluadas):
+
+\begin{equation}
+u_{B71} = \frac{1}{\sqrt{3}} \max_{i=1}^{n} \left| \frac{x_i - x_{\text{REF},i}}{x_{\text{REF},i}} \right|
+\label{eq:u_B71}
+\end{equation}
+
+La segunda componente ($u_{B72}$) considera la incertidumbre expandida intrínseca del vector de referencia del TDG suministrada por los comités internacionales de mantenimiento, calibrada a un nivel de confianza del $\SI{95}{\percent}$ con un factor de cobertura $k=2$:
+
+\begin{equation}
+u_{B72} = \frac{1}{2} \max_{i=1}^{n} U_{x,i}
+\label{eq:u_B72}
+\end{equation}
+
+La incertidumbre estándar combinada asignada al componente del software ($u_{B7}$) se obtiene mediante la raíz cuadrada de la suma de los cuadrados de ambas componentes independientes:
+
+\begin{equation}
+u_{B7} = \sqrt{u_{B71}^2 + u_{B72}^2}
+\label{eq:u_B7_combinada}
+\end{equation}
+
+
+\newpage
+\chapter{Implementación del motor de procesamiento (DSP)}
+\vspace{3\baselineskip}
+
+\section{Arquitectura General del Sistema y UI}
+El sistema está estructurado bajo el patrón de diseño Model-View-Presenter (MVP) en su variante Passive View. Esta topología garantiza la separación estricta entre la interfaz gráfica (UI) y la lógica de negocio, procesamiento digital de señales (acorde a la norma IEC 60060-1) y control de instrumentos.
+
+Capa (MVP),Componente Python,Responsabilidad Técnica
+Model,"LightningImpulseAnalyzer, GWInstekGDS1000AU, FileManager","Encapsulan la lógica de procesamiento matemático, comunicación VISA/SCPI con el hardware y la persistencia de datos (HDF5/CSV). Desconocen por completo la existencia de la vista o el controlador."
+View,Ui\_MainWindow,Componentes visuales generados a partir de PySide6. Es una vista estrictamente pasiva; no procesa datos ni se comunica con los Modelos. Su único propósito es exponer los elementos gráficos.
+Presenter,MainController,"Actúa como orquestador central. Intercepta los eventos generados en la View, actualiza y consulta los Models, gestiona los hilos de ejecución asíncronos y refresca la View con los resultados."
+
+
+\section{Adquisición y Control de Hardware SCPI}
+La interacción con el osciloscopio digital GW Instek serie GDS se implementa mediante la librería pyvisa. El diseño utiliza comandos SCPI (Standard Commands for Programmable Instruments) para gobernar las escalas de tiempo, tensión, niveles de disparo y para ejecutar la extracción de la memoria de adquisición profunda del instrumento en formato binario estructurado (Big Endian).
+
+Comando SCPI Clave,Función dentro de la Máquina de Estados
+*IDN? / *RST,Interrogación de identidad y reinicio de fábrica para garantizar la limpieza de los registros antes de sincronizar la parametrización de la UI.
+:single,Armando del instrumento para captura única (Single Shot) en el nivel de trigger establecido.
+:trigger:state?,Consulta cíclica del estado del trigger. Devuelve el estado actual para determinar si el instrumento capturó el transitorio.
+:acquire<X>:memory?,Comando crítico de extracción de datos del canal específico <X>. Devuelve la cabecera de calibración temporal seguida de los datos crudos cuantizados.
+
+\section{Procesamiento Digital de Señales (DSP)}
+El núcleo de procesamiento numérico cumple de manera estricta con las exigencias funcionales de las normas IEC 61083-2 e IEC 60060-1 , implementando el método analítico para la remoción de componentes oscilatorios y el cálculo riguroso de los parámetros fundamentales de impulsos atmosféricos tipo rayo ($\SI[parse-numbers=false]{1,2/50}{\micro\second}$).
+
+\subsection{Validaciones Paramétricas bajo IEC 61083-2}
+El software ejecuta la validación de la función de transferencia de los algoritmos mediante el procesamiento de vectores digitales de referencia. El objetivo de este procedimiento DSP es aislar la curva base del impulso de cualquier perturbación de alta frecuencia (overshoot o ruidos de conmutación) para construir la curva de tensión de ensayo de manera reproducible.
+La norma define diferencias máximas aceptables entre los valores verdaderos del generador de datos de prueba (TDG) y los calculados por el algoritmo bajo evaluación. El procesamiento se divide de acuerdo a la topología de la señal bajo análisis:
+
+\subsection{Justificación Matemática de sigma\_fit}
+La determinación de la curva base $U_m(t)$ exige el ajuste no lineal de una función doble exponencial teórica mediante el algoritmo de optimización de Levenberg-Marquardt:
+
+\begin{equation}
+    u_d(t) = U \cdot \left( e^{-\dfrac{t-t_d}{\tau_1}} - e^{-\dfrac{t-t_d}{\tau_2}} \right)
+    \label{eq:DobleExponencial}
+\end{equation}
+
+Donde:\\
+$U$ es la constante de amplitud escalar.\\
+$\tau_1$ es la constante de tiempo asociada a la cola del impulso ($\approx \SI{70}{\micro\second}$).\\
+$\tau_2$ es la constante de tiempo asociada al frente de la onda ($\approx \SI{0,4}{\micro\second}$).\\
+$t_d$ representa el retraso temporal del origen respecto al disparo físico.
+
+Debido a que la tasa de muestreo del ADC genera una densidad de puntos significativamente mayor en la zona de la cola que en el frente de la onda (donde los gradientes de tensión son extremadamente elevados y transcurren en escala de nanosegundos), un ajuste de mínimos cuadrados ordinario converge erróneamente. El optimizador tiende de forma natural a minimizar el error residual en el segmento denso de la cola, provocando desviaciones inaceptables o divergencia matemática en la reconstrucción del frente ($T_1$).
+
+Para forzar la convergencia y garantizar el rigor metrológico en la zona crítica de elevación, se introduce la matriz de pesos diagonales inversos a través del parámetro sigmafit. El vector de varianza estimada $\sigma$ se parametriza de la siguiente manera:
+
+\begin{equation}
+    u_d(t) = U \cdot \left( e^{-\dfrac{t-t_d}{\tau_1}} - e^{-\dfrac{t-t_d}{\tau_2}} \right)
+    \label{eq:varianza estimada}
+\end{equation}
+
+Al configurar un valor de $\text{sigma\_fit} \le 0,1$, el algoritmo LM penaliza severamente cualquier residuo matemático en la zona del frente. Esto obliga al lazo numérico a converger de forma prioritaria en las muestras que definen a $\tau_2$, estabilizando el cálculo de los parámetros de tiempo e impidiendo que las oscilaciones de alta frecuencia distorsionen la estimación de la amplitud teórica del impulso.
+
+\subsection{Ecuaciones Matemáticas Principales del Filtro K-Factor}
+Una vez calculada la curva residual $R(t)$, se aplica un filtro digital de respuesta al impulso infinita (IIR) diseñado de manera que su respuesta en frecuencia equivalga exactamente a la función de la tensión de ensayo normada:
+
+\begin{equation}
+    k(f) = \frac{1}{1 + 2,2 \ cdot f^2}
+\end{equation}
+
+Donde $f$ se expresa en $\text{MHz}$. La constante empírica de atenuación de la norma corresponde a $d = 2,2 \times 10^{-12}$. El algoritmo discretiza la ecuación mediante el cálculo del parámetro de mapeo bilineal $c$:
+
+\begin{equation}
+    c = \tan\left(\frac{\pi \cdot T_S}{\sqrt{d}}\right)
+\end{equation}
+
+Donde $T_s$ representa el periodo de muestreo real del osciloscopio extraído del encabezado binario. Los coeficientes del filtro directo se calculan mediante:
+
+\begin{align*}
+    b_0 &= b_1 &= \frac{c}{1+c}\\
+    a_1 &= \frac{1-c}{1+c}
+\end{align*}
+
+La señal se procesa mediante una técnica de filtrado de fase cero (zero-phase filtering), ejecutando la ecuación de diferencias recursiva en sentido directo y posteriormente en sentido reverso para anular el desplazamiento de fase introducido por la topología del filtro IIR:
+
+\begin{equation}
+    y[i] = b_0 \cdot x[i] + b_1 \cdot x[i-1] + a_1 \cdot y[i-1]
+    \label{eq:ecuacion_filtro}
+\end{equation}
+
+La adición de la curva residual filtrada resultante $R_f(t)$ a la curva base matemática $U_m(t)$ restituye la tensión de ensayo libre de perturbaciones espurias de acoplamiento:
+
+\begin{equation}
+    U_t(t) = U_m(t)+ R_f(t)    
+\end{equation}
+
+\section{Persistencia y Gestión de Archivos (file\_manager.py)}
+La arquitectura de persistencia implementa una estrategia de aislamiento crítico de datos para mitigar el riesgo de pérdida de registros metrológicos durante los ensayos de alta tensión. La gestión de los sistemas de archivos está diseñada bajo un principio de tolerancia a fallos numéricos, asegurando la inmutabilidad de los datos crudos frente a errores de convergencia del procesador DSP.
+
+\subsection{Estrategia de Almacenamiento Dual}
+El flujo de persistencia es gobernado por el Presenter (MainController), el cual bifurca las operaciones de escritura inmediatamente después de finalizar la transferencia DMA/USB del buffer del osciloscopio digital.
+\begin{enumerate}
+    \item Persistencia Estructurada (HDF5): Almacena de forma jerárquica las condiciones del laboratorio, coeficientes de atenuación de los divisores resistivos y los vectores temporales y de amplitud indexados en grupos (Time, CH1\_Voltage, CH2\_Current).
+    \item Respaldo de Seguridad Crudo (.bin / .csv): En paralelo e independientemente del estado de éxito del pipeline DSP, el buffer nativo de cuantización del ADC se vuelca a un archivo plano de respaldo en el directorio de respaldo físico (01 Respaldo). Si el algoritmo Levenberg-Marquardt diverge o el análisis de la señal genera una excepción de tipo ValueError (debido a ruidos extremos o truncamiento de la onda física), la GUI captura la falla, notifica al operador, pero garantiza la inmutabilidad y almacenamiento del registro crudo original para su posterior análisis offline.
+\end{enumerate}
+
+\subsection{Prevención de Modificación de Datos Originales}
+La inmutabilidad de la traza de calibración se implementa mediante métodos estáticos especializados en FileManager. El método de lectura binaria deserializa el flujo Big Endian (>i2) convirtiendo los enteros del ADC a magnitudes físicas de tensión sin alterar el archivo origen:
+
+$$\text{Waveform}_{\text{Voltios}} = \frac{\text{Raw}_{\text{Bits}} \times \text{Escala}_{\text{V/div}}}{\text{ADC}_{\text{Steps/div}}}$$
+
+Para auditorías metrológicas y compatibilidad con sistemas externos de procesamiento de datos, se expone una función de exportación que convierte los arreglos internos a estructuras planas de tipo Comma-Separated Values (.csv). Este proceso escribe exclusivamente en modo de adición forzada (append-only o creación limpia) bloqueando los punteros de escritura del archivo fuente, impidiendo la manipulación accidental o la sobrescritura del histórico de ensayos almacenado en el volumen HDF5 del ítem bajo calibración.
+
+\section{Validación y Reportes (report.py y Testing)}
+El proceso de aseguramiento de la calidad del software se ejecuta mediante una suite de pruebas automatizadas que inyectan las formas de onda sintéticas y grabadas definidas en la norma IEC 61083-2. El objetivo de este procedimiento es cuantificar el sesgo del algoritmo respecto a las magnitudes de referencia metrológica.
+
+\subsection{Flujo de Validación del Software contra TDG}
+La validación implementa el protocolo de ensayos de desempeño (performance tests) estipulado en la sección 6.2 de la norma. Se cargan los casos de prueba del generador de datos de prueba (TDG) correspondientes al grupo Full Lightning Impulse (LI-A1 a LI-A12 y LI-M1 a LI-M17) e impulsos cortados en la cola (LIC-M4 y LIC-M5). El sistema procesa los archivos ASCII de dos columnas en segundos y voltios, ejecuta el pipeline algorítmico de filtrado y remoción de componentes continuas, y contrasta los resultados con los límites normativos.
+
+\subsection{Estimación de Incertidumbre del Software (Anexo B.3.3)}
+En lugar de adoptar los límites simplificados fijos, el módulo de pruebas calcula las incertidumbres combinadas del software basándose en las desviaciones analíticas reales encontradas frente al TDG, siguiendo de forma estricta las directrices matemáticas del Anexo B de la norma IEC 61083-2.
+
+La primera componente del cálculo representa la incertidumbre estándar tipo B del software ($u_{B71}$), calculada a partir de la máxima desviación relativa observada en el conjunto de datos analizados ($n$ ondas evaluadas):
+
+$$u_{B71} = \frac{1}{\sqrt{3}} \max_{i=1}^{n} \left| \frac{x_i - x_{\text{REF},i}}{x_{\text{REF},i}} \right|$$
+
+La segunda componente ($u_{B72}$) considera la incertidumbre expandida intrínseca del vector de referencia del TDG suministrada por los comités internacionales de mantenimiento, calibrada a un nivel de confianza del $\SI{95}{\percent}$ con un factor de cobertura $k=2$:
+
+$$u_{B72} = \frac{1}{2} \max_{i=1}^{n} U_{x,i}$$
+
+La incertidumbre estándar combinada asignada al componente del software ($u_{B7}$) se obtiene mediante la raíz cuadrada de la suma de los cuadrados de ambas componentes independientes:
+
+$$u_{B7} = \sqrt{u_{B71}^2 + u_{B72}^2}$$
+
