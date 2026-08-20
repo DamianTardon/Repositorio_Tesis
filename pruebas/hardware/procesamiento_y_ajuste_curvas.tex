@@ -1,0 +1,161 @@
+\section{Motor de Cálculo: Procesamiento de Señales y Ajuste de Curvas}
+\label{subsec:motor_calculo}
+
+Este componente constituye el núcleo matemático del software, y es responsable de obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}.
+
+El motor de cálculo ha sido diseñado exclusivamente para cumplir con las normas IEC 60060-1 \cite{iec60060_1} e IEC 61083-2-1 \cite{iec61083_2}, aplicando criterios de modularidad, que permiten su validación automatizada e independiente del resto de la aplicación.
+
+\subsection{Flujo algorítmico del DSP}
+\label{subsubsec:flujo_algoritmico}
+
+El algoritmo del módulo matemático se estructura en función lo establecido en la norma del ensayo de impulso \cite{iec60060_1}.
+Este proceso comprende desde el acondicionamiento inicial del vector de datos brutos hasta la obtención final de los parámetros característicos de la onda.
+
+Las etapas se ejecutan secuencialmente de la siguiente manera:
+\begin{enumerate}
+    \item \textbf{Eliminación de Offset}: Se calcula el valor de tensión continua ($V_{\text{offset}}$) promediando estadísticamente una ventana de datos adquiridos ($N_{\text{pretrigger}}$) en el instante previo al disparo (``pre-trigger''), donde la curva registrada ($U_\text{e}[n]$) es nula.
+    \begin{equation}
+        \label{eq:calculo_offset}
+        V_{\text{offset}} = \frac{1}{N_{\text{pretrigger}}} \sum_{n=1}^{N_{\text{pretrigger}}} U_\text{e}[n]
+    \end{equation}
+    El vector de tensión corregida se calcula como:
+    \begin{equation}
+        \label{eq:eliminacion_offset}
+        U_{\text{corregida}}[n] = y[n] - V_{\text{offset}}
+    \end{equation}
+    \item \textbf{Normalización de Polaridad}: Dado que los impulsos pueden ser de polaridad positiva o negativa, el algoritmo detecta el sentido del impulso evaluando el signo de la muestra extrema:
+    \begin{equation}
+        \label{eq:buscar_polaridad}
+        \text{polaridad} = \text{sign}(\text{arg max} |U_{\text{corregida}}[n]|)
+    \end{equation}
+    El vector de tensión corregida se multiplica por este término para simplificar el resto del procesamiento, asegurando que el análisis sea exclusivamente en el semiplano positivo:
+    \begin{equation}
+        \label{eq:normalizacion_polaridad}
+        U_{\text{abs}}[n] = \text{polaridad} \cdot U_{\text{corregida}}[n]
+    \end{equation}
+    \item \textbf{Normalización Unitaria}: Se normaliza la amplitud al dominio unitario respecto a su valor de cresta.
+    \begin{equation}
+        \label{eq:onda_normalizada}
+        U_{\text{norm}}[n] = \frac{U_{\text{abs}}[n]}{\max(U_{\text{abs}}[n])}
+    \end{equation}
+===============================================================================
+    \item \textbf{Cálculo del desfasaje temporal}: El corrimiento temporal, $t_L$, entre el frente de onda del último impulso con el de referencia, se calcula como el promedio de las diferencias de los instantes de $t_{30}$, $t_{50}$ y $t_{80}$, correspondientes al \qty{30}{\percent}, \qty{50}{\percent} y \qty{80}{\percent} de $U_\text{t}$ respectivamente, de ambos impulsos.
+    \begin{equation}
+        t_L = \frac{\left( t_{30, \text{ref}} - t_{30, \text{i}} \right) + \left( t_{50, \text{ref}} - t_{50, \text{i}} \right) + \left( t_{80, \text{ref}} - t_{80, \text{i}} \right)}{3} 
+    \end{equation}
+    \item \textbf{Alineación del eje temporal}: Se obtiene el vector temporal alineado del último impulso, $t_{aligned}[n]$, partiendo de su vector temporal original $t[n]$, al que se lo desplaza la cantidad $t_L$.
+    \begin{equation}
+        \label{eq:eje_alineado}
+        t_{aligned}[n] = t[n] + t_L
+    \end{equation}
+    \item \textbf{Clasificación del impulso}: Se calcula la diferencia absoluta punto a punto entre el último impulso y el de referencia, usando sus vectores normalizados en amplitud.
+    \begin{equation}
+        \label{eq:umbral_desviacion}
+        | U_{\text{i,norm}}[n] - U_{\text{ref, norm}}[n] | > umbral
+    \end{equation}
+    Si supera el umbral, la onda es cortada y se almacena el punto de separación $idx_{deviation}$. Caso contrario, es plena y continúa el análisis principal.
+        \item \textbf{Cálculo del factor de escala}: Se calcula como el promedio del intervalo comprendido entre el \qty{30}{\percent} y \qty{80}{\percent} de $U_{\text{corregida}}[n]$ del frente de la última onda y la de referencia.
+    \begin{equation}
+        \overline{U_\text{i}} = \frac{1}{N} \sum_{n = k_{30\%}}^{k_{80\%}} U_\text{i}[n]
+    \end{equation}
+    \begin{equation}
+        \overline{U_\text{ref}} = \frac{1}{N} \sum_{n = k_{30\%}}^{k_{80\%}} U_\text{ref}[n]
+    \end{equation}
+    \begin{equation}
+        \label{eq:factor_escala_e}
+        E = \frac{\overline{U_\text{i}}}{\overline{U_\text{ref}}}
+    \end{equation}
+    \item \textbf{Escalado de la Curva Base}: Debido a que la descarga disruptiva hace colapsar el ajuste por el corte abrupto de la señal, se sintetiza la curva base de la onda de referencia $U_\text{b, ref}[n]$, y se escala en amplitud con el factor de escala $E$.
+    \begin{equation}
+        \label{eq:curva_base_lic}
+        U_\text{b, i}[n] = E \cdot U_\text{b, ref}[n]
+    \end{equation}
+    \item \textbf{Tiempo de corte}: Se analiza la cola del impulso, identificando el punto de máxima pendiente de caída mediante la derivada primera
+    \begin{equation}
+        \label{eq:gradiente_colapso}
+        n_\text{abrupto} = \text{arg min}\left(\frac{\text{d} U_{\text{cola}}[n]}{\text{d} t}\right)
+    \end{equation}
+    y el punto de inflexión mediante la derivada segunda
+    \begin{equation}
+        \label{eq:derivada2_colapso}
+        n_\text{inflexion} = \text{arg min}\left(\frac{\text{d}^2 U_\text{cola}[n]}{\text{d}^2 t}\right)
+    \end{equation}
+    para obtener la tensión del instante del colapso
+    \begin{equation}
+        U_\text{colapso} = U_\text{corregida}[n_\text{pico} + n_\text{inflexion}]
+    \end{equation}
+    Se calculan los instantes correspondientes al \qty{70}{\percent} y al \qty{10}{\percent} de $U_\text{colapso}$ en la descarga disruptiva, para extrapolar el instante de corte:
+    \begin{equation}
+        t_c = t_{70} + (U_{\text{colapso}} - U_{70}) \left(\frac{t_{10} - t_{70}}{U_{10} - U_{70}}\right)
+    \end{equation}
+    Finalmente, se calcula el tiempo de corte respecto al origen virtual:
+    \begin{equation}
+        T_c = t_c - O_1
+    \end{equation}
+
+===============================================================================
+
+    \item \textbf{Segmentación de Datos}: Se selecciona una ventana de datos en el intervalo comprendido entre el \qty{20}{\percent} en el flanco de subida y el \qty{40}{\percent} en la cola de descarga del impulso.
+    \item \textbf{Ajuste de curva base}: Se realiza un ajuste paramétrico no lineal sobre la ventana de muestras, utilizando el algoritmo de \textbf{Levenberg-Marquardt} \cite{iec60060_1}, teniendo como modelo de estimación la función de doble exponencial:
+\begin{equation}
+    \label{eq:modelo_doble_exponencial}
+    u_d[n] = U \cdot \left( e^{-\frac{t - t_d}{\tau_1}} - e^{-\frac{t - t_d}{\tau_2}} \right)
+\end{equation}
+Donde los coeficientes desconocidos a determinar son:
+\begin{itemize}
+    \item $U$ el parámetro de amplitud escalar.
+    \item $\tau_1$ la constante de tiempo de descarga.
+    \item $\tau_2$ la constante de tiempo de carga.
+    \item $t_d$ el retardo temporal del origen virtual.
+\end{itemize}
+    \item \textbf{Cálculo de Curva Residual}: Se obtiene como la diferencia algebraica entre la curva corregida ($U_{\text{corregida}}[n]$) y la curva base ($U_\text{b}[n]$) construída con los parámetros obtenidos del ajuste:
+    \begin{equation}
+        \label{eq:curva_residual}
+        R[n] = U_{\text{corregida}}[n] - U_\text{b}[n]
+    \end{equation}
+    \item \textbf{Filtrado Digital de Fase Cero}: 
+    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR a la curva residual ($R[n]$). Para reducir el ruido de muy alta frecuencia relacionado a la interferencia electromagnética, sin perder oscilaciones propias del ensayo.
+    \item \textbf{Curva de Tensión de Ensayo}: Se sintetiza la curva de ensayo ($U_\text{t}[n]$) sumando algebraicamente la curva base analítica con la residual filtrada:
+    \begin{equation}
+        \label{eq:curva_ensayo}
+        U_\text{t}[n] = U_\text{b}[n] + R_f[n]
+    \end{equation}
+    \item \textbf{Cálculo de parámetros característicos}: A partir de la curva de tensión de ensayo $U_\text{t}[n]$, se calculan los parámetros normativos \cite{iec60060_1}. Dado que la señal procesada es de tiempo discreto, hay valores analíticos que pueden no corresponder con las muestras obtenidas, por lo que para encontrarlos se realiza una interpolación lineal.
+    \begin{itemize}
+        \item \textbf{Valor de cresta} ($U_\text{t}$): Es la amplitud máxima de la curva de tensión de ensayo $U_\text{t}[n]$:
+        \begin{equation}
+            \label{eq:valor_cresta}
+            U_\text{t} = \text{max}(U_\text{t}[n])
+        \end{equation}
+        \item \textbf{Tiempo de Frente} ($T_1$): Se calcula como el cociente del intervalo temporal transcurrido entre el instante $t_{30}$ (amplitud correspondiente al \qty{30}{\percent} de $U_\text{t}$) y el instante $t_{90}$ (amplitud correspondiente al \qty{90}{\percent} de $U_\text{t}$), dividiendo por $\num{0.6}$:
+        \begin{equation}
+            \label{eq:tiempo_frente}
+            T_1 = \frac{t_{90} - t_{30}}{\num{0.6}}
+        \end{equation}
+        \item \textbf{Origen Virtual} ($O_1$): El inicio ficticio de la descarga eléctrica se calcula:
+        \begin{equation}
+            \label{eq:origen_virtual}
+            O_1 = t_{30} - \num{0.5} \cdot T_{ab}
+        \end{equation}
+        \item \textbf{Tiempo de Cola} ($T_2$): El intervalo temporal entre el origen virtual $O_1$ y el instante $t_{50}$ (amplitud correspondiente al \qty{50}{\percent} de $U_\text{t}$) en el flanco descendente de la onda, se calcula:
+        \begin{equation}
+            \label{eq:tiempo_cola}
+            T_2 = t_{50} - O_1
+        \end{equation}
+        \item \textbf{Sobreimpulso Relativo} ($\text{OS}\%$): Se calcula como la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$):
+        \begin{equation}
+            \label{eq:max_curva_registrada}
+            U_\text{e} = \max(U_\text{e}[n])
+        \end{equation}
+        y el valor máximo de la curva base ($U_\text{b}$):
+        \begin{equation}
+            \label{eq:max_curva_base}
+            U_\text{b} = \max(U_\text{b}[n])
+        \end{equation}
+        expresado en porcentaje:
+        \begin{equation}
+            \label{eq:sobreimpulso_relativo}
+            \text{OS}\% = \frac{U_\text{e} - U_\text{b}}{U_\text{e}} \cdot \num{100}
+        \end{equation}
+    \end{itemize}
+\end{enumerate}

@@ -1,0 +1,24 @@
+El diseño de la vista se modela empleando la herramienta visual Qt Designer, que sirve para diseñar interfaces gráficas visualmente (arrastrando y soltando objetos). Luego, una vez que se terminó el diseño de la ventana, se compila a código de Python mediante el compilador de la biblioteca \texttt{PySide6}.
+
+
+\subsection{Configuración del osciloscopio mediante la GUI}
+\label{subsec:configuracion_gui}
+
+El operador configura de manera remota el osciloscopio interactuando con la Interfaz Gráfica de Usuario (GUI, \emph{Graphical User Interface}), la cual se comunica con el instrumento, siguiendo un flujo de control basado en la arquitectura MVP.
+
+\begin{enumerate}
+    \item \textbf{Captura de eventos (Vista):} La GUI captura las entradas de texto, la selección de menús desplegables o la pulsación de botones, y emite señales de Qt (\emph{Qt Signals}).
+    \item \textbf{Orquestación (Presentador):} El presentador conectan las señales de la GUI con sus correspondientes receptores lógicos (\emph{slots}). Además, valida que las entradas sean correctas, y envía las configuraciones al módulo controlador de \emph{hardware}.
+    \item \textbf{Traducción y control de \emph{hardware} (Modelo):} El controlador de \emph{hardware} traduce los parámetros en comandos SCPI, y los envía al instrumento, que responde en función de la operación realizada.
+\end{enumerate}
+
+La interfaz gráfica se divide en los siguientes bloques de visualización:
+\begin{itemize}
+    \item \textbf{Datos del Ensayo:} Metadatos generales del ensayo (fecha, identificador del elemento bajo ensayo y cliente solicitante).
+    \item \textbf{Condiciones Ambientales:} Parámetros ambientales del laboratorio (temperatura, presión atmosférica y humedad).
+    \item \textbf{Atenuaciones del Sistema:} Factores de atenuación de la señal analógica (divisor resistivo, resistencia \emph{shunt} y atenuadores coaxiales).
+    \item \textbf{Configuración del Osciloscopio:} Vincula y define de los parámetros del instrumento (escalas de amplitud vertical, escala de tiempo horizontal y sistema de disparo).
+    \item \textbf{Ensayo:} Inicia la captura del impulso, además de guardar y exportar los resultados.
+    \item \textbf{Resultados del ensayo:} Muestra los resultados del último impulso analizado.
+    \item \textbf{Gráfico de onda:} Muestra el historial de ondas almacenadas.
+\end{itemize}

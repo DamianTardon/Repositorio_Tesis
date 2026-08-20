@@ -1,4 +1,5 @@
 % !TeX program = lualatex
+% !TeX BIB program = biber
 %\PassOptionsToPackage{table, xcdraw}{xcolor}
 %\documentclass[11pt, draft]{book} % Clase de documento Borrador, agiliza compilación.
 \documentclass[11pt, final]{book} % Clase de documento para un informe.
@@ -31,18 +32,21 @@
 %\usepackage[table, xcdraw]{xcolor}
 \usepackage{siunitx}
 \DeclareSIUnit{\sample}{Sa} % Unidad personalizada: muestra = sample = Sa
+\DeclareSIUnit{\division}{div} % Unidad personalizada: division = div
 \sisetup{output-decimal-marker={,}}
 
 % --- GRÁFICOS ---
 \usepackage{graphicx} % Permite incluir imágenes.
 \usepackage{subcaption} % Permite agregar subfiguras dentro de una figura principal, cada una con su leyenda.
 \usepackage{float}
+\usepackage{dirtree}
+\usepackage[edges]{forest}
 
 % --- BIBLIOGRAFÍA ---
 \usepackage{csquotes} % Formato de citas textuales.
 \usepackage[backend=biber, style=apa]{biblatex} % Estilo APA.
-% IMPORTANTE: Debes tener un archivo .bib con tus referencias.
-% \addbibresource{referencias.bib}
+% IMPORTANTE: Cargar las referencias en .bib.
+\addbibresource{referencias.bib}
 
 % --- LISTAS ---
 \usepackage{enumitem}
@@ -76,7 +80,7 @@
 \pagestyle{fancy}
 
 \pagenumbering{roman}
-\input{capitulos/00_portada.tex}
+%\input{capitulos/00_portada.tex}
 %\input{capitulos/00_acta_tribunal.tex}
 %\input{capitulos/00_acta_director.tex}
 %\input{capitulos/00_dedicatoria.tex}
@@ -101,32 +105,35 @@
 %\pagenumbering{arabic}
 \pagestyle{normal} % A partir de aquí cambia el estilo de numeración.
 
-% INTRODUCCIÓN =================================================================================================
+% =================================================================================================
 %\input{capitulos/01_introduccion.tex}
 
-% MARCO TEÓRICO ================================================================================================
+% ================================================================================================
 %\part{MARCO TEÓRICO}
 %\input{capitulos/02_fundamentos_at.tex}
-%\input{capitulos/03_instrumentacion_adquisicion.tex}
+\input{capitulos/03_instrumentacion_adquisicion.tex}
 %\input{capitulos/04_procesamiento_senales.tex}
 %\input{capitulos/05_arquitectura_sistema.tex}
 
 
-% MARCO METODOLÓGICO ===========================================================================================
+% ===========================================================================================
 %\part{MARCO METODOLÓGICO}
-%\input{capitulos/06_comunicacion_osciloscopio.tex}
-\input{capitulos/07_implementacion_dsp_copy.tex}
+%\input{capitulos/09_descripcion_modelo.tex}
+\input{capitulos/06_comunicacion_osciloscopio.tex}
+%\input{capitulos/07_implementacion_dsp_copy.tex}
+%\input{capitulos/08_diseno_gui.tex}
 
-% RESULTADOS Y CONCLUSIONES ====================================================================================
+
+% ====================================================================================
 %\part{RESULTADOS Y CONCLUSIONES}
 
 
 % BIBLIOGRAFÍA =================================================================================================
 \cleardoublepage
 % La bibliografía solo aparecerá si hay citas en el texto y el archivo .bib existe.
-%\printbibliography[heading=bibintoc, title={Bibliografía}]
+\printbibliography[heading=bibintoc, title={Bibliografía}]
 
-% ANEXOS =======================================================================================================
+% =======================================================================================================
 %\part*{ANEXOS}
 \addcontentsline{toc}{part}{ANEXOS}
 

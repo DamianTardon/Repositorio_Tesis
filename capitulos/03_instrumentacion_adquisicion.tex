@@ -2,16 +2,19 @@
 \chapter{Instrumentación y adquisición de señales}
 \vspace{3\baselineskip}
 
-Este capítulo detalla los fundamentos teóricos de los sistemas de adquisición de datos en el contexto de ensayos de alta tensión. Se aborda la transición del dominio analógico al digital para la captura de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}) empleando un osciloscopio de almacenamiento digital (DSO).\par
+Este capítulo detalla los fundamentos teóricos de los sistemas de adquisición de datos en el contexto de ensayos de alta tensión. Se aborda la transición del dominio analógico al digital para la captura de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}) empleando un osciloscopio de almacenamiento digital.
+
 A lo largo de las siguientes secciones, se analizan los conceptos básicos necesarios para entender el funcionamiento de un osciloscopio.
 
-\section{Arquitectura de osciloscopios de almacenamiento digital (DSO)}
-Antes de procesar digitalmente las señales, es necesario capturarlas adecuadamente. Para ello se utiliza un instrumento de medición electrónico denominado, osciloscopio de almacenamiento digital (DSO). El cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y análisis posterior. Por esto es útil comprender su arquitectura, ya que su diseño y limitaciones impactan directamente en la calidad de los datos adquiridos y, por ende, en el análisis posterior.\par
-La señal ingresa por un circuito analógico de acondicionamiento de entrada, para dirigirse al bloque del ADC que se encarga de realizar el muestreo y cuantización a una tasa definida por la base de tiempo. Luego, se almacena en la memoria del osciloscopio, para finalmente presentarla en pantalla.\par
+\section{Arquitectura de osciloscopios de almacenamiento digital}
+Antes de procesar digitalmente las señales, es necesario capturarlas adecuadamente. Para ello se utiliza un instrumento de medición electrónico denominado, osciloscopio de almacenamiento digital (DSO, \emph{Digital Storage Oscilloscope}). El cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y análisis posterior. Por esto es útil comprender su arquitectura, ya que su diseño y limitaciones impactan directamente en la calidad de los datos adquiridos y, por ende, en el análisis posterior.
+
+La señal ingresa por un circuito analógico de acondicionamiento de entrada, para dirigirse al bloque del convertidor Analógico-Digital (ADC, \emph{Analog-Digital Converter}) que se encarga de realizar el muestreo y cuantización a una tasa definida por la base de tiempo. Luego, se almacena en la memoria del osciloscopio, para finalmente presentarla en pantalla.
+
 A continuación, se describen los parámetros más relevantes relacionados con la adquisición de señales, que deben ser considerados al momento de configurar el osciloscopio para capturar impulsos de alta tensión.
 
 \subsection{Muestreo de señales}
-La conversión analógica-digital (ADC) se basa en el \textbf{Teorema de Muestreo} de Nyquist-Shannon, el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, para evitar el fenómeno destructivo del aliasing (cuando la velocidad de muestreo es insuficiente, pueden aparecer erróneamente componentes de frecuencia más bajas que la de la señal real, denominadas “Alias”). Matemáticamente, se define como:
+La conversión analógica-digital se basa en el \textbf{Teorema de Muestreo} de Nyquist-Shannon, el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, para evitar el fenómeno destructivo del aliasing (cuando la velocidad de muestreo es insuficiente, pueden aparecer erróneamente componentes de frecuencia más bajas que la de la señal real, denominadas “Alias”). Matemáticamente, se define como:
 \begin{equation}
     f_s > 2 f_{max}
 \end{equation}
@@ -35,7 +38,7 @@ Mientras que el muestreo discretiza el eje temporal, la \textbf{cuantización} d
 Donde $V_{FSR}$ representa el rango dinámico de escala completa (FSR) (relación entre el valor máximo y el valor mínimo de la señal que se puede capturar o representar), y $N$ es la resolución en bits del convertidor.
 
 \subsection{Longitud de memoria}
-El DSO como todo sistema de almacenamiento digital, posee una \textbf{longitud de memoria} finita para almacenar datos, que junto con la frecuencia de muestreo, determina la ventana temporal total de captura, es decir, el tiempo que el osciloscopio puede registrar datos a una frecuencia de muestreo dada.
+El osciloscopio posee una \textbf{longitud de memoria} finita para almacenar datos, que junto con la frecuencia de muestreo, determina la ventana temporal total de captura, es decir, el tiempo que el osciloscopio puede registrar datos a una frecuencia de muestreo dada.
 \begin{equation}
     T_{acq} = \dfrac{N_{record}}{f_s}
 \end{equation}
@@ -52,9 +55,10 @@ El \textbf{ancho de banda} es un parámetro importante del osciloscopio, que se 
 \subsection{Velocidad de muestreo}
 La \textbf{velocidad de muestreo} es una medida de la resolución en el tiempo, que se mide en \SI{}{MSa/s} o \SI{}{GSa/s}, e indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas.
 
-\section{Estándares de comunicación de instrumentos y protocolo VISA}
+\section{Estándares de comunicación de instrumentos}
 
-En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos desde la memoria del osciloscopio hacia la computadora requiere de interfaces físicas estandarizadas, y protocolos lógicos de control.\par
+En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos desde la memoria del osciloscopio hacia la computadora requiere de interfaces físicas estandarizadas, y protocolos lógicos de control.
+
 Actualmente, la comunicación entre instrumentos de medida y sistemas de adquisición se rige por los siguientes estándares físicos:
 
 \begin{itemize}
@@ -63,24 +67,32 @@ Actualmente, la comunicación entre instrumentos de medida y sistemas de adquisi
     \item \textbf{LXI (LAN eXtensions for Instrumentation) / Ethernet:} Permite la integración del instrumento en redes de área local, facilitando tasas de transferencia de datos significativamente mayores y posibilitando el control y monitoreo remoto a largas distancias.
 \end{itemize}
 
-\subsection{Arquitectura de Software de Instrumentos Virtuales (Protocolo VISA)}
+\subsection{Protocolo VISA}
 
-La diversidad de buses físicos (GPIB, RS-232, USB, Ethernet) presenta un desafío a nivel de desarrollo de software, ya que tradicionalmente cada puerto requería llamadas al sistema y controladores (\textit{drivers}) de bajo nivel completamente distintos. Para mitigar este problema, la industria adoptó el protocolo \textbf{VISA (Virtual Instrument Software Architecture)}.\par
-VISA es una Interfaz de Programación de Aplicaciones (API) estándar que funciona como una capa de abstracción de Entrada/Salida (E/S). Su objetivo es proporcionar una interfaz de software unificada que encapsula y oculta los detalles de implementación del hardware subyacente.\par
-Las características fundamentales del protocolo VISA en la adquisición de señales incluyen:\par
+La diversidad de buses físicos (GPIB, RS-232, USB, Ethernet) presenta un desafío a nivel de desarrollo de software, ya que tradicionalmente cada puerto requería llamadas al sistema y controladores (\emph{drivers}) de bajo nivel completamente distintos. Para mitigar este problema, la industria adoptó la Arquitectura de Software para Instrumentos Virtuales (VISA, \emph{Virtual Instrument Software Architecture}), que funciona como una capa de abstracción de Entrada/Salida, cuyo objetivo es proporcionar una interfaz de software, que encapsula y oculta los detalles de implementación del hardware subyacente. Lo que brinda las siguientes ventajas en el desarrollo de este trabajo:
 
 \begin{itemize}
     \item \textbf{Independencia del bus de hardware:} VISA permite que el software de control envíe comandos al osciloscopio sin necesidad de especificar cómo se gestionan eléctricamente los bits. Si el diseño del sistema migra de una conexión USB a una LAN, el código fuente de control de nivel superior no requiere modificaciones sustanciales.
-    \item \textbf{Integración con comandos SCPI:} VISA actúa como el canal de transporte para los comandos SCPI (\textit{Standard Commands for Programmable Instruments}). SCPI es un lenguaje basado en cadenas de texto ASCII estandarizadas (por ejemplo, \texttt{MEASure:VOLTage:DC?} o \texttt{TIMebase:SCALe?}) que los instrumentos interpretan para ajustar su escala de tiempo, resolución vertical, o para enviar el contenido de su memoria hacia la computadora.
+    \item \textbf{Integración con comandos SCPI:} VISA actúa como el canal de transporte para el protocolo de Comandos Estándar para Instrumentos Programables (SCPI, \emph{Standard Commands for Programmable Instruments}), que es un lenguaje basado en cadenas de texto ASCII estandarizadas (por ejemplo, \texttt{TIMebase:SCALe?}) y los instrumentos interpretan para ajustar sus parámetros como escala de tiempo, resolución vertical, o para entregar el contenido de su memoria hacia la computadora.
     \item \textbf{Gestión de recursos:} La arquitectura asigna descriptores unificados a cada instrumento detectado, centralizando la inicialización, la lectura de las muestras adquiridas, la escritura de comandos de configuración y el cierre de las sesiones de comunicación.
 \end{itemize}
 
 Los descriptores de recursos VISA por lo general, tienen la siguiente gramática estructural:
+\begin{align*}
+    \texttt{Interfaz[Índice]::Dirección\_del\_Dispositivo::[Recurso]}
+\end{align*}
 
-Interfaz[Controlador]::Dirección\_del\_Dispositivo::[Clase\_de\_Recurso]
+\begin{itemize}
+    \item \textbf{Interfaz}: Indica el tipo de controlador del puerto.
+    \item \textbf{Índice}: Permite diferenciar numéricamente (por ejemplo, el 0 en USB0) cuando existen múltiples tarjetas controladoras del mismo tipo instaladas en la misma computadora (por ejemplo, dos placas PCI para GPIB distintas). Si se omite, VISA asume el valor cero por defecto.
+    \item \textbf{Dirección del Dispositivo}: Identificador o ruta simbólica asignada para ubicar de forma unívoca el dispositivo.
+    \item \textbf{Recurso}:
+    \begin{itemize}
+        \item \textbf{\texttt{INSTR}}: La sesión se gestiona utilizando los mecanismos de VISA completos, permitiendo por ejemplo, el uso de comandos de aserción de eventos y de lectura de estado.
+        \item \textbf{\texttt{SOCKET}}: VISA actuará simplemente como un puente datos de bajo nivel sin enviar comandos de control propios del protocolo de instrumentación.
+    \end{itemize}
+\end{itemize}
 
-\textbf{El parámetro [Controlador]:} Es un índice numérico (por ejemplo, el 0 en USB0). Permite diferenciar cuando existen múltiples tarjetas controladoras del mismo tipo instaladas en la misma computadora (por ejemplo, dos placas PCI para GPIB distintas). Si se omite, la API de VISA asume el valor cero por defecto.\par
-\textbf{La clase de recurso [INSTR] vs [SOCKET]:} El sufijo INSTR (Instrumento) es el más utilizado e indica a la API que debe gestionar la sesión utilizando los mecanismos completos de VISA (por ejemplo, permitiendo el uso de comandos de aserción de eventos y lectura de estado). El sufijo SOCKET indica que VISA simplemente actuará como un puente datos de bajo nivel sin enviar comandos de control propios del protocolo de instrumentación (cabeceras del protocolo VXI-11).
 
 A continuación, se presentan ejemplos de descriptores de recursos VISA para cada tipo de interfaz física comúnmente utilizada en la adquisición de señales:
 

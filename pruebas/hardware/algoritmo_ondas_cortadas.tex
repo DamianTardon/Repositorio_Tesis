@@ -1,0 +1,105 @@
+\subsection{Algoritmo de Procesamiento para Ondas Cortadas}
+\label{subsec:algoritmo_ondas_cortadas}
+
+El análisis de impulsos de tensión tipo rayo interrumpidos por una descarga disruptiva en un entrehierro externo, con un tiempo de corte comprendido usualmente entre \qty{2}{\micro\second} y \qty{5}{\micro\second}, se denomina \textbf{ondas cortadas} (LIC, por sus siglas en inglés) \cite{iec60060_1}. Esta interrupción produce una caída súbita y severa de la tensión que impide aplicar directamente el ajuste de la curva base doble exponencial en la cola del impulso, requiriendo un procedimiento diferencial o dual frente a un impulso de referencia completo. Para cumplir con los requisitos metrológicos y de control de incertidumbre de la norma \cite{iec61083_2}, el módulo matemático \textbf{LightningImpulseAnalyzer} implementa un algoritmo relacional síncrono.
+
+\subsubsection{Fases de Inicialización y Acondicionamiento Comunes}
+\label{subsubsection:fases_comunes_lic}
+
+Con el objeto de unificar la base de cálculo y preservar la compatibilidad numérica, se ejecutan de manera idéntica las etapas previas aplicadas para la onda plena, sin alteración de las rutinas de bajo nivel:
+
+\begin{itemize}
+    \item \textbf{Eliminación estadística del offset}: Supresión del desvío de tensión continuo promedio previo al disparo de ensayo mediante el método \texttt{\_remove\_offset()}.
+    \item \textbf{Normalización de polaridad}: Orientación de la traza de tensión hacia el semiplano positivo mediante el factor absoluto en \texttt{\_polarity\_normalization()}.
+    \item \textbf{Normalización unitaria}: Escalamiento inicial de la traza de tensión a un valor de cresta provisional de \qty{1.0}{\text{p.u.}} mediante \texttt{\_normalize\_waveform()}.
+\end{itemize}
+
+\subsubsection{Bifurcación Dinámica e Identificación del Tipo de Onda}
+\label{subsubsection:bifurcacion_dinamica}
+
+La discriminación entre impulsos plenos y cortados se ejecuta dinámicamente mediante el método \texttt{\_find\_deviation\_point()} tras la alineación temporal de la señal con la traza de referencia:
+
+\begin{enumerate}
+    \item \textbf{Alineación de ejes temporales}: Se realiza el ajuste horizontal de la señal bajo prueba respecto a la traza del impulso de referencia. El origen temporal virtual de ambas ondas se unifica en un punto común de correspondencia temporal de manera que:
+    \begin{equation}
+    \label{eq:eje_alineado}
+    t_{aligned} = t - t_d
+    \end{equation}
+    Donde $t$ es el vector temporal discretizado y $t_d$ representa el retraso relativo de fase obtenido para maximizar la correlación entre ambos frentes de onda.
+    \item \textbf{Evaluación del índice de desviación}: El analizador calcula secuencialmente la diferencia absoluta entre la onda bajo análisis ($u_{norm}$) y la onda de referencia completa ($u_{ref,norm}$):
+    \begin{equation}
+    \label{eq:funcion_desviacion}
+    D(t) = | u_{norm}(t) - u_{ref,norm}(t) |
+    \end{equation}
+    \item \textbf{Clasificación del impulso (LI vs LIC)}: Se detecta el índice de separación $idx_{deviation}$ donde la función de discrepancia $D(t)$ supera permanentemente un umbral de tolerancia crítica. Si este punto ocurre antes de que la tensión descienda por debajo de \qty{50}{\percent} de la amplitud máxima, el software clasifica el ensayo como \textbf{onda cortada} (\texttt{impulse\_type == "chopped"}). En caso contrario, se desvía el flujo hacia el procesamiento síncrono convencional de \textbf{onda plena} (\texttt{impulse\_type == "full"}).
+\end{enumerate}
+
+\subsubsection{Ajuste y Escalado Relacional de la Curva Base}
+\label{subsubsection:escalado_curva_base}
+
+Para reconstruir analíticamente la porción de cola no registrada debido al colapso por disrupción, se calcula el factor escalar de acoplamiento de amplitud $E$. Este coeficiente minimiza cuadráticamente el error de aproximación en el frente de onda pre-corte, definido por el enmascarado del vector de tensión \texttt{chopped\_front\_voltage}:
+
+\begin{equation}
+\label{eq:factor_escala_e}
+E = \frac{\sum_{i=1}^{N_{front}} u(t_i) \cdot u_{ref}(t_i)}{\sum_{i=1}^{N_{front}} u_{ref}(t_i)^2}
+\end{equation}
+
+Donde $u(t_i)$ representa la amplitud discreta de la onda cortada, $u_{ref}(t_i)$ es la amplitud de la onda de referencia completa en idéntico instante alineado, y $N_{front}$ es el número total de muestras temporales anteriores al colapso.
+
+El método \texttt{\_scale\_base\_curve()} sintetiza la curva base analítica doble exponencial para la onda cortada:
+
+\begin{equation}
+\label{eq:curva_base_lic}
+u_b(t) = E \cdot u_{b,ref}(t)
+\end{equation}
+
+Donde $u_{b,ref}(t)$ es la función base analítica calculada mediante la optimización de Levenberg-Marquardt para el impulso de referencia. El valor extremo de esta curva define la amplitud máxima de la base, denotada por $U_b$.
+
+\subsubsection{Determinación del Instante y Tiempo de Corte}
+\label{subsubsection:instante_tiempo_corte}
+
+El instante relevante en el cual se produce el colapso abrupto de tensión, denominado \textbf{instante de corte} ($t_c$), se determina linealizando el tramo descendente comprendido entre el \qty{70}{\percent} y el \qty{10}{\percent} del valor de colapso \cite{iec60060_1}. El método \texttt{\_find\_chopping\_instant()} ejecuta este cálculo mediante el siguiente algoritmo:
+
+\begin{enumerate}
+    \item \textbf{Localización de límites de caída}: A partir del punto de máxima pendiente negativa ($dU/dt_{max}$), se extraen mediante interpolación lineal los instantes temporales $t_{70}$ y $t_{10}$ asociados a las amplitudes del \qty{70}{\percent} y \qty{10}{\percent} de la tensión antes del colapso.
+    \item \textbf{Extrapolación de la recta de colapso}: Se formula la ecuación lineal de la secante que modela la descarga transitoria:
+    \begin{equation}
+    \label{eq:recta_colapso}
+    u_{col}(t) = \left( \frac{u_{10} - u_{70}}{t_{10} - t_{70}} \right) \cdot (t - t_{70}) + u_{70}
+    \end{equation}
+    \item \textbf{Cálculo de la intersección del instante de corte ($t_c$)}: Se determina numéricamente el punto donde la recta extrapolada $u_{col}(t)$ interseca el nivel de tensión inmediatamente previo al colapso ($u_{prev}$):
+    \begin{equation}
+    \label{eq:instante_corte_final}
+    t_c = t_{70} + (u_{prev} - u_{70}) \cdot \left( \frac{t_{10} - t_{70}}{u_{10} - u_{70}} \right)
+    \end{equation}
+    \item \textbf{Cálculo del tiempo de corte ($T_c$)}: Expresa el parámetro temporal de disrupción en segundos, cuantificado como la diferencia entre el instante de corte $t_c$ y el origen virtual de la onda $O_1$ obtenido a partir de la curva de ensayo reconstruida:
+    \begin{equation}
+    \label{eq:tiempo_corte_tc}
+    T_c = t_c - O_1
+    \end{equation}
+\end{enumerate}
+
+\subsubsection{Reconstrucción, Filtrado de Fase Cero y Parámetros Finales}
+\label{subsubsection:reconstruccion_lic}
+
+Una vez delimitado el instante de corte $t_c$, se restringe el dominio del análisis matemático numérico. La síntesis de la onda se completa según la siguiente secuencia:
+
+\begin{itemize}
+    \item \textbf{Generación de la curva residual}: Se sustrae la curva base escalada de la traza original registrada exclusivamente para el dominio pre-disruptivo:
+    \begin{equation}
+    \label{eq:residual_lic}
+    R(t) = u(t) - u_b(t), \quad \forall t \le t_c
+    \end{equation}
+    \item \textbf{Filtrado digital paso bajo}: Se inyecta la curva residual $R(t)$ en el método \texttt{\_filter\_to\_residual()}, el cual aplica un filtro digital Butterworth de respuesta impulsional infinita (\textbf{IIR}) de segundo orden de manera bidireccional (fase cero) para mitigar ruidos electromagnéticos de alta frecuencia sin introducir corrimientos temporales de fase, resultando en la curva residual filtrada $R_f(t)$.
+    \item \textbf{Sntesis de la curva de tensión de ensayo ($u_t(t)$)}: Se reconstruye sumando la base analítica y el residuo filtrado limpio:
+    \begin{equation}
+    \label{eq:curva_ensayo_lic}
+    u_t(t) = u_b(t) + R_f(t), \quad \forall t \le t_c
+    \end{equation}
+    \item \textbf{Cálculo de parámetros metrológicos}: Sobre la curva de tensión de ensayo $u_t(t)$ se calcula por aproximación la tensión de ensayo ($U_t$), el tiempo de frente ($T_1$), la sobreelevación relativa ($OS\%$) y la amplitud de tensión en el instante del corte ($u(t_c)$).
+\end{itemize}
+
+\begin{thebibliography}{99}
+    \bibitem{iec60060_1} International Electrotechnical Commission, ``IEC 60060-1: High-voltage test techniques - Part 1: General definitions and test requirements'', Edition 3.0, 2010.
+    \bibitem{iec61083_2} International Electrotechnical Commission, ``IEC 61083-2: Instruments and software used for measurement in high-voltage impulse tests - Part 2: Evaluation of software used for the determination of the parameters of impulse waveforms'', Edition 2.0, 2013.
+\end{thebibliography}

@@ -1,9 +1,12 @@
 % !TeX program = lualatex
-\documentclass[11pt]{book} % Clase de documento para un informe.
+%\PassOptionsToPackage{table, xcdraw}{xcolor}
+%\documentclass[11pt, draft]{book} % Clase de documento Borrador, agiliza compilación.
+\documentclass[11pt, final]{book} % Clase de documento para un informe.
+\usepackage{fancyhdr}
 
 % --- IDIOMA Y LOCALIZACIÓN ---
-\usepackage[spanish, bidi=basic, provide=*]{babel} % Soporte para texto en español.
-\babelprovide[import, onchar=ids fonts]{spanish} % Manejo de caracteres y reglas gramaticales.
+\usepackage[bidi=basic, provide=*]{babel}
+\babelprovide[main, import, onchar=ids fonts]{spanish}
 \babelprovide[import, onchar=ids fonts]{english}
 \babelprovide[import, onchar=ids fonts]{portuguese}
 
@@ -15,26 +18,35 @@
 
 % --- GEOMETRÍA Y DISEÑO ---
 \usepackage[a4paper, left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry} % Tamaño de la página.
+%\usepackage[headheight=13.6pt]{geometry}
 \usepackage{setspace} % Control de interlineado.
 \onehalfspacing % Interlineado de 1.5.
 \setlength{\parskip}{1.5ex} % Espacio entre párrafos.
+\usepackage{verbatim}
 
 % --- MATEMÁTICAS Y TABLAS ---
 \usepackage{amsmath, amssymb, mathtools}
 \usepackage{booktabs} % Formateo de tablas.
+\usepackage{tabularx}
 %\usepackage{multirow, booktabs} % Para texto en varias filas, y Formateo de tablas.
-\usepackage[table, xcdraw]{xcolor}
+%\usepackage[table, xcdraw]{xcolor}
+\usepackage{siunitx}
+\DeclareSIUnit{\sample}{Sa} % Unidad personalizada: muestra = sample = Sa
+\sisetup{output-decimal-marker={,}}
 
 % --- GRÁFICOS ---
 \usepackage{graphicx} % Permite incluir imágenes.
 \usepackage{subcaption} % Permite agregar subfiguras dentro de una figura principal, cada una con su leyenda.
 \usepackage{float}
+\usepackage{dirtree}
+\usepackage[edges]{forest}
 
 % --- BIBLIOGRAFÍA ---
 \usepackage{csquotes} % Formato de citas textuales.
-\usepackage[backend=biber, style=apa]{biblatex} % Estilo APA.
+%\usepackage[backend=biber, style=apa]{biblatex} % Estilo APA.
+\usepackage[backend=biber, style=ieee]{biblatex} % Estilo IEEE.
 % IMPORTANTE: Debes tener un archivo .bib con tus referencias.
-% \addbibresource{referencias.bib}
+\addbibresource{referencias.bib}
 
 % --- LISTAS ---
 \usepackage{enumitem}
@@ -43,6 +55,7 @@
 % --- HIPERVÍNCULOS ---
 \usepackage[hidelinks]{hyperref} % Hipervínculos transparentes.
 
+\usepackage{pythonhighlight} % Sintaxis de código Python.
 % Redefinición de títulos y etiquetas.
 \addto\captionsspanish{
   \renewcommand{\contentsname}{Índice}
@@ -51,46 +64,28 @@
   \renewcommand{\tablename}{Tabla}
 }
 
+% Configuración de encabezado y pie de página a partir de la "Introduccion"
+\fancypagestyle{normal}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{1pt}
+    \renewcommand{\footrulewidth}{1pt}
+    \fancyhead[RE]{\nouppercase{\textit{\leftmark}}}
+    \fancyhead[LO]{\nouppercase{\textit{\rightmark}}}
+    \fancyfoot[RO, LE]{\textit{Tardón Damián David}} 
+    \fancyfoot[C]{\thepage}
+    \pagenumbering{arabic}
+}
+
 \begin{document}
 
 \pagenumbering{roman}
 
-\input{capitulos/00_portada.tex}
-\input{capitulos/00_acta_tribunal.tex}
-\input{capitulos/00_acta_director.tex}
-\input{capitulos/00_dedicatoria.tex}
-\input{capitulos/00_agradecimientos.tex}
-\input{capitulos/00_resumen.tex}
-
-\tableofcontents
-
-\cleardoublepage
-\listoftables
-\addcontentsline{toc}{chapter}{\listtablename}
-
-\cleardoublepage
-\listoffigures
-\addcontentsline{toc}{chapter}{\listfigurename}
-
-\newpage
-\pagenumbering{arabic}
-
-\input{capitulos/01_introduccion.tex}
-
-\part{MARCO TEÓRICO}
-
-
-\part{MARCO METODOLÓGICO}
-
-
-\part{RESULTADOS Y CONCLUSIONES}
-
+%\input{pruebas/hardware/integracion.tex}
+%\input{pruebas/hardware/procesamiento_y_ajuste_curvas.tex}
+\input{capitulos/09_descripcion_modelo.tex}
 
 \cleardoublepage
 % La bibliografía solo aparecerá si hay citas en el texto y el archivo .bib existe.
 \printbibliography[heading=bibintoc, title={Bibliografía}]
-
-\part*{ANEXOS}
-\addcontentsline{toc}{part}{ANEXOS}
 
 \end{document}
