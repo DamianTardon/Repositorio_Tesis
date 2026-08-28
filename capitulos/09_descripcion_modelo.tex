@@ -16,14 +16,14 @@ La división de tareas facilita la validación algorítmica y control de la ince
     \label{fig:Lab_1_Circ_1_V1-esquema}
 \end{figure}
 
-\subsection{Capa de Presentación: Vista}
+\subsection{Capa de presentación: Vista}
 \label{subsec:vista}
 
 La \textbf{Vista} maneja de forma exclusiva la representación visual del sistema y la captura de las interacciones del operador. Ya que, solo declara estáticamente la disposición y propiedades de los componentes gráficos.
 
 Esta capa se caracteriza por no tener referencias directas hacia la lógica de adquisición física o los algoritmos de procesamiento digital de señales. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, la Vista emite eventos en forma de señales de Qt (\textbf{Qt Signals}), que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
 
-\subsection{Capa de Lógica y Datos: Modelo}
+\subsection{Capa de lógica y datos: Modelo}
 \label{subsec:modelo}
 
 El \textbf{Modelo} representa el núcleo funcional del software, abarcando el control del instrumental de laboratorio, la lógica de cálculo metrológico y la administración de la persistencia de datos.
@@ -31,12 +31,12 @@ El \textbf{Modelo} representa el núcleo funcional del software, abarcando el co
 Esta capa se subdivide en tres submódulos independientes especializados:
 
 \begin{enumerate}
-    \item \textbf{Abstracción de Hardware}: Implementada en el módulo \textbf{GWInstekGDS1000AU}. Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
-    \item \textbf{Persistencia y Gestión de Archivos}: Administrada por el módulo \textbf{FileManager}. Maneja la creación y el acceso al sistema de archivos. Su función principal es el almacenamiento en bases de datos utilizando el formato HDF5. Asimismo, gestiona la exportación de resultados a hojas de cálculo tipo CSV o XLSX.
-    \item \textbf{Procesamiento Digital de Señales}: Llevado a cabo por el módulo matemático \textbf{LightningImpulseAnalyzer}. Constituye el motor matemático del sistema. Es responsable de acondicionar la señal y extraer sus parámetros característicos según la norma \cite{iec60060_1}.
+    \item \textbf{Abstracción de hardware}: Implementada en el módulo \textbf{GWInstekGDS1000AU}. Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
+    \item \textbf{Persistencia y gestión de archivos}: Administrada por el módulo \textbf{FileManager}. Maneja la creación y el acceso al sistema de archivos. Su función principal es el almacenamiento en bases de datos utilizando el formato HDF5. Asimismo, gestiona la exportación de resultados a hojas de cálculo tipo CSV o XLSX.
+    \item \textbf{Procesamiento digital de señales}: Llevado a cabo por el módulo matemático \textbf{LightningImpulseAnalyzer}. Constituye el motor matemático del sistema. Es responsable de acondicionar la señal y extraer sus parámetros característicos según la norma \cite{iec60060_1}.
 \end{enumerate}
 
-\subsection{Capa de Coordinación: Presentador}
+\subsection{Capa de coordinación: Presentador}
 \label{subsec:presentador}
 
 El \textbf{Presentador}, es implementado en el módulo \textbf{MainPresenter}, y actúa como coordinador de la arquitectura MVP. Tiene como responsabilidad orquestar la interacción entre la interfaz visual y los motores lógico-físicos.
@@ -185,7 +185,7 @@ El motor de cálculo ha sido diseñado exclusivamente para cumplir con las norma
 
 Este proceso se divide en tres fases operativas: preprocesamiento común, clasificación dinámica y reconstrucción de la señal.
 
-\subsubsection{Fase I: Acondicionamiento Inicial}
+\subsubsection{Fase I: acondicionamiento inicial}
 
 Esta etapa es común a todos los registros adquiridos.
 \begin{enumerate}
@@ -411,28 +411,4 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
   ]
 \end{forest}
 
-
-\section{Gestión de problemas}
-\label{subsec:gestion_fallos}
-
-Para garantizar el funcionamiento continuo y evitar comportamientos indeterminados, ante perturbaciones o errores operativos, la aplicación tiene la siguiente estructura de manejo de problemas:
-
-\begin{enumerate}
-    \item \textbf{Errores de comunicación del hardware:} 
-    En caso de una desconexión accidental del cable USB, o fallos de alimentación del osciloscopio durante el ensayo, la capa lógica interrumpe la ejecución, emite una notificación al operador sobre la pérdida de comunicación, y reestablece los controles de la interfaz gráfica.
-    
-    \item \textbf{Validación de datos de entrada:}
-    Para impedir que el software realice cálculos numéricos con buffers vacíos o configuraciones incompletas, el presentador realiza validaciones lógicas antes de interactuar con el módulo de almacenamiento o el analizador matemático, previniendo las siguientes fallas:
-    \begin{itemize}
-        \item \textbf{Ensayo nulo:} Si el operador acciona el botón de \enquote{Guardar} o \enquote{Exportar} sin haber creado previamente la carpeta del ensayo, se detiene la operación, y se notifica la ausencia del directorio del ensayo.
-        \item \textbf{Ausencia de condiciones ambientales:} Se restringe el ingreso de datos inválidos en estos campos, y se impide el almacenamiento de la onda si no están cargados, advirtiendo al operador que debe completarlos.
-        \item \textbf{Buffer de adquisición vacío:} Si el operador solicita guardar datos sin haber capturado una señal, se interrumpe la escritura de un registro nulo, y genera una alerta de buffer vacío.
-    \end{itemize}
-
-    \item \textbf{Fallos del módulo matemático:}
-    Durante el procesamiento de la señal, pueden presentarse divergencias o inestabilidades numéricas. En ese caso, el motor de cálculo detiene el proceso, y notifica al operador sobre la necesidad de repetir la captura y reajustar la configuración del oscilocopio (si es necesario).
-\end{enumerate}
-
-
 La etapa 1 de acondicionamiento analógico, es propia del montaje del ensayo, por lo que, no se afecta en ningún aspecto. La etapa 2 de digitalización, se modificó para este proyecto respecto al montaje vigente, analizando entre las alternativas de osciloscopio disponibles en el laboratorio, cuál era el más indicado tanto por sus características eléctricas, como por su capacidad de comunicación con la PC. Mientras que, las etapas 3, 4 y 5 son desarrollo íntegro del presente trabajo.
-
