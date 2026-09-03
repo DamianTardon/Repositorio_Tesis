@@ -1,0 +1,167 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{iec61083_2}{standard}{}
+      \name{author}{1}{}{%
+        {{hash=1bfbc8812fd493bd4a6c196b196d1291}{%
+           family={{International Electrotechnical Commission}},
+           familyi={I\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {IEC}%
+      }
+      \list{location}{1}{%
+        {Geneva, Switzerland}%
+      }
+      \strng{namehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{fullhash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{bibnamehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{authorbibnamehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{authornamehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{authorfullhash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \field{extraname}{1}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{IEC 61083-2:2013}
+      \field{title}{Instruments and software used for measurement in high-voltage impulse tests - Part 2: Requirements for software for tests with impulse voltages and currents}
+      \field{year}{2013}
+    \endentry
+    \entry{iec60060_1}{standard}{}
+      \name{author}{1}{}{%
+        {{hash=1bfbc8812fd493bd4a6c196b196d1291}{%
+           family={{International Electrotechnical Commission}},
+           familyi={I\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {IEC}%
+      }
+      \list{location}{1}{%
+        {Geneva, Switzerland}%
+      }
+      \strng{namehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{fullhash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{bibnamehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{authorbibnamehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{authornamehash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \strng{authorfullhash}{1bfbc8812fd493bd4a6c196b196d1291}
+      \field{extraname}{2}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{IEC 60060-1:2010}
+      \field{title}{High-voltage test techniques - Part 1: General definitions and test requirements}
+      \field{year}{2010}
+    \endentry
+    \entry{gds1000au_ProgrammingManual}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=21d808ab5d2fe19f101d7a316dac42fe}{%
+           family={{Good Will Instrument Co., Ltd.}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New Taipei City, Taiwan}%
+      }
+      \strng{namehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{fullhash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{bibnamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authorbibnamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authornamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authorfullhash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \field{extraname}{1}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{Part No. 82DS-112AUI01}
+      \field{title}{Digital Storage Oscilloscope GDS-1000A-U Series Programming Manual}
+      \field{year}{2011}
+      \verb{urlraw}
+      \verb www.gwinstek.com
+      \endverb
+      \verb{url}
+      \verb www.gwinstek.com
+      \endverb
+    \endentry
+    \entry{gds1000au_driver}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=21d808ab5d2fe19f101d7a316dac42fe}{%
+           family={{Good Will Instrument Co., Ltd.}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {GW Instek}%
+      }
+      \strng{namehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{fullhash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{bibnamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authorbibnamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authornamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authorfullhash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \field{extraname}{2}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Accedido en 2026}
+      \field{title}{GDS-1000A-U Series USB Driver}
+      \verb{urlraw}
+      \verb https://www.gwinstek.com
+      \endverb
+      \verb{url}
+      \verb https://www.gwinstek.com
+      \endverb
+    \endentry
+    \entry{gds1000b_ProgrammingManual}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=21d808ab5d2fe19f101d7a316dac42fe}{%
+           family={{Good Will Instrument Co., Ltd.}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New Taipei City, Taiwan}%
+      }
+      \strng{namehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{fullhash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{bibnamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authorbibnamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authornamehash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \strng{authorfullhash}{21d808ab5d2fe19f101d7a316dac42fe}
+      \field{extraname}{3}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Digital Storage Oscilloscope GDS-1000B Series Programming Manual}
+      \field{year}{2020}
+      \verb{urlraw}
+      \verb www.gwinstek.com
+      \endverb
+      \verb{url}
+      \verb www.gwinstek.com
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

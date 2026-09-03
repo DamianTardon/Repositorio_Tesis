@@ -1,0 +1,14 @@
+[1] Config.pm:307> INFO - This is Biber 2.19
+[1] Config.pm:310> INFO - Logfile is 'borrador.blg'
+[351] biber:340> INFO - === Thu Sep  3, 2026, 01:16:29
+[563] Biber.pm:419> INFO - Reading 'borrador.bcf'
+[817] Biber.pm:979> INFO - Found 1 citekeys in bib section 0
+[883] Biber.pm:4419> INFO - Processing section 0
+[995] Biber.pm:4610> INFO - Looking for bibtex file 'referencias.bib' for section 0
+[998] bibtex.pm:1713> INFO - LaTeX decoding ...
+[1008] bibtex.pm:1519> INFO - Found BibTeX data source 'referencias.bib'
+[1105] UCollate.pm:68> INFO - Overriding locale 'es-ES' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[1106] UCollate.pm:68> INFO - Overriding locale 'es-ES' defaults 'variable = shifted' with 'variable = non-ignorable'
+[1106] Biber.pm:4239> INFO - Sorting list 'none/global//global/global' of type 'entry' with template 'none' and locale 'es-ES'
+[1109] bbl.pm:660> INFO - Writing 'borrador.bbl' with encoding 'UTF-8'
+[1112] bbl.pm:763> INFO - Output to borrador.bbl
