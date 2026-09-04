@@ -1,0 +1,43 @@
+\section{Orquestador del sistema}
+\label{sec:orquestador_sistema}
+
+El módulo del presentador actúa como el núcleo de coordinación central del programa. Su función principal consiste en desvincular de forma absoluta la interfaz de usuario de las capas de cálculo, control de hardware y persistencia de archivos. No ejecuta ninguna tarea de forma autónoma, sino que, conecta y transfiere información entre las diferentes capas del sistema.
+
+\subsection{Interacción con la interfaz gráfica}
+La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a presentar la pantalla y capturar las acciones del operador técnico. Las interacciones entre el presentador y esta capa se rigen de la siguiente manera:
+\begin{itemize}
+    \item \textbf{Recepción de eventos}: Cuando el usuario interactúa con la interfaz (por ejemplo, al modificar las variables ambientales de laboratorio, cambiar los factores de atenuación o presionar el botón de inicio de captura), el presentador intercepta asíncronamente estas acciones para activar los flujos correspondientes.
+    \item \textbf{Actualización y visualización reactiva}: Una vez finalizado el procesamiento, el presentador toma las formas de onda (tensión bruta, tensión de ensayo y corriente) y las inyecta en la interfaz. Asimismo, actualiza los indicadores numéricos con los valores característicos del impulso (tensión máxima, tiempos de frente y cola, y sobreimpulso).
+    \item \textbf{Control de capas visuales}: El presentador responde dinámicamente a las casillas de verificación de la pantalla que habilitan o deshabilitan la visibilidad de trazas individuales, modificando la interfaz de forma instantánea.
+\end{itemize}
+
+\subsection{Interacción con la capa de abstracción de hardware}
+La comunicación con el osciloscopio digital se realiza a través de un módulo especializado de abstracción de hardware, coordinado por el presentador:
+\begin{itemize}
+    \item \textbf{Configuración del instrumental}: El presentador indica a la capa de hardware los parámetros que el operador estableció en la interfaz gráfica para configurar el instrumento, tales como, las escalas verticales y horizontal, el origen de los ejes verticales y horizontal, el disparo en modo único (\emph{single-shot}) del osciloscopio.
+    \item \textbf{Espera no bloqueante de señal}: Ante la orden de inicio de ensayo, debido a que la descarga de alta tensión ocurre de forma indeterminada, el presentador coordina una rutina en segundo plano que sondea continuamente el estado del instrumento, esperando el disparo. Esto evita que la interfaz gráfica se congele, y siga siendo manipulable.
+    \item \textbf{Descarga y procesamiento de datos}: Al detectarse el disparo, el presentador detiene la espera activa y transfiere los datos desde la memoria del osciloscopio hacia el motor de cálculo, para luego, con los valores obtenidos actualizar la interfaz gráfica y renderizar las señales.
+\end{itemize}
+
+\subsection{Interacción con la capa de lógica matemática}
+Una vez obtenidos los vectores de tensión y corriente, el presentador los transfiere al motor de cálculo:
+\begin{itemize}
+    \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
+    \item \textbf{Delegación del cálculo normativo}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
+    \item \textbf{Tranferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual $OS\%$) para cargarlos en la capa de visualización.
+\end{itemize}
+
+\subsection{Interacción con el gestor de archivos}
+El presentador se comunica con el módulo de gestión de archivos para almacenanar los resultados de los ensayos:
+\begin{itemize}
+        \item \textbf{Validación de datos de entrada:} Para evitar fallos de cálculo y errores operativos, el presentador restringe el ingreso de datos en la interfaz, mediante validadores numéricos que bloquean caracteres no válidos o valores fuera de rango, antes de interactuar con los módulos correspondientes, previniendo las siguientes fallas:
+        \begin{itemize}
+            \item \textbf{Ensayo nulo:} Si el operador acciona el botón de \enquote{Guardar} o \enquote{Exportar} sin haber creado previamente la carpeta del ensayo, se bloquea la operación, y se notifica la ausencia del directorio del ensayo.
+            \item \textbf{Ausencia de condiciones ambientales:} Se restringe el ingreso de datos inválidos en estos campos, se impide el almacenamiento de la onda si no están cargados, y se notifica al operador que debe completarlos.
+            \item \textbf{Búfer de adquisición vacío:} Si el operador solicita guardar datos sin haber capturado una señal, se interrumpe la acción, y dispara una alerta de búfer vacío.
+        \end{itemize}
+    \item \textbf{Verificación de sesión}: Antes de escribir en el disco, el presentador evalúa que haya una sesión de trabajo abierta, de lo contrario no tiene ninguna ruta donde almacenar la información.
+    \item \textbf{Guardado de información}: Una vez calculados los parámetros, empaqueta la información de las trazas de las señales, junto con los metadatos (cliente, condiciones ambientales, etc), para delegar al gestor de archivos el almacenamiento permanente en disco. Mientras que, se bloquea el guardado en caso de búferes vacíos o en ausencia de campos obligatorios, para evitar archivos corruptos en la base de datos.
+    \item \textbf{Carga de ensayos previos}: Cuando el operador carga un ensayo realizado anteriormente, el presentador solicita al gestor de archivos que recupere la información del mismo, para luego actualizar los gráficos e indicadores numéricos de la pantalla.
+    \item \textbf{Exportación a planillas externas}: Cuando el operador solicita exportar los resultados, delega al gestor de archivos la conversión de datos a hojas de cálculo.
+\end{itemize}
