@@ -44,18 +44,21 @@
 
 % --- BIBLIOGRAFÍA ---
 \usepackage{csquotes} % Formato de citas textuales.
-\usepackage[backend=biber, style=apa]{biblatex} % Estilo APA.
+\usepackage[backend=biber, style=ieee]{biblatex} % Estilo IEEE.
 % IMPORTANTE: Cargar las referencias en .bib.
 \addbibresource{referencias.bib}
 
 % --- LISTAS ---
 \usepackage{enumitem}
 %\setlist[itemize]{label=-}
+\raggedbottom
+\setlist{nosep} % Configuración global: elimina todo el padding vertical elástico
 
 % --- HIPERVÍNCULOS ---
 \usepackage[hidelinks]{hyperref} % Hipervínculos transparentes.
 
 \usepackage{pythonhighlight} % Sintaxis de código Python.
+
 % Redefinición de títulos y etiquetas.
 \addto\captionsspanish{
   \renewcommand{\contentsname}{Índice}
@@ -102,30 +105,29 @@
 \addcontentsline{toc}{chapter}{c}
 
 \newpage
-%\pagenumbering{arabic}
+\pagenumbering{arabic}
 \pagestyle{normal} % A partir de aquí cambia el estilo de numeración.
 
 % =================================================================================================
-%\input{capitulos/01_introduccion.tex}
+\input{capitulos/01_introduccion.tex}
 
 % ================================================================================================
-%\part{MARCO TEÓRICO}
-%\input{capitulos/02_fundamentos_at.tex}
+\part{MARCO TEÓRICO}
+\input{capitulos/02_fundamentos_at.tex}
 \input{capitulos/03_instrumentacion_adquisicion.tex}
-%\input{capitulos/04_procesamiento_senales.tex}
-%\input{capitulos/05_arquitectura_sistema.tex}
+\input{capitulos/04_procesamiento_senales.tex}
+\input{capitulos/05_arquitectura_sistema.tex}
 
 
 % ===========================================================================================
-%\part{MARCO METODOLÓGICO}
-%\input{capitulos/09_descripcion_modelo.tex}
-\input{capitulos/06_comunicacion_osciloscopio.tex}
-%\input{capitulos/07_implementacion_dsp_copy.tex}
-%\input{capitulos/08_diseno_gui.tex}
+\part{MARCO METODOLÓGICO}
+\input{capitulos/06_descripcion_modelo.tex}
+\input{capitulos/07_diseno_gui.tex}
+\input{capitulos/08_calibracion.tex}
 
 
 % ====================================================================================
-%\part{RESULTADOS Y CONCLUSIONES}
+\part{RESULTADOS Y CONCLUSIONES}
 
 
 % BIBLIOGRAFÍA =================================================================================================

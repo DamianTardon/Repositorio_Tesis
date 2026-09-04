@@ -51,6 +51,8 @@
 % --- LISTAS ---
 \usepackage{enumitem}
 %\setlist[itemize]{label=-}
+\raggedbottom
+\setlist{nosep} % Configuración global: elimina todo el padding vertical elástico
 
 % --- HIPERVÍNCULOS ---
 \usepackage[hidelinks]{hyperref} % Hipervínculos transparentes.
@@ -80,9 +82,8 @@
 
 \pagenumbering{roman}
 
-%\input{pruebas/hardware/integracion.tex}
-%\input{pruebas/hardware/procesamiento_y_ajuste_curvas.tex}
-\input{capitulos/09_descripcion_modelo.tex}
+\input{pruebas/integracion.tex}
+
 
 \cleardoublepage
 % La bibliografía solo aparecerá si hay citas en el texto y el archivo .bib existe.

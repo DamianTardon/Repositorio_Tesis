@@ -1,0 +1,80 @@
+\subsection{Estructura y Funcionamiento del Módulo de Persistencia}
+\label{subsec:modulo_persistencia}
+
+El almacenamiento de los registros metrológicos generados durante las pruebas de impulsos atmosféricos de alta tensión requiere un sistema de almacenamiento fiable y estructurado que garantice el cumplimiento de las normativas de trazabilidad vigentes \cite{iec60060_1}. Con este propósito, se desarrolló el módulo denominado \textbf{FileManager}, el cual se sitúa dentro de la capa del Modelo en el patrón arquitectónico adoptado. Este módulo gobierna de manera centralizada la persistencia de datos en disco, protegiendo la integridad de las formas de onda originales y los resultados analíticos calculados, impidiendo pérdidas de información por fallos en el suministro de energía o errores en la capa gráfica de presentación \cite{iec61083_2}.
+
+\subsubsection{Tareas del Módulo de Persistencia}
+\label{subsubsec:tareas_persistencia}
+
+El componente lógico \textbf{FileManager} asume tareas específicas enfocadas en la administración del sistema de archivos y la consolidación de la base de datos experimental:
+\begin{itemize}
+    \item \textbf{Gestión de Directorios}: Automatiza la creación física de la jerarquía de carpetas requerida para la organización interna de los ensayos desde el momento en que se inicia un nuevo proyecto, delimitando espacios físicos en disco para los datos brutos, las bases estructuradas y los reportes finales.
+    \item \textbf{Resguardo de Seguridad}: Genera de forma paralela archivos en formato de texto plano con valores separados por comas (\textbf{CSV}) que contienen el registro crudo digitalizado directamente de la memoria del osciloscopio, sirviendo como un sistema de respaldo analógico redundante previo a cualquier manipulación numérica.
+    \item \textbf{Persistencia Indexada}: Registra de manera unificada y comprimida la metadata ambiental de laboratorio, los parámetros analíticos normativos extraídos y los vectores numéricos densos mediante un motor de archivos binarios jerárquicos.
+    \item \textbf{Exportación de Resultados}: Provee subrutinas para recuperar los conjuntos de datos binarios históricos, aplicarles un escalado metrológico y transferirlos de forma directa a archivos compatibles con hojas de cálculo comerciales utilizando los formatos de extensión \textbf{CSV} o \textbf{XLSX}.
+\end{itemize}
+
+\subsubsection{Mecanismo de Funcionamiento}
+\label{subsubsec:mecanismo_funcionamiento}
+
+El funcionamiento del módulo se fundamenta en la manipulación orientada a objetos empleando las bibliotecas \textbf{pathlib} de la biblioteca estándar de Python y la biblioteca especializada \textbf{h5py}. Este esquema se integra de manera síncrona dentro del flujo lógico del sistema, orquestado directamente por el presentador principal \textbf{MainPresenter}.
+
+Cuando el operador acciona el comando para persistir un ensayo en la interfaz de usuario, el presentador ejecuta un protocolo secuencial de validación de condiciones:
+\begin{enumerate}
+    \item Verifica la existencia de una sesión de proyecto activa creada o cargada previamente en disco.
+    \item Evalúa la completitud de las variables ambientales requeridas en la interfaz de usuario (temperatura, presión atmosférica y humedad relativa).
+    \item Certifica que el buffer temporal de adquisición de trazas contenga datos válidos de tensión y corriente digitalizados.
+\end{enumerate}
+
+Superados estos filtros de seguridad metrológica, el presentador determina recursivamente la naturaleza de la señal, clasificándola de forma automática en impulsos de tensión de prueba estándar o formas de onda de calibración de referencia. Con base en esta categorización, incrementa los contadores internos del proyecto y genera una marca temporal única empleando la librería \textbf{datetime}. Posteriormente, se empaqueta la metadata técnica y se invoca al método de adición de base de datos del módulo \textbf{FileManager}. El archivo estructurado se abre en disco empleando el modo append (\texttt{'a'}), lo que previene la sobreescritura accidental y minimiza los retardos de entrada y salida al no requerir la recreación de índices de lectura.
+
+\subsubsection{Manejo Estructurado de la Información}
+\label{subsubsec:manejo_informacion}
+
+El módulo \textbf{FileManager} procesa la información de forma multinivel adoptando el estándar de datos jerárquicos versión 5 (\textbf{HDF5}). Este formato organiza el espacio interno del archivo de manera homóloga a un sistema de ficheros físico, estructurando los datos en grupos que actúan como carpetas y conjuntos de datos (\textbf{datasets}) que se comportan como archivos de almacenamiento de arreglos numéricos contiguos de memoria.
+
+Para coordinar la escritura binaria sin inducir acoplamientos rígidos en el código, se declara de forma estática un mapa de variables denominado \texttt{HDF5\_DATASET\_MAP}. Este diccionario establece la disposición exacta de los arreglos numéricos tridimensionales dentro del archivo HDF5, como se detalla en la siguiente ecuación lógica:
+
+\begin{equation}
+\label{eq:dataset_map}
+\mathcal{M} = \{ \text{Time} \rightarrow \{t_{raw}, t_{aligned}\}, \text{CH1\_Voltage} \rightarrow \{u_{raw}, u_{test}, u_{norm}\}, \text{CH2\_Current} \rightarrow \{i_{raw}, i_{test}, i_{norm}\} \}
+\end{equation}
+
+Donde las variables indexadas representan:
+\begin{itemize}
+    \item $t_{raw}$ y $t_{aligned}$: El eje de tiempo continuo original y el eje alineado respecto al origen virtual $O_1$.
+    \item $u_{raw}$, $u_{test}$ y $u_{norm}$: Las señales del canal 1 correspondientes a la tensión cruda, la curva de tensión de ensayo limpia $u_t(t)$ tras el filtrado digital normativo, y la curva normalizada a valor unitario.
+    \item $i_{raw}$, $i_{test}$ y $i_{norm}$: Las señales del canal 2 de corriente, si el canal de medición de shunt se encuentra activo en la sesión física.
+\end{itemize}
+
+El módulo traduce transparentemente las variables lógicas complejas de Python a tipos compatibles con la biblioteca de C subyacente de HDF5. Las cadenas de texto variables se sanitizan y se codifican empleando una lista de control de atributos declarada en \texttt{METADATA\_STRING\_KEYS}, evitando distorsiones por el uso de codificaciones locales del sistema operativo anfitrión. La escritura paralela de datos pesados se realiza de forma atómica en bloques binarios contiguos aprovechando el formato nativo de memoria de la biblioteca \textbf{NumPy}.
+
+Para el proceso de exportación a formatos comerciales, el módulo implementa la biblioteca \textbf{pandas} para estructurar un cuadro de datos tabular indexado de forma temporal. Durante esta etapa, el módulo realiza de manera automática la conversión de escala física de los resultados: las bases de tiempo se multiplican para transicionar desde segundos hacia microsegundos (\unit{\micro\second}) y las tensiones escalan matemáticamente de voltios a kilovoltios (\unit{\kilo\volt}), aplicando factores constantes de proporcionalidad sobre los datos crudos digitalizados:
+
+\begin{equation}
+\label{eq:atenuacion_escalado}
+u_{real}(t) = u_{raw}(t) \cdot F_{div} \cdot F_{att}
+\end{equation}
+
+Donde las variables implicadas corresponden a:
+\begin{itemize}
+    \item $u_{real}(t)$: Vector final de tensión escalada expresada en kilovoltios (\unit{\kilo\volt}).
+    \item $u_{raw}(t)$: Tensión instantánea digitalizada por el conversor analógico-digital del osciloscopio en voltios (\unit{\volt}).
+    \item $F_{div}$: Factor de escala de atenuación física del divisor resistivo de alta tensión, ajustado con un valor nominal de \num{614}.
+    \item $F_{att}$: Atenuación analógica del atenuador coaxial de baja tensión externo, parametrizado nominalmente con un valor de \num{50}.
+\end{itemize}
+
+\subsubsection{Información Almacenada}
+\label{subsubsec:informacion_almacenada}
+
+La base de datos estructurada por el módulo garantiza la trazabilidad metrológica de la prueba al encapsular tres niveles diferenciados de información:
+\begin{itemize}
+    \item \textbf{Metadata del Proyecto}: Se almacena en la raíz del archivo HDF5 como atributos globales. Contiene el nombre de la entidad solicitante (\texttt{Cliente}), la identificación del equipo físico bajo ensayo (\texttt{Item}), la polaridad eléctrica aplicada (\texttt{Polarity}) y la fecha y hora de inicio de la sesión (\texttt{Date}).
+    \item \textbf{Metadata de Ensayo}: Se guarda de forma local en los atributos de cada grupo de onda (por ejemplo, bajo la ruta indexada \texttt{/Onda\_001}). Almacena las variables ambientales físicas de laboratorio formadas por la temperatura ambiente expresada en grados Celsius (\qty{23.5}{\celsius}), la humedad relativa del aire (\qty{60}{\percent}) y la presión atmosférica local (\qty{1013}{\hecto\pascal}).
+    \item \textbf{Arreglos Numéricos}: Conjuntos multidimensionales que guardan las curvas completas de tensión y corriente digitalizadas con la resolución vertical de \num{8} bits provista por el osciloscopio digital, así como las curvas limpias de referencia normativas procesadas por el motor matemático del sistema.
+\end{itemize}
+
+\begin{thebibliography}{99}
+    \bibitem{iec60060_1} International Electrotechnical Commission, ``IEC 60060-1: High-voltage test techniques - Part 1: General definitions and test requirements'', Edition 3.0, 2010.
+    \bibitem{iec61083_2} International Electrotechnical Commission, ``IEC 61083-2: Instruments and software used for measurement in high-voltage impulse tests - Part 2: Evaluation of software used for the determination of the parameters of impulse waveforms'', Edition 2.0, 2013.
+\end{thebibliography}

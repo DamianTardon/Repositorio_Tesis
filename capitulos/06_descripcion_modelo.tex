@@ -10,8 +10,8 @@ El diseño estructural del software se fundamenta en una separación de responsa
 La división de tareas facilita la validación algorítmica y control de la incertidumbre matemática especificados en la norma \cite{iec61083_2}, permitiendo someter los algoritmos a ensayos automatizados, aislados de cualquier interfaz gráfica de usuario.
 
 \begin{figure}[H]
-    %\centering
-    %\includegraphics{img/arquitectura_instrumentacion.pdf}
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/arquitectura_instrumentacion.pdf}
     \caption{Diagrama de bloque de la arquitectura.}
     \label{fig:Lab_1_Circ_1_V1-esquema}
 \end{figure}
@@ -21,7 +21,7 @@ La división de tareas facilita la validación algorítmica y control de la ince
 
 La \textbf{Vista} maneja de forma exclusiva la representación visual del sistema y la captura de las interacciones del operador. Ya que, solo declara estáticamente la disposición y propiedades de los componentes gráficos.
 
-Esta capa se caracteriza por no tener referencias directas hacia la lógica de adquisición física o los algoritmos de procesamiento digital de señales. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, la Vista emite eventos en forma de señales de Qt (\textbf{Qt Signals}), que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
+Esta capa se caracteriza por no tener referencias directas hacia la lógica de adquisición física o los algoritmos de procesamiento digital de señales. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, la Vista emite eventos en forma de \emph{señales de Qt}, que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
 
 \subsection{Capa de Lógica y Datos: Modelo}
 \label{subsec:modelo}
@@ -90,7 +90,7 @@ Por otro lado, a nivel físico, la conexión se realiza a través de un puerto U
 \end{align*}
 Donde \texttt{COM1} identifica el número de puerto serie virtual asignado por el sistema operativo.
 
-\subsection{Sistema de Adquisición y Almacenamiento}
+\subsection{Sistema de Adquisición y acondicionamiento}
 \label{subsec:arquitectura_flujo}
 
 La adquisición del impulso de alta tensión desde el generador Marx, hasta el almacenamiento en la computadora, se estructuran de la siguiente forma:
@@ -139,7 +139,7 @@ Las señales eléctricas que ingresan a los bornes analógicos del osciloscopio,
 \subsubsection{Desempaquetado de datos}
 \label{subsec:desempaquetado_datos}
 
-Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{La estructura de datos descrita en el manual del fabricante tiene algunas diferencias con los resultados obtenidos del instrumento, debido a la dificultad que esto presentó al momento de intentar procesarla, se contactó con el frabricante obteniendo un script de procesamiento del paquete de datos, que se corresponde con el formato indicado en este trabajo. A su vez, se encontró que el manual de programación de la series GDS-1000B aporta detalles explicativos sobre cómo procesar esta estructura \cite{gds1000b_ProgrammingManual}} \cite{gds1000au_ProgrammingManual}:
+Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{Debido a discrepancias entre la estructura de datos obtenida del instrumento y el manual del fabricante, se adoptó un script provisto por el soporte técnico del fabricante.}\footnote{El manual de programación de la serie GDS-1000B complementa los detalles para manipular esta estructura.}:
 
 \begin{equation*}\label{eq:formato_memoria}
 \text{\texttt{\# A B C D E}}
@@ -359,58 +359,103 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
     \end{itemize}
 \end{enumerate}
 
+\subsection{Precisión del ajuste de curva}
+
+Debido a la naturaleza de la forma de onda estudiada, la cantidad de puntos es significativamente mayor en la zona de la cola que en el frente de la onda (donde los gradientes de tensión son mayores y transcurren en menor tiempo), el ajuste de mínimos cuadrados ordinario en algunos casos puede converger erróneamente, ya que el optimizador tiende de forma natural a minimizar el error residual en la cola, provocando desviaciones considerables en el frente.
+
+Para minimizar el error en el frente de la onda, se introduce el vector de varianza estimada $\sigma_i$, con distintos pesos a través del parámetro \texttt{sigma\_fit}, que se parametriza de la siguiente manera:
+
+\begin{equation}
+    \sigma_i = \begin{cases} 
+        \text{sigma\_fit} & \text{si } i \le \text{idx\_peak} + 5 \\ 
+        1.0 & \text{si } i > \text{idx\_peak} + 5 
+    \end{cases}
+    \label{eq:varianza_estimada}
+\end{equation}
+
+Al configurar un valor de $\text{sigma\_fit} \le 1$, el algoritmo LM penaliza con mayor severidad los residuos matemáticos en el frente de la onda, mejorando la precisión en esta zona.
+
+\subsection{Cálculo del Filtro de fase cero}
+
+El filtro digital de respuesta al impulso infinita (IIR), se diseña tal que su respuesta en frecuencia sea la función de la tensión de ensayo, establecida en la norma IEC 60060-1:
+
+\begin{equation}
+k(f) = \frac{1}{1 + 2,2 \cdot f^2}
+\end{equation}
+Donde $f$ se expresa en \unit{\mega\hertz}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{img/funcion_tension_ensayo.png}
+    \caption{Función tensión de ensayo.}
+    \label{fig:funcion_tension_ensayo}
+\end{figure}
+
+La señal se procesa primero en sentido directo y después en sentido reverso, para anular el desplazamiento de fase introducido por el filtro, ejecutando la siguiente ecuación de diferencias recursiva:
+
+\begin{equation}
+    y[i] = b_0 \cdot x[i] + b_1 \cdot x[i-1] + a_1 \cdot y[i-1]
+    \label{eq:ecuacion_filtro}
+\end{equation}
+
+Los coeficientes del filtro directo se calculan mediante:
+
+\begin{align*}
+    b_0 &= b_1 = \frac{c}{1+c}\\
+    a_1 &= \frac{1-c}{1+c}
+\end{align*}
+
+El parámetro $c$ se calcula:
+
+\begin{equation}
+c = \tan\left(\frac{\pi \cdot T_S}{\sqrt{d}}\right)
+\end{equation}
+
+Donde:
+
+$T_s$ es el periodo de muestreo del impulso.
+
+La constante $d = 2,2 \times 10^{-12}$ está definida en el Anexo D.2 de IEC 60060-1.
 
 
-\noindent
-========================================================================
 
-\begin{forest}
-  for tree={
-    folder,
-    grow'=0,
-    font=\sffamily\small,
-    inner sep=3pt,
-    s sep=3pt,        % Separación vertical ajustada
-    draw=black!20,    % Color del borde del nodo (opcional)
-    fill=black!5,     % Color de fondo del nodo (opcional)
-    rounded corners   % Bordes redondeados (opcional)
-  }
-  [\textbf{Grupo raíz (Archivo .h5)}
-    [\textbf{Atributos globales}: \emph{Datos comunes a todos los registros}
-      [{\textbf{\texttt{Item}}: \emph{Identificador del objeto a ensayar}}]
-      [{\textbf{\texttt{Cliente}}: \emph{Nombre de la entidad solicitante}}]
-      [{\textbf{\texttt{Atenuaciones}}: \emph{Factores de atenuación de CH1 y CH2}}]
-    ]
-    [{\textbf{Grupos de ondas} \emph{Impulso capturado} (\texttt{Onda\_n} / \texttt{Referencia\_n})}
-      [\textbf{Atributos particulares}: \emph{Metadatos propios de cada impulso}
-        [{\textbf{\texttt{Fecha}}: \emph{Marca de tiempo de adquisición}}]
-        [{\textbf{\texttt{Temperatura}}: \emph{Parámetro ambiental}}]
-        [{\textbf{\texttt{Humedad}}: \emph{Parámetro ambiental}}]
-        [{\textbf{\texttt{Presión}}: \emph{Parámetro ambiental}}]
-        [{\textbf{\texttt{Polaridad}}: \emph{Sentido eléctrico del impulso} (+/-)}]
-        [{\textbf{\texttt{Valor\_pico}}: \emph{Tensión de cresta}}]
-        [{\textbf{\texttt{T1}}: \emph{Tiempo de frente}}]
-        [{\textbf{\texttt{T2}}: \emph{Tiempo de cola}}]
-        [{\textbf{\texttt{OS}}: \emph{Sobreimpulso porcentual}}]
-      ]
-      [{\textbf{Grupo de Tiempos} (\texttt{/Time}) [\unit{\second}]}
-        [{\textbf{\texttt{raw}}: \emph{Vector bruto a apartir de} $\Delta t$}]
-        [{\textbf{\texttt{alineado}}: \emph{Vector alineado con el frente del impulso de referencia}}]
-      ]
-      [{\textbf{Grupo de CH1} (\texttt{/CH1\_Voltage}) [\unit{\volt}]}
-        [{\textbf{\texttt{raw}}: \emph{Vector de tensión bruta, magnitud real}}]
-        [{\textbf{\texttt{ensayo}}: \emph{Vector de tensión de ensayo IEC 60060-1}}]
-        [{\textbf{\texttt{normalizado}}: \emph{Vector normalizado} ($V_{\text{pico}} = \num{1.0}$)}]
-      ]
-      [{\textbf{Grupo de CH2} (\texttt{/CH2\_Current}) [\unit{\ampere}]}
-        [{\textbf{\texttt{raw}}: \emph{Vector de corriente bruta, magnitud real}}]
-        [{\textbf{\texttt{ensayo}}: \emph{Copia del bruto (simetría de procesamiento con CH1)}}]
-        [{\textbf{\texttt{normalizado}}: \emph{Vector normalizado} ($I_{\text{pico}} = \num{1.0}$)}]
-      ]
-    ]
-  ]
-\end{forest}
 
+===============================================================================
+===============================================================================
+
+\section{Elección del stack tecnológico}
+
+Para desarrollar el software de control del osciloscopio y procesamiento de los datos, se analizaron tres opciones que se consideran las más adecuadas para este trabajo: Python, C++ y LabVIEW. Estas opciones ofrecen herramientas y bibliotecas para la comunicación con instrumentos de medición.\par
+Python es un lenguaje de programación de alto nivel, conocido por su simplicidad y legibilidad. Cuenta con una amplia gama de bibliotecas y frameworks que facilitan el desarrollo de aplicaciones científicas y de ingeniería. Además, es de código abierto, gratuito y de uso libre, incluso para fines comerciales, lo que permite acceder a una gran cantidad de recursos sin tener que pagar licencias.\par
+C++ es un lenguaje compilado que destaca por su máximo rendimiento en tiempo de ejecución y control a bajo nivel de los recursos del sistema. Presenta una curva de desarrollo pronunciada, la necesidad de gestionar la memoria manualmente, y la verbosidad de su sintaxis que incrementan drásticamente los tiempos de programación frente a lenguajes de mayor nivel de abstracción. Según el tipo de licencia que se adopte para QT, puede ser gratis o tener un costo asociado.\par
+LabVIEW, es un entorno de desarrollo gráfico utilizado principalmente en aplicaciones de ingeniería y automatización, conocido por su facilidad para crear interfaces de usuario y su capacidad para interactuar con hardware de medición. Sin embargo, es un software propietario, con licencias costosas, que lo convierte en la opción menos accesible.\par
+Las tres herramientas llevan mucho tiempo en el mercado y son ampliamente utilizadas en la industria, por lo que son opciones viables para llevar a cabo este proyecto. Sin embargo, dada la diferencia de costos y la agilidad de desarrollo requerida, Python se presenta como la opción más balanceada, accesible y eficiente para el contexto del laboratorio.\par
+En la Tabla 1 se sintetiza el análisis comparativo que decantó en la adopción conjunto de herramientas: Python 3 para la lógica de negocio, PySide6 para la interfaz gráfica y PyVISA para la comunicación con el hardware.\par
+
+\begin{table}[H]
+    \centering
+    \begin{tabularx}{\textwidth}{>{\hsize=0.8\hsize\raggedright\arraybackslash}X >{\hsize=1.1\hsize\raggedright\arraybackslash}X >{\hsize=1.1\hsize\raggedright\arraybackslash}X >{\hsize=1\hsize\raggedright\arraybackslash}X}
+        \toprule
+        \textbf{Criterio de Evaluación}      & \textbf{Python}                                         & \textbf{C++}                                           & \textbf{LabVIEW} \\ \midrule
+        \textbf{Tipo de Lenguaje}       & Interpretado (Alto nivel).                                                            & Compilado (Alto nivel/Bajo nivel).                                                    & Gráfico (Flujo de datos). \\ \addlinespace
+        \textbf{Bibliotecas}       & Nativas + Externas. Multiples aplicaciones.                                                            & Nativas + Externas. Enfocadas en rendimiento.                                                    & Nativas. Especializadas en hardware/instrumentos. \\ \addlinespace
+        \textbf{Desarrollo de GUI}           & QT Desiger (\emph{Drag \& Drop}). Hay que codificar las funciones.           & QT Desiger (\emph{Drag \& Drop}). Hay que codificar las funciones.   & Nativo (\emph{Drag \& Drop}). Funciones ya codificadas. \\ \addlinespace
+        \textbf{Costos}     & Gratis. \emph{Open Source} (GPL/LGPL/BSD).                 & Depende de la licencia de Qt. \emph{Open Source} o Comercial . & Licencia costosa. \\\addlinespace
+        \textbf{Mantenimiento} & Alto. Código basado en texto.                                                      & Alto. Código basado en texto.                                              & Bajo. Archivos binarios (\texttt{.vi}), difícil revisión y actualización de código. \\ \bottomrule
+    \end{tabularx}
+    \caption{Análisis comparativo de entornos para instrumentación y procesamiento de señales.}
+\end{table}
+
+\section{Gestión del entorno de desarrollo y control de versiones}
+
+El desarrollo del código fuente se centralizó en el entorno de desarrollo integrado Visual Studio Code (VS Code). Para asegurar la reproducibilidad del entorno de ejecución a través de diferentes estaciones de trabajo y evitar conflictos con los paquetes del sistema operativo, el proyecto se aisló utilizando entornos virtuales nativos (\texttt{venv}). Todas las dependencias (ej. \texttt{PySide6}, \texttt{numpy}, \texttt{h5py}) quedaron registradas explícitamente en un archivo de requerimientos (\texttt{requirements.txt}) con sus versiones exactas. Esta homologación garantiza la utilización de las mismas librerías independientemente de la computadora de desarrollo, certificando así la estabilidad y el comportamiento determinista de los algoritmos matemáticos a lo largo del tiempo.\par
+
+El control de versiones del código fuente se gestionó mediante Git. Se adoptó un flujo de trabajo basado en la creación de ramas. Esta estrategia permitió:
+
+\begin{itemize}
+    \item Desarrollar características experimentales de forma aislada (ej. implementación de la GUI) en ramas secundarias.
+    \item Integrar (\emph{merge}) el código a la rama principal (\texttt{main}) únicamente tras la validación funcional de los módulos frente a las señales de referencia del TDG.
+\end{itemize}
 
 \section{Gestión de problemas}
 \label{subsec:gestion_fallos}
@@ -435,4 +480,3 @@ Para garantizar el funcionamiento continuo y evitar comportamientos indeterminad
 
 
 La etapa 1 de acondicionamiento analógico, es propia del montaje del ensayo, por lo que, no se afecta en ningún aspecto. La etapa 2 de digitalización, se modificó para este proyecto respecto al montaje vigente, analizando entre las alternativas de osciloscopio disponibles en el laboratorio, cuál era el más indicado tanto por sus características eléctricas, como por su capacidad de comunicación con la PC. Mientras que, las etapas 3, 4 y 5 son desarrollo íntegro del presente trabajo.
-
