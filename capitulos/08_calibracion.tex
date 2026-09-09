@@ -1,39 +1,22 @@
 \newpage
 \chapter{Calibracion del software}
+\label{ch:calibracion_software}
 \vspace{3\baselineskip}
 
-\section{Validación y Reportes (report.py y Testing)}
-El proceso de aseguramiento de la calidad del software se ejecuta mediante una suite de pruebas automatizadas que inyectan las formas de onda sintéticas y grabadas definidas en la norma IEC 61083-2 \cite{iec61083_2}. El objetivo de este procedimiento es cuantificar el sesgo del algoritmo respecto a las magnitudes de referencia metrológica.
 
-\subsection{Flujo de Validación del Software contra TDG}
-La validación implementa el protocolo de ensayos de desempeño (performance tests) estipulado en la sección 6.2 de la norma. Se cargan los casos de prueba del generador de datos de prueba (TDG) correspondientes al grupo Full Lightning Impulse (LI-A1 a LI-A12 y LI-M1 a LI-M17) e impulsos cortados en la cola (LIC-M4 y LIC-M5). El sistema procesa los archivos ASCII de dos columnas en segundos y voltios, ejecuta el pipeline algorítmico de filtrado y remoción de componentes continuas, y contrasta los resultados con los límites normativos.
+El módulo calibración constituye el entorno de validación normativa del software de procesamiento de impulsos atmosféricos, y debe evaluar los algoritmos del motor de cálculo, en forma independiente de cualquier otro módulo del software.
 
-\subsection{Estimación de Incertidumbre del Software (Anexo B.3.3)}
-En lugar de adoptar los límites simplificados fijos, el módulo de pruebas calcula las incertidumbres combinadas del software basándose en las desviaciones analíticas reales encontradas frente al TDG, siguiendo de forma estricta las directrices matemáticas del Anexo B de la norma IEC 61083-2 \cite{iec61083_2}.
+\section{Análisis de incertidumbre según IEC 61083-2}
+\label{subsec:analisis_incertidumbre_iec61083_2}
 
-La primera componente del cálculo representa la incertidumbre estándar tipo B del software ($u_{B71}$), calculada a partir de la máxima desviación relativa observada en el conjunto de datos analizados ($n$ ondas evaluadas):
+Debido a que el algoritmo de cálculo forma parte integral del sistema digital de medición, debe cuantificarse su contribución a la incertidumbre global. Para ello, la norma IEC 61083-2 \cite{iec61083_2} indica que la evaluación del software debe realizarse mediante la inyección de registros digitales de ondas patrón provistos por el generador de datos de prueba (\emph{Test Data Generator}, TDG) suministrado por la misma, para compararlos con sus valores de referencia ($x_{\text{REF}}$) y sus respectivas incertidumbres expandidas ($U_x$).
 
-\begin{equation}
-u_{B71} = \frac{1}{\sqrt{3}} \max_{i=1}^{n} \left| \frac{x_i - x_{\text{REF},i}}{x_{\text{REF},i}} \right|
-\label{eq:u_B71}
-\end{equation}
+Además, establece dos evaluaciones complementarias:
 
-La segunda componente ($u_{B72}$) considera la incertidumbre expandida intrínseca del vector de referencia del TDG suministrada por los comités internacionales de mantenimiento, calibrada a un nivel de confianza del $\SI{95}{\percent}$ con un factor de cobertura $k=2$:
-
-\begin{equation}
-u_{B72} = \frac{1}{2} \max_{i=1}^{n} U_{x,i}
-\label{eq:u_B72}
-\end{equation}
-
-La incertidumbre estándar combinada asignada al componente del software ($u_{B7}$) se obtiene mediante la raíz cuadrada de la suma de los cuadrados de ambas componentes independientes:
-
-\begin{equation}
-u_{B7} = \sqrt{u_{B71}^2 + u_{B72}^2}
-\label{eq:u_B7_combinada}
-\end{equation}
-
-\subsection{Validaciones Paramétricas bajo IEC 61083-2}
-El software ejecuta la validación de la función de transferencia de los algoritmos mediante el procesamiento de vectores digitales de referencia. El objetivo de este procedimiento DSP es aislar la curva base del impulso de cualquier perturbación de alta frecuencia (\textit{overshoot} o ruidos de conmutación) para construir la curva de tensión de ensayo de manera reproducible. La norma define diferencias máximas aceptables entre los valores verdaderos del generador de datos de prueba (TDG) y los calculados por el algoritmo bajo evaluación. El procesamiento se divide de acuerdo a la topología de la señal bajo análisis:
+\begin{enumerate}
+    \item \textbf{Verificación de límites de aceptación}: Comprobación de que las desviaciones relativas entre los valores calculados por el software, y los valores de referencia no superen las tolerancias estipuladas en el Anexo A de la norma \cite{iec61083_2}, que pueden observarse en la tabla \ref{tab:tolerancias_iec61083}.
+    \item \textbf{Cuantificación de la incertidumbre estándar del software}: En el Anexo B de la norma \cite{iec61083_2} describe un procedimiento para determinar la incertidumbre combinada, para un conjunto de formas de onda selecciondas (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), con el algoritmo del software que se va a evaluar .
+\end{enumerate}
 
 \begin{table}[H]
     \centering
@@ -42,10 +25,78 @@ El software ejecuta la validación de la función de transferencia de los algori
     \begin{tabular}{@{}lll@{}}
         \toprule
         \textbf{Tipo de Impulso} & \textbf{Parámetro Físico} & \textbf{Tolerancia Máxima}           \\ \midrule
-        Completo (LI)            & Valor Pico ($U_t$)        & $\pm\SI{0,10}{\percent}$             \\ \cmidrule(l){2-3} 
+        Completo (LI)            & Valor Pico ($U_\text{t}$)        & $\pm\SI{0,10}{\percent}$             \\ \cmidrule(l){2-3} 
                                  & Tiempo de Frente ($T_1$)  & $\pm\SI{2,0}{\percent}$              \\ \cmidrule(l){2-3} 
                                  & Tiempo de Cola ($T_2$)    & $\pm\SI{1,0}{\percent}$              \\ \cmidrule(l){2-3} 
-                                 & Sobrepasamiento ($\beta$) & $\pm\SI{1,0}{\percent}$ (Absoluto)   \\ \midrule
-        Cortado (LIC)            & Tiempo de Corte ($T_c$)   & $\pm\SI{2,0}{\percent}$              \\ \bottomrule
+                                 & Sobrepasamiento (OS) & $\pm\SI{1,0}{\percent}$ (Absoluto)   \\ \midrule
+        Cortado (LIC)            & Tiempo de Corte ($T_\text{C}$)   & $\pm\SI{2,0}{\percent}$              \\ \bottomrule
     \end{tabular}
 \end{table}
+
+\section{Procedimiento de calibración}
+\label{sec:mecanismo_trabajo}
+
+La calibración automática se ejecuta aplicando la siguiente secuencia de trabajo:
+
+\begin{enumerate}
+    \item \textbf{Inyección de casos de prueba:}
+    
+    Se inyecta iterativamente los \num{29} casos de prueba de la tabla A.1 de la norma \cite{iec61083_2} para impulsos plenos (LI) y los \num{6} casos de la tabla A.2 para impulsos cortados (LIC).
+
+    \item \textbf{Procesamiento de las ondas:}
+
+    Para cada caso de prueba, se carga el vector de tensión desde el archivo TDG correspondiente. A continuación, se ejecuta la rutina de análisis, obteniendo los parámetros característicos ($U_\text{t}$, $T1$, $T2$, $OS$ y $T_\text{C}$).
+
+    \item \textbf{Evaluación de errores relativos y tolerancias:}
+    
+    El sistema compara el valor calculado $x_{\text{calc}}$ con el valor patrón $x_{\text{REF}}$, determinando el error relativo percentual $\varepsilon_{r,i}\%$, dado por la ecuación:
+
+    \begin{equation}
+        \varepsilon_{r,i}\% = \left| \frac{x_{\text{calc,i}} - x_{\text{REF,i}}}{x_{\text{REF,i}}} \right| \cdot \qty{100}{\percent}
+        \label{eq:error_relativo}
+    \end{equation}
+
+    Luego, valida que no supere la tolerancia máxima especificada en la norma \cite{iec61083_2}.
+
+    \item \textbf{Cálculo de la incertidumbre estándar del software:}
+    
+    Posteriormente, se calculan los dos componentes de la incertidumbre estándar, para cada parámetro evaluado.
+
+    \begin{enumerate}
+        \item \textbf{Componente de incertidumbre del algoritmo:}
+        
+        El primer componente $u_\text{B71}$ representa la incertidumbre estándar tipo A del software, y determina la máxima desviación observada en el conjunto de $n$ formas de onda evaluadas. Asumiendo una distribución de probabilidad rectangular para los errores computacionales, la incertidumbre estándar relativa se determina mediante la ecuación:
+
+        \begin{equation}
+            u_\text{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i=1}^{n} \left| \frac{x_i - x_{\text{REF},i}}{x_{\text{REF},i}} \right|
+            \label{eq:ub71}
+        \end{equation}
+
+        Para parámetros expresados en términos absolutos o porcentuales directos, tales como la magnitud relativa de la sobreelevación (OS), la ecuación resulta:
+
+        \begin{equation}
+            u_\text{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i=1}^{n} \left| \text{OS}_i - \text{OS}_{\text{REF},i} \right|
+            \label{eq:ub71_os}
+        \end{equation}
+
+        \item \textbf{Componente de incertidumbre del patrón:}
+        
+        El segundo componente $u_\text{B72}$ representa la incertidumbre estándar tipo B del patrón, y calcula la máxima incertidumbre estándar a partir de las incertidumbres expandidas $U_{x,i}$ de los valores de referencia, provistas en el Anexo B de la norma \cite{iec61083_2} para un nivel de confianza de aproximadamente \qty{95}{\percent} con un factor de cobertura $k = 2$, según la ecuación:
+
+        \begin{equation}
+            u_\text{B72} = \frac{1}{2} \cdot \max_{i=1}^{n} U_{x,i}
+            \label{eq:ub72}
+        \end{equation}
+
+        Finalmente, la incertidumbre estándar combinada del software $u_\text{B7}$ se obtiene mediante la suma cuadrática de ambos componentes según la ecuación:
+
+        \begin{equation}
+            u_\text{B7} = \sqrt{u_\text{B71}^2 + u_\text{B72}^2}
+            \label{eq:ub7}
+        \end{equation}
+    \end{enumerate}
+    
+    \item \textbf{Generación del certificado:}
+    
+    Una vez concluidos los cálculos de incertidumbre, genera un reporte en formato PDF con los resultados del análisis, para su trazabilidad metrológica conforme a la norma \cite{iec61083_2}. Donde indica, características del software evaluado, los valores calculados y el desvío de cada parámetro, para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
+\end{enumerate}

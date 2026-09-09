@@ -41,6 +41,50 @@ Esta capa se subdivide en tres submódulos independientes especializados:
 
 El \textbf{Presentador}, es implementado en el módulo \textbf{MainPresenter}, y actúa como coordinador de la arquitectura MVP. Tiene como responsabilidad orquestar la interacción entre la interfaz visual y los motores lógico-físicos.
 
+\section{Orquestador del sistema}
+\label{sec:orquestador_sistema}
+
+El módulo del presentador actúa como el núcleo de coordinación central del programa. Su función principal consiste en desvincular de forma absoluta la interfaz de usuario de las capas de cálculo, control de hardware y persistencia de archivos. No ejecuta ninguna tarea de forma autónoma, sino que, conecta y transfiere información entre las diferentes capas del sistema.
+
+\subsection{Interacción con la interfaz gráfica}
+La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a presentar la pantalla y capturar las acciones del operador técnico. Las interacciones entre el presentador y esta capa se rigen de la siguiente manera:
+\begin{itemize}
+    \item \textbf{Recepción de eventos}: Cuando el usuario interactúa con la interfaz (por ejemplo, al modificar las variables ambientales de laboratorio, cambiar los factores de atenuación o presionar el botón de inicio de captura), el presentador intercepta asíncronamente estas acciones para activar los flujos correspondientes.
+    \item \textbf{Actualización y visualización reactiva}: Una vez finalizado el procesamiento, el presentador toma las formas de onda (tensión bruta, tensión de ensayo y corriente) y las inyecta en la interfaz. Asimismo, actualiza los indicadores numéricos con los valores característicos del impulso (tensión máxima, tiempos de frente y cola, y sobreimpulso).
+    \item \textbf{Control de capas visuales}: El presentador responde dinámicamente a las casillas de verificación de la pantalla que habilitan o deshabilitan la visibilidad de trazas individuales, modificando la interfaz de forma instantánea.
+\end{itemize}
+
+\subsection{Interacción con la capa de abstracción de hardware}
+La comunicación con el osciloscopio digital se realiza a través de un módulo especializado de abstracción de hardware, coordinado por el presentador:
+\begin{itemize}
+    \item \textbf{Configuración del instrumental}: El presentador indica a la capa de hardware los parámetros que el operador estableció en la interfaz gráfica para configurar el instrumento, tales como, las escalas verticales y horizontal, el origen de los ejes verticales y horizontal, el disparo en modo único (\emph{single-shot}) del osciloscopio.
+    \item \textbf{Espera no bloqueante de señal}: Ante la orden de inicio de ensayo, debido a que la descarga de alta tensión ocurre de forma indeterminada, el presentador coordina una rutina en segundo plano que sondea continuamente el estado del instrumento, esperando el disparo. Esto evita que la interfaz gráfica se congele, y siga siendo manipulable.
+    \item \textbf{Descarga y procesamiento de datos}: Al detectarse el disparo, el presentador detiene la espera activa y transfiere los datos desde la memoria del osciloscopio hacia el motor de cálculo, para luego, con los valores obtenidos actualizar la interfaz gráfica y renderizar las señales.
+\end{itemize}
+
+\subsection{Interacción con la capa de lógica matemática}
+Una vez obtenidos los vectores de tensión y corriente, el presentador los transfiere al motor de cálculo:
+\begin{itemize}
+    \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
+    \item \textbf{Delegación del cálculo normativo}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
+    \item \textbf{Tranferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual $OS\%$) para cargarlos en la capa de visualización.
+\end{itemize}
+
+\subsection{Interacción con el gestor de archivos}
+El presentador se comunica con el módulo de gestión de archivos para almacenanar los resultados de los ensayos:
+\begin{itemize}
+        \item \textbf{Validación de datos de entrada:} Para evitar fallos de cálculo y errores operativos, el presentador restringe el ingreso de datos en la interfaz, mediante validadores numéricos que bloquean caracteres no válidos o valores fuera de rango, antes de interactuar con los módulos correspondientes, previniendo las siguientes fallas:
+        \begin{itemize}
+            \item \textbf{Ensayo nulo:} Si el operador acciona el botón de \enquote{Guardar} o \enquote{Exportar} sin haber creado previamente la carpeta del ensayo, se bloquea la operación, y se notifica la ausencia del directorio del ensayo.
+            \item \textbf{Ausencia de condiciones ambientales:} Se restringe el ingreso de datos inválidos en estos campos, se impide el almacenamiento de la onda si no están cargados, y se notifica al operador que debe completarlos.
+            \item \textbf{Búfer de adquisición vacío:} Si el operador solicita guardar datos sin haber capturado una señal, se interrumpe la acción, y dispara una alerta de búfer vacío.
+        \end{itemize}
+    \item \textbf{Verificación de sesión}: Antes de escribir en el disco, el presentador evalúa que haya una sesión de trabajo abierta, de lo contrario no tiene ninguna ruta donde almacenar la información.
+    \item \textbf{Guardado de información}: Una vez calculados los parámetros, empaqueta la información de las trazas de las señales, junto con los metadatos (cliente, condiciones ambientales, etc), para delegar al gestor de archivos el almacenamiento permanente en disco. Mientras que, se bloquea el guardado en caso de búferes vacíos o en ausencia de campos obligatorios, para evitar archivos corruptos en la base de datos.
+    \item \textbf{Carga de ensayos previos}: Cuando el operador carga un ensayo realizado anteriormente, el presentador solicita al gestor de archivos que recupere la información del mismo, para luego actualizar los gráficos e indicadores numéricos de la pantalla.
+    \item \textbf{Exportación a planillas externas}: Cuando el operador solicita exportar los resultados, delega al gestor de archivos la conversión de datos a hojas de cálculo.
+\end{itemize}
+
 \section{Controlador de \emph{hardware}}
 \label{sec:controlador_osciloscopio}
 
@@ -139,7 +183,7 @@ Las señales eléctricas que ingresan a los bornes analógicos del osciloscopio,
 \subsubsection{Desempaquetado de datos}
 \label{subsec:desempaquetado_datos}
 
-Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{Debido a discrepancias entre la estructura de datos obtenida del instrumento y el manual del fabricante, se adoptó un script provisto por el soporte técnico del fabricante.}\footnote{El manual de programación de la serie GDS-1000B complementa los detalles para manipular esta estructura.}:
+Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{Debido a discrepancias entre la estructura de datos obtenida del instrumento y el manual del fabricante, se adoptó un script provisto por el soporte técnico del fabricante.}\footnote{El manual de programación de la serie GDS-1000B complementa los detalles para manipular esta estructura.\cite{gds1000b_ProgrammingManual}}:
 
 \begin{equation*}\label{eq:formato_memoria}
 \text{\texttt{\# A B C D E}}
@@ -359,56 +403,138 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
     \end{itemize}
 \end{enumerate}
 
+\section{Gestión de la base de datos}
+\label{sec:gestion_base_datos}
+
+Los registros generados durante los ensayos de impulsos atmosféricos de alta tensión requieren un sistema de almacenamiento fiable y trazable. Para ello, el módulo de persistencia denominado \textbf{FileManager}, maneja de forma centralizada la persistencia de datos en disco, protegiendo la integridad de las formas de onda originales y los resultados analíticos calculados, evitando pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
+
+\subsection{Flujo de almacenamiento}
+\label{subsec:flujo_almacenamiento}
+
+El flujo de guardado inicia cuando el operador acciona el comando en la interfaz gráfica, entonces, el Presentador ejecuta una secuencia de validación:
+\begin{enumerate}
+    \item \textbf{Verificación de sesión activa}: Comprueba la existencia de un proyecto nuevo o cargado desde memoria.
+    \item \textbf{Validación sintáctica de campos}: Certifica que los campos obligatorios (datos del ensayo y condiciones ambientales) hayan sido cargados, cumpliendo con los filtros sintácticos aplicados mediante expresiones regulares.
+    \item \textbf{Integridad del buffer}: Evalúa que el buffer temporal de adquisición contenga ondas digitalizadas pendientes de almacenamiento.
+\end{enumerate}
+
+Si alguna de las comprobaciones falla, el flujo se interrumpe y se emite una notificación de error en la interfaz de gráfica. Por el contrario, si se superan los filtros de validación, el Presentador clasifica el impulso (ensayo o referencia), actualiza el contador de onda correspondiente, y genera una marca temporal unívoca que asegura la trazabilidad del impulso.
+
+Posteriormente, el módulo de almacenamiento, graba la información en disco, implementando mecanismos de tolerancia a fallos (como pérdidas de alimentación eléctrica o excepciones en tiempo de ejecución) para mitigar riesgos de corrupción de datos:
+
+\begin{enumerate}
+    \item \textbf{Apertura segura}: El archivo HDF5 se manipula en \emph{modo adición} usando un manejador de contexto, que asegura la
+    escritura segura frente a fallos y la correcta liberación del descriptor de archivo del sistema operativo ante cierres inesperados, evitando la corrupción de la base de datos.
+    \item \textbf{Organización jerárquica}: Se crea un subgrupo individual para cada registro (por ej. \texttt{/Onda\_01} o \texttt{/Referencia\_01}). Las condiciones ambientales, la fecha y los parámetros calculados, se inyectan como atributos de este grupo específico, garantizando que cada onda digitalizada esté inseparablemente asociada a sus parámetros de ensayo.
+    \item \textbf{Resguardo de seguridad redundante}: En paralelo a la base de datos, crea copias de seguridad independientes de cada onda, en formato de texto plano con valores separados por comas (\textbf{CSV}), que contienen el registro bruto escalado verticalmente a su magnitud real. Lo que brinda un sistema de respaldo redundante de los datos originales, desacoplado del formato principal.
+\end{enumerate}
+
+\subsubsection{Exportación de resultados}
+\label{subsec:estructura_base_datos}
+
+Para exportar los resultados a hojas de cálculo que faciliten su manipulación en programas comerciales para la elaboración de informes, el módulo permite la extracción del historial completo de los impulsos aplicados al elemento bajo ensayo, hacia hojas de cálculo utilizando los formatos de extensión \textbf{CSV} o \textbf{XLSX}.
+
+Aunque previamente convierte la escala física de los resultados: las bases de tiempo se convierten de segundos (\unit{\second}) a microsegundos (\unit{\micro\second}) y las tensiones de volts (\unit{\volt}) a kilovolts (\unit{\kilo\volt}).
 
 
-\noindent
-========================================================================
+\subsection{Sistema de ficheros en disco}
+\label{subsec:estructura_ficheros_disco}
 
-\begin{forest}
-  for tree={
-    folder,
-    grow'=0,
-    font=\sffamily\small,
-    inner sep=3pt,
-    s sep=3pt,        % Separación vertical ajustada
-    draw=black!20,    % Color del borde del nodo (opcional)
-    fill=black!5,     % Color de fondo del nodo (opcional)
-    rounded corners   % Bordes redondeados (opcional)
-  }
-  [\textbf{Grupo raíz (Archivo .h5)}
-    [\textbf{Atributos globales}: \emph{Datos comunes a todos los registros}
-      [{\textbf{\texttt{Item}}: \emph{Identificador del objeto a ensayar}}]
-      [{\textbf{\texttt{Cliente}}: \emph{Nombre de la entidad solicitante}}]
-      [{\textbf{\texttt{Atenuaciones}}: \emph{Factores de atenuación de CH1 y CH2}}]
-    ]
-    [{\textbf{Grupos de ondas} \emph{Impulso capturado} (\texttt{Onda\_n} / \texttt{Referencia\_n})}
-      [\textbf{Atributos particulares}: \emph{Metadatos propios de cada impulso}
-        [{\textbf{\texttt{Fecha}}: \emph{Marca de tiempo de adquisición}}]
-        [{\textbf{\texttt{Temperatura}}: \emph{Parámetro ambiental}}]
-        [{\textbf{\texttt{Humedad}}: \emph{Parámetro ambiental}}]
-        [{\textbf{\texttt{Presión}}: \emph{Parámetro ambiental}}]
-        [{\textbf{\texttt{Polaridad}}: \emph{Sentido eléctrico del impulso} (+/-)}]
-        [{\textbf{\texttt{Valor\_pico}}: \emph{Tensión de cresta}}]
-        [{\textbf{\texttt{T1}}: \emph{Tiempo de frente}}]
-        [{\textbf{\texttt{T2}}: \emph{Tiempo de cola}}]
-        [{\textbf{\texttt{OS}}: \emph{Sobreimpulso porcentual}}]
-      ]
-      [{\textbf{Grupo de Tiempos} (\texttt{/Time}) [\unit{\second}]}
-        [{\textbf{\texttt{raw}}: \emph{Vector bruto a apartir de} $\Delta t$}]
-        [{\textbf{\texttt{alineado}}: \emph{Vector alineado con el frente del impulso de referencia}}]
-      ]
-      [{\textbf{Grupo de CH1} (\texttt{/CH1\_Voltage}) [\unit{\volt}]}
-        [{\textbf{\texttt{raw}}: \emph{Vector de tensión bruta, magnitud real}}]
-        [{\textbf{\texttt{ensayo}}: \emph{Vector de tensión de ensayo IEC 60060-1}}]
-        [{\textbf{\texttt{normalizado}}: \emph{Vector normalizado} ($V_{\text{pico}} = \num{1.0}$)}]
-      ]
-      [{\textbf{Grupo de CH2} (\texttt{/CH2\_Current}) [\unit{\ampere}]}
-        [{\textbf{\texttt{raw}}: \emph{Vector de corriente bruta, magnitud real}}]
-        [{\textbf{\texttt{ensayo}}: \emph{Copia del bruto (simetría de procesamiento con CH1)}}]
-        [{\textbf{\texttt{normalizado}}: \emph{Vector normalizado} ($I_{\text{pico}} = \num{1.0}$)}]
-      ]
-    ]
-  ]
-\end{forest}
+Una vez que el operador haya seleccionado un directorio raíz para el proyecto, la creación de carpetas se automatiza aplicando el árbol de directorios de la \autoref{fig:estructura_carpetas}, asignando espacios físicos en disco para la información.
 
-La etapa 1 de acondicionamiento analógico, es propia del montaje del ensayo, por lo que, no se afecta en ningún aspecto. La etapa 2 de digitalización, se modificó para este proyecto respecto al montaje vigente, analizando entre las alternativas de osciloscopio disponibles en el laboratorio, cuál era el más indicado tanto por sus características eléctricas, como por su capacidad de comunicación con la PC. Mientras que, las etapas 3, 4 y 5 son desarrollo íntegro del presente trabajo.
+\begin{figure}[H]
+    \centering
+    \begin{forest}
+        for tree={
+            folder,
+            grow'=0,
+            font=\sffamily\small,
+            inner sep=3pt,
+            s sep=3pt,        % Separación vertical ajustada
+            draw=black!20,    % Color del borde del nodo (opcional)
+            fill=black!5,     % Color de fondo del nodo (opcional)
+            rounded corners   % Bordes redondeados (opcional)
+        }
+        [\textbf{Directorio raíz (Carpeta item-cliente)}
+            [\textbf{01 Respaldo}: \emph{Carpeta de respaldo en texto plano (\textbf{CSV})}
+            [{\textbf{\texttt{Onda\_nn\_AAAAMMDD\_HHMMSS\_V.csv}}: \emph{Archivo respaldo de onda de tensión}}]
+            [{\textbf{\texttt{Onda\_nn\_AAAAMMDD\_HHMMSS\_A.csv}}: \emph{Archivo respaldo de onda de corriente}}]
+            ]
+            [\textbf{02 Analisis de datos}: \emph{Carpeta de datos procesados}
+            [{\textbf{\texttt{item-cliente.h5}}: \emph{Base de datos en formato HDF5}}]
+            ]
+            [\textbf{03 Resultados}: \emph{Carpeta de resultados exportados (hoja de cálculo e imágenes)}
+            [{\textbf{\texttt{item-cliente - Resultados.xlsx}}: \emph{Archivo de resultados del ensayo}}]
+            [{\textbf{\texttt{item-cliente - Resultados.cvs}}: \emph{Archivo de resultados del ensayo}}]
+            [{\textbf{\texttt{ondas.png}}: \emph{Imagen exportada manualmente desde el visualizador de ondas}}]
+            ]
+        ]
+    \end{forest}
+    \caption{Esctructura de directorio de archivos.}
+    \label{fig:estructura_carpetas}
+\end{figure}
+Donde:
+\begin{itemize}
+    \item \texttt{nn}: Indica el número de onda con rango 00-99.
+    \item \texttt{AAAAMMDD}: Indica la fecha en formato Año-Mes-Día.
+    \item \texttt{HHMMSS}: Indica el horario en formato Hora-Minutos-Segundos.
+\end{itemize}
+
+\subsection{Estructura de la base de datos}
+\label{subsec:estructura_base_datos}
+
+La información se almacena de manera estructurada y comprimida, en único archivo con formato \textbf{HDF5}, que actúa como una base datos independiente para cada elemento bajo ensayo.
+
+Este formato organiza internamente el archivo como un sistema de ficheros, distribuyendo los datos en grupos que actúan como carpetas, aplicando la estructura de la \autoref{fig:estructura_base_datos}.
+
+\begin{figure}[H]
+    \centering
+    \begin{forest}
+        for tree={
+            folder,
+            grow'=0,
+            font=\sffamily\small,
+            inner sep=3pt,
+            s sep=3pt,        % Separación vertical ajustada
+            draw=black!20,    % Color del borde del nodo (opcional)
+            fill=black!5,     % Color de fondo del nodo (opcional)
+            rounded corners   % Bordes redondeados (opcional)
+        }
+        [\textbf{Grupo raíz (Archivo .h5)}
+            [\textbf{Atributos globales}: \emph{Datos comunes a todos los registros}
+            [{\textbf{\texttt{Item}}: \emph{Identificador del objeto a ensayar}}]
+            [{\textbf{\texttt{Cliente}}: \emph{Nombre de la entidad solicitante}}]
+            [{\textbf{\texttt{Atenuaciones}}: \emph{Factores de atenuación de CH1 y CH2}}]
+            ]
+            [{\textbf{Grupos de ondas} \emph{Impulso capturado} (\texttt{Onda\_n} / \texttt{Referencia\_n})}
+            [\textbf{Atributos particulares}: \emph{Metadatos propios de cada impulso}
+                [{\textbf{\texttt{Fecha}}: \emph{Marca de tiempo de adquisición}}]
+                [{\textbf{\texttt{Temperatura}}: \emph{Parámetro ambiental}}]
+                [{\textbf{\texttt{Humedad}}: \emph{Parámetro ambiental}}]
+                [{\textbf{\texttt{Presión}}: \emph{Parámetro ambiental}}]
+                [{\textbf{\texttt{Polaridad}}: \emph{Sentido eléctrico del impulso} (+/-)}]
+                [{\textbf{\texttt{Valor\_pico}}: \emph{Tensión de cresta}}]
+                [{\textbf{\texttt{T1}}: \emph{Tiempo de frente}}]
+                [{\textbf{\texttt{T2}}: \emph{Tiempo de cola}}]
+                [{\textbf{\texttt{OS}}: \emph{Sobreimpulso porcentual}}]
+            ]
+            [{\textbf{Grupo de Tiempos} (\texttt{/Time}) [\unit{\second}]}
+                [{\textbf{\texttt{raw}}: \emph{Vector bruto a apartir de} $\Delta t$}]
+                [{\textbf{\texttt{alineado}}: \emph{Vector alineado con el frente del impulso de referencia}}]
+            ]
+            [{\textbf{Grupo de CH1} (\texttt{/CH1\_Voltage}) [\unit{\volt}]}
+                [{\textbf{\texttt{raw}}: \emph{Vector de tensión bruta, magnitud real}}]
+                [{\textbf{\texttt{ensayo}}: \emph{Vector de tensión de ensayo IEC 60060-1}}]
+                [{\textbf{\texttt{normalizado}}: \emph{Vector normalizado} ($V_{\text{pico}} = \num{1.0}$)}]
+            ]
+            [{\textbf{Grupo de CH2} (\texttt{/CH2\_Current}) [\unit{\ampere}]}
+                [{\textbf{\texttt{raw}}: \emph{Vector de corriente bruta, magnitud real}}]
+                [{\textbf{\texttt{ensayo}}: \emph{Copia del bruto (simetría de procesamiento con CH1)}}]
+                [{\textbf{\texttt{normalizado}}: \emph{Vector normalizado} ($I_{\text{pico}} = \num{1.0}$)}]
+            ]
+            ]
+        ]
+        \end{forest}
+    \caption{Estructura jerárquica de la base de datos.}
+    \label{fig:estructura_base_datos}
+\end{figure}
