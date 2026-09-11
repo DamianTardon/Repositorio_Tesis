@@ -1,8 +1,8 @@
 \newpage
-\chapter{Implementación del Software}
+\chapter{Implementación del \emph{software}}
 \vspace{3\baselineskip}
 
-\section{Arquitectura de software adoptada}
+\section{Arquitectura de \emph{software} adoptada}
 \label{sec:arquitectura_adoptada}
 
 El sistema se diseñó con el patrón arquitectónico MVP, con el objetivo de separar las responsabilidades de la lógica de presentación, la lógica de negocio, y la gestión de eventos, lo que permite desarrollar y evaluar de forma independiente cada parte del sistema. Este desacoplamiento de componentes, facilita la escalabilidad del sistema ante la incorporación de otros modelos de osciloscopios, métodos adicionales de análisis, etc.
@@ -10,10 +10,10 @@ El sistema se diseñó con el patrón arquitectónico MVP, con el objetivo de se
 Los componentes de la arquitectura se distribuyen de la siguiente manera:
 
 \begin{itemize}
-    \item \textbf{Vista:} Maneja exclusivamente la representación visual del software y la interacción del usuario. Se mantiene completamente independiente de la lógica de adquisición y procesamiento, emitiendo señales que son capturadas por el presentador para desencadenar las acciones correspondientes.
+    \item \textbf{Vista:} Maneja exclusivamente la representación visual del \emph{software} y la interacción del usuario. Se mantiene completamente independiente de la lógica de adquisición y procesamiento, emitiendo señales que son capturadas por el presentador para desencadenar las acciones correspondientes.
     \item \textbf{Modelo:} Está compuesto por tres módulos:
     \begin{enumerate}
-        \item \textbf{Controlador de hardware}: Traduce las acciones requeridas a comandos que el osciloscopio pueda interpretar.
+        \item \textbf{Controlador de \emph{hardware}}: Traduce las acciones requeridas a comandos que el osciloscopio pueda interpretar.
         \item \textbf{Persistencia de la información}: Gestiona el almacenamiento y recuperación de los datos.
         \item \textbf{Motor de cálculos}: Realiza el procesamiento digital de señales.
     \end{enumerate}
@@ -25,17 +25,17 @@ Los componentes de la arquitectura se distribuyen de la siguiente manera:
 
 La \textbf{Vista} maneja de forma exclusiva la representación visual del sistema y la captura de las interacciones del operador. Ya que, solo declara estáticamente la disposición y propiedades de los componentes gráficos.
 
-Esta capa se caracteriza por no tener referencias directas hacia la lógica de adquisición física o los algoritmos de procesamiento digital de señales. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, la Vista emite eventos en forma de \emph{señales de Qt}, que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
+Esta capa se caracteriza por no tener referencias directas hacia la lógica de adquisición física o los algoritmos de procesamiento digital de señales. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, la Vista emite eventos en forma de señales, que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
 
 \subsection{Capa de lógica y datos: Modelo}
 \label{subsec:modelo}
 
-El \textbf{Modelo} representa el núcleo funcional del software, abarcando el control del instrumental de laboratorio, la lógica de cálculo metrológico y la administración de la persistencia de datos.
+El \textbf{Modelo} representa el núcleo funcional del \emph{software}, abarcando el control del instrumental de laboratorio, la lógica de cálculo metrológico y la administración de la persistencia de datos.
 
 Esta capa se subdivide en tres submódulos independientes especializados:
 
 \begin{enumerate}
-    \item \textbf{Abstracción de hardware}: Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
+    \item \textbf{Abstracción de \emph{hardware}}: Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
     \item \textbf{Persistencia y gestión de archivos}: Maneja la creación y el acceso al sistema de archivos. Su función principal es el almacenamiento en bases de datos utilizando el formato HDF5. Asimismo, gestiona la exportación de resultados a hojas de cálculo tipo CSV o XLSX.
     \item \textbf{Procesamiento digital de señales}: Llevado a cabo por el módulo matemático. Constituye el motor matemático del sistema. Es responsable de acondicionar la señal y extraer sus parámetros característicos según la norma \cite{iec60060_1}.
 \end{enumerate}
@@ -48,9 +48,9 @@ El \textbf{Presentador}, actúa como coordinador de la arquitectura MVP. Tiene c
 \section{Orquestador del sistema}
 \label{sec:orquestador_sistema}
 
-El módulo del presentador actúa como el núcleo de coordinación central del programa. Su función principal consiste en desvincular de forma absoluta la interfaz de usuario de las capas de cálculo, control de hardware y persistencia de archivos. No ejecuta ninguna tarea de forma autónoma, sino que, conecta y transfiere información entre las diferentes capas del sistema.
+El módulo del presentador actúa como el núcleo de coordinación central del programa. Su función principal consiste en desvincular de forma absoluta la interfaz de usuario de las capas de cálculo, control de \emph{hardware} y persistencia de archivos. No ejecuta ninguna tarea de forma autónoma, sino que, conecta y transfiere información entre las diferentes capas del sistema.
 
-\subsection{Interacción con la interfaz gráfica}
+\subsection{Coordinación de la interfaz gráfica}
 La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a presentar la pantalla y capturar las acciones del operador técnico. Las interacciones entre el presentador y esta capa se rigen de la siguiente manera:
 \begin{itemize}
     \item \textbf{Recepción de eventos}: Cuando el usuario interactúa con la interfaz (por ejemplo, al modificar las variables ambientales de laboratorio, cambiar los factores de atenuación o presionar el botón de inicio de captura), el presentador intercepta asíncronamente estas acciones para activar los flujos correspondientes.
@@ -58,23 +58,23 @@ La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a
     \item \textbf{Control de capas visuales}: El presentador responde dinámicamente a las casillas de verificación de la pantalla que habilitan o deshabilitan la visibilidad de trazas individuales, modificando la interfaz de forma instantánea.
 \end{itemize}
 
-\subsection{Interacción con la capa de abstracción de hardware}
-La comunicación con el osciloscopio digital se realiza a través de un módulo especializado de abstracción de hardware, coordinado por el presentador:
+\subsection{Coordinación de la capa de abstracción de \emph{hardware}}
+La comunicación con el osciloscopio digital se realiza a través de un módulo especializado de abstracción de \emph{hardware}, coordinado por el presentador:
 \begin{itemize}
-    \item \textbf{Configuración del instrumental}: El presentador indica a la capa de hardware los parámetros que el operador estableció en la interfaz gráfica para configurar el instrumento, tales como, las escalas verticales y horizontal, el origen de los ejes verticales y horizontal, el disparo en modo único (\emph{single-shot}) del osciloscopio.
+    \item \textbf{Configuración del instrumental}: El presentador indica a la capa de \emph{hardware} los parámetros que el operador estableció en la interfaz gráfica para configurar el instrumento, tales como, las escalas verticales y horizontal, el origen de los ejes verticales y horizontal, el disparo en modo único (\emph{single-shot}) del osciloscopio.
     \item \textbf{Espera no bloqueante de señal}: Ante la orden de inicio de ensayo, debido a que la descarga de alta tensión ocurre de forma indeterminada, el presentador coordina una rutina en segundo plano que sondea continuamente el estado del instrumento, esperando el disparo. Esto evita que la interfaz gráfica se congele, y siga siendo manipulable.
     \item \textbf{Descarga y procesamiento de datos}: Al detectarse el disparo, el presentador detiene la espera activa y transfiere los datos desde la memoria del osciloscopio hacia el motor de cálculo, para luego, con los valores obtenidos actualizar la interfaz gráfica y renderizar las señales.
 \end{itemize}
 
-\subsection{Interacción con la capa de lógica matemática}
+\subsection{Coordinación de la lógica matemática}
 Una vez obtenidos los vectores de tensión y corriente, el presentador los transfiere al motor de cálculo:
 \begin{itemize}
     \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
     \item \textbf{Delegación del cálculo normativo}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
-    \item \textbf{Tranferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual $OS\%$) para cargarlos en la capa de visualización.
+    \item \textbf{Tranferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual OS\%) para cargarlos en la capa de visualización.
 \end{itemize}
 
-\subsection{Interacción con el gestor de archivos}
+\subsection{Coordinación del gestor de archivos}
 El presentador se comunica con el módulo de gestión de archivos para almacenanar los resultados de los ensayos:
 \begin{itemize}
         \item \textbf{Validación de datos de entrada:} Para evitar fallos de cálculo y errores operativos, el presentador restringe el ingreso de datos en la interfaz, mediante validadores numéricos que bloquean caracteres no válidos o valores fuera de rango, antes de interactuar con los módulos correspondientes, previniendo las siguientes fallas:
@@ -92,12 +92,12 @@ El presentador se comunica con el módulo de gestión de archivos para almacenan
 \section{Controlador de \emph{hardware}}
 \label{sec:controlador_osciloscopio}
 
-En esta sección se expone la implementación controlador del osciloscopio, cuya función general es abstraer las operaciones de bajo nivel, permitiendo desacoplar la comunicación con el dispositivo del resto del sistema.
+El controlador del osciloscopio, tiene como función general abstraer las operaciones de bajo nivel, permitiendo desacoplar la comunicación con el dispositivo del resto del sistema.
 
-\subsection{Interfaz de comunicación y capa de abstracción de hardware}
+\subsection{Interfaz de comunicación y capa de abstracción de \emph{hardware}}
 \label{subsec:interfaz_fisica_hal}
 
-A nivel de \emph{software}, para evitar el acoplamiento directo del código de la aplicación con las llamadas al sistema de bajo nivel (capa física de transmisión), se implementa una capa de abstracción de hardware (HAL, \emph{Hardware Abstraction Layer}), bajo la arquitectura VISA. Esta capa de abstracción permite que los comandos de consulta (\textit{queries}) y configuración (\textit{writes}) permanezcan independientes de la interfaz de hardware utilizada (sea USB, GPIB, Ethernet o RS-232), permitiendo actualizaciones de la instrumentación sin necesidad de modificar el código del presentador.
+A nivel de \emph{software}, para evitar el acoplamiento directo del código de la aplicación con las llamadas al sistema de bajo nivel (capa física de transmisión), se implementa una capa de abstracción de \emph{hardware} (HAL, \emph{Hardware Abstraction Layer}), bajo la arquitectura VISA. Esta capa de abstracción permite que los comandos de consulta (\textit{queries}) y configuración (\textit{writes}) permanezcan independientes de la interfaz de \emph{hardware} utilizada (sea USB, GPIB, Ethernet o RS-232), permitiendo actualizaciones de la instrumentación sin necesidad de modificar el código del presentador.
 
 El controlador inicializa el administrador de recursos, y ejecuta un escaneo automático para buscar algún dispositivo conectado, que tenga un descriptor de recurso lógico VISA, como el siguiente:
 \begin{align*}
@@ -106,7 +106,7 @@ El controlador inicializa el administrador de recursos, y ejecuta un escaneo aut
 
 Si encuentra al menos un dispositivo direccionable, se conecta al mismo. La comunicación inicia instanciando el administrador de recursos VISA de Python (PyVISA), acompañado de la biblioteca \texttt{pyvisa-py} para asegurar un entorno multiplataforma sin depender de bibliotecas nativas propietarias.
 
-Sobre el canal de transporte establecido con VISA, el software envía comandos SCPI, que debe cumplir con el siguiente formato indicado en el manual del fabricante \cite{gds1000au_ProgrammingManual}:
+Sobre el canal de transporte establecido con VISA, el \emph{software} envía comandos SCPI, que debe cumplir con el siguiente formato indicado en el manual del fabricante \cite{gds1000au_ProgrammingManual}:
 \begin{itemize}
     \item \textbf{No sensibilidad a mayúsculas:} Puede usarse mayúsculas y minúsculas.
     \item \textbf{Separación de parámetros:} Al configurar parámetros, debe separarse el comando y su argumento numérico, mediante un carácter de espacio en blanco simple.
@@ -115,7 +115,7 @@ Sobre el canal de transporte establecido con VISA, el software envía comandos S
 
 Para gestionar la configuración del osciloscopio de manera robusta, se implementa una arquitectura, basada en métodos de consulta (\emph{getters}) y configuración (\emph{setters}), que encapsulan los comandos SCPI.
 
-Los métodos de consulta usan la instrucción \textbf{\texttt{.query()}}, reciben una cadena de caracteres, que deben convertir al tipo de dato correspondiente (\texttt{float}, \texttt{int} o \texttt{string}) y la retornan al presentador. En tanto que, los métodos de configuración emplean la instrucción \textbf{\texttt{.write()}}, sin esperar ninguna respuesta del instrumento.
+Los métodos de consulta usan la instrucción \textbf{\texttt{.query()}}, reciben una cadena de caracteres, que deben convertir al tipo de dato correspondiente (float, int o string) y la retornan al presentador. En tanto que, los métodos de configuración emplean la instrucción \textbf{\texttt{.write()}}, sin esperar ninguna respuesta del instrumento.
 
 Este flujo se protege con una rutina de control de excepciones que, ante fallos críticos en el bus o pérdidas de sincronismo, aborta la operación y libera los recursos del sistema de forma segura, ya que de lo contrario impediría la reconexión posterior del instrumento, debiendo reiniciar la computadora o el osciloscopio.
 
@@ -138,7 +138,7 @@ Por otro lado, a nivel físico, la conexión se realiza a través de un puerto U
 \end{align*}
 Donde \texttt{COM1} identifica el número de puerto serie virtual asignado por el sistema operativo.
 
-\subsection{Sistema de Adquisición y acondicionamiento}
+\subsection{Sistema de adquisición y acondicionamiento}
 \label{subsec:arquitectura_flujo}
 
 La adquisición del impulso de alta tensión desde el generador Marx, hasta el almacenamiento en la computadora, se estructuran de la siguiente forma:
@@ -221,10 +221,10 @@ A continuación, para obtener las magnitudes reales aplicadas al objeto bajo ens
 \end{equation}
 Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en amperes, \unit{\ampere}), se transfieren al módulo de procesamiento matemático para determinar sus parámetros normativos: tiempo de frente $T_1$, tiempo de cola $T_2$, valor de cresta $U_{\text{t}}$ y sobreimpulso OS, conforme a los requerimientos de la norma \cite{iec60060_1}.
 
-\section{Motor de Cálculo: Procesamiento de Señales y Ajuste de Curvas}
+\section{Motor de cálculo: procesamiento de señales y ajuste de curvas}
 \label{sec:motor_calculo}
 
-Este componente constituye el núcleo matemático del software, y es responsable de obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}.
+Este componente constituye el núcleo matemático del \emph{software}, y es responsable de obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}.
 
 El motor de cálculo ha sido diseñado exclusivamente para cumplir con las normas IEC 60060-1 \cite{iec60060_1} e IEC 61083-2-1 \cite{iec61083_2}, aplicando criterios de modularidad, que permiten su validación automatizada e independiente del resto de la aplicación.
 
@@ -419,7 +419,7 @@ El flujo de guardado inicia cuando el operador acciona el comando en la interfaz
 \begin{enumerate}
     \item \textbf{Verificación de sesión activa}: Comprueba la existencia de un proyecto nuevo o cargado desde memoria.
     \item \textbf{Validación sintáctica de campos}: Certifica que los campos obligatorios (datos del ensayo y condiciones ambientales) hayan sido cargados, cumpliendo con los filtros sintácticos aplicados mediante expresiones regulares.
-    \item \textbf{Integridad del buffer}: Evalúa que el buffer temporal de adquisición contenga ondas digitalizadas pendientes de almacenamiento.
+    \item \textbf{Integridad del búfer}: Evalúa que el búfer temporal de adquisición contenga ondas digitalizadas pendientes de almacenamiento.
 \end{enumerate}
 
 Si alguna de las comprobaciones falla, el flujo se interrumpe y se emite una notificación de error en la interfaz de gráfica. Por el contrario, si se superan los filtros de validación, el Presentador clasifica el impulso (ensayo o referencia), actualiza el contador de onda correspondiente, y genera una marca temporal unívoca que asegura la trazabilidad del impulso.

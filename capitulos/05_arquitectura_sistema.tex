@@ -1,15 +1,15 @@
 \newpage
-\chapter{Arquitectura del software y entorno de desarrollo}
+\chapter{Arquitectura del software}
 \vspace{3\baselineskip}
 
-Este capítulo detalla el diseño estructural del software desarrollado para la adquisición y análisis de ondas de impulso tipo rayo (\SI[parse-numbers=false]{1,2/50}{\micro\second}). Se describe el patrón de diseño implementado para garantizar la escalabilidad y el desacople de los componentes, el flujo de datos desde el osciloscopio digital hasta la generación de reportes, y se presenta la justificación técnica del \emph{stack} de desarrollo seleccionado en contraste con otras alternativas de la industria. Finalmente, se definen los lineamientos de gestión del entorno de desarrollo y el control de versiones aplicados durante el ciclo de vida del proyecto.
+Este capítulo explica las características del diseño arquitectónico del software desarrollado para la adquisición y análisis de ondas de impulso tipo rayo (\qty[parse-numbers=false]{1,2/50}{\micro\second}). Se describe el patrón de diseño implementado para garantizar la escalabilidad y el desacople de los componentes.
 
 \section{Patrones de arquitectura del software}
 
-Actualmente, para el desarrollo de software en general, se existen diversos patrones de diseño que ayudan a organizar el código, mejorar la mantenibilidad y facilitar la escalabilidad. Algunos de los patrones más comunes son:
+Actualmente, para el desarrollo de software en general, se existen diversos patrones de diseño que ayudan a organizar el código, mejorar la mantenibilidad y facilitar la escalabilidad. Algunos de esos patrones son:
 
-Modelo-Vista-Controlador (MVC, \emph{Model-View-Controller}): es un patrón de diseño de software que se utiliza para separar la lógica de presentación, la lógica de negocio (procesar los datos, realizar cálculos y tomar decisiones) y la gestión de eventos en una aplicación. En este patrón, el \textbf{Modelo} representa los datos y la lógica de negocio, la \textbf{Vista} se encarga de la presentación visual y la interacción con el usuario, y el \textbf{Controlador} actúa como intermediario entre el Modelo y la Vista, gestionando las entradas del usuario y actualizando la Vista en consecuencia.
-
-Modelo-Vista-Presentador (MVP, \emph{Model-View-Presenter}): es similar al MVC, pero con una separación más clara entre la lógica de presentación y la lógica de negocio. En este patrón, el \textbf{Presentador} se encarga de manejar la lógica de presentación y la interacción con el usuario, mientras que el \textbf{Modelo} sigue representando los datos y la lógica de negocio. La \textbf{Vista} se limita a mostrar los datos proporcionados por el Presentador y a enviar las acciones del usuario al Presentador.
-
-Modelo-Vista-VistaModelo (MVVM, \emph{Model-View-ViewModel}): es una evolución del MVP, el cual introduce el concepto de \textbf{ViewModel}, que actúa como un enlace entre el Modelo y la Vista. En este patrón, el ViewModel expone los datos y comandos que la Vista puede enlazar directamente, lo que facilita la separación de responsabilidades y mejora la testabilidad de la aplicación.
+\begin{itemize}
+    \item \textbf{Modelo-Vista-Controlador (MVC)}: Es un patrón de diseño de software que se utiliza para separar la lógica de presentación, la lógica de negocio (procesar los datos, realizar cálculos y tomar decisiones), y la gestión de eventos en una aplicación. En este patrón, el \textbf{Modelo} representa los datos y la lógica de negocio, la \textbf{Vista} se encarga de la presentación visual y la interacción con el usuario, y el \textbf{Controlador} actúa como intermediario entre el Modelo y la Vista, gestionando las entradas del usuario y actualizando la Vista en consecuencia.
+    \item \textbf{Modelo-Vista-Presentador (MVP)}: Es similar al MVC, pero con una separación más clara entre la lógica de presentación y la lógica de negocio. En este patrón, el \textbf{Presentador} se encarga de manejar la lógica de presentación y la interacción con el usuario, mientras que el \textbf{Modelo} sigue representando los datos y la lógica de negocio. La \textbf{Vista} se limita a mostrar los datos proporcionados por el Presentador y a enviar las acciones del usuario al Presentador.
+    \item \textbf{Modelo-Vista-VistaModelo (MVVM)}: Es una evolución del MVP, el cual introduce el concepto de \textbf{VistaModelo}, que actúa como un enlace entre el Modelo y la Vista. En este patrón, la VistaModelo expone los datos y comandos que la Vista puede enlazar directamente, lo que facilita la separación de responsabilidades y mejora la testabilidad de la aplicación.
+\end{itemize}

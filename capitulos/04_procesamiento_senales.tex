@@ -2,16 +2,15 @@
 \chapter{Procesamiento digital de señales}
 \vspace{3\baselineskip}
 
-Este capítulo detalla los fundamentos teóricos del procesamiento digital de señales (DSP).
-
-A lo largo de las siguientes secciones, se analizan las técnicas de filtrado digital orientadas a la mitigación de ruido sin alteración de la morfología del impulso, y los algoritmos de interpolación necesarios para la extracción paramétrica. Toda la metodología de procesamiento matemático y validación algorítmica se fundamenta en los lineamientos establecidos por la norma IEC 61083-2 para software utilizado en la evaluación de ensayos con impulsos de tensión y corriente.
-
+Este capítulo detalla los fundamentos teóricos del procesamiento digital de señales (DSP). Donde, se describen las técnicas de filtrado digital orientadas a la mitigación de ruido sin alterar la morfología del impulso, y los algoritmos de interpolación necesarios para la extracción de datos, respaldado por la norma IEC 61083-2 \cite{iec61083_2}.
 
 \section{Filtros digitales}
+
 Los filtros digitales son algoritmos matemáticos diseñados para modificar selectivamente las componente en frecuencia de una señal, permitiendo el paso de ciertas frecuencias y atenuando otras, tal como ocurre con los filtros analógicos constituídos por componentes electrónicos (resistencias, capacitores e inductores), ya que buscan simular su comportamiento. Estos se clasifican principalmente en dos grandes familias, FIR o IIR, según la duración de su respuesta al impulso.
 
 \subsection{Filtro de respuesta impulsional finita (FIR)}
-Un filtro FIR se caracteriza porque su respuesta al impulso decae a cero en un número finito de pasos. Se implementa mediante una estructura no recursiva (feedforward), lo que significa que la salida actual del filtro depende exclusivamente de los valores presentes y pasados de la señal de entrada.
+
+Un filtro FIR se caracteriza porque su respuesta al impulso decae a cero en un número finito de pasos. Se implementa mediante una estructura no recursiva, lo que significa que la salida actual del filtro depende exclusivamente de los valores presentes y pasados de la señal de entrada.
 
 Su mayor ventaja es que son intrínsecamente estables, ya que carecen de lazos de retroalimentación que puedan causar oscilaciones.
 
@@ -20,16 +19,17 @@ Tienen desfasaje lineal, lo que asegura que todas las frecuencias de la señal p
 Su principal limitación es la ineficiencia computacional. Ya que, para lograr un corte abrupto entre la banda de paso y la de atenuación, necesitan un orden muy elevado, lo cual exige mayor potencia de cálculo.
 
 \subsection{Filtro de respuesta impulsional infinita (IIR)}
+
 Un filtro IIR posee una respuesta al impulso que puede prolongarse indefinidamente en el tiempo.
-A diferencia de los FIR, estos filtros utilizan retroalimentación (feedback). Es decir, la salida actual se calcula utilizando las entradas actuales y pasadas, y además las salidas anteriores del propio filtro.
+A diferencia de los FIR, estos filtros utilizan retroalimentación. Es decir, la salida actual se calcula utilizando las entradas actuales y pasadas, y además, las salidas anteriores del propio filtro.
 
 Destacan por su eficiencia computacional. Ya que, pueden lograr caídas de atenuación muy pronunciadas con un orden drásticamente menor que su equivalente en un filtro FIR, lo que los hace ideales para procesamientos muy rápidos en tiempo real o para sistemas con pocos recursos.
 
-Su diseño es más complejo porque son condicionalmente estables, lo que implica que una mala ubicación de sus polos puede provocar que el filtro se vuelva inestable y oscile descontroladamente. Además, su respuesta de fase es no lineal, introduciendo una distorsión temporal en la señal y una distorsión de retardo de grupo en el dominio de la frecuencia.
+Su diseño es más complejo porque son condicionalmente estables, lo que implica que una mala ubicación de sus polos puede provocar que el filtro se vuelva inestable y oscile descontroladamente. Por otro lado, su respuesta de fase es no lineal, lo que introduce una distorsión temporal en la señal, y una distorsión de retardo de grupo en el dominio de la frecuencia, es decir, que distintas componentes en frecuencia de la señal tienen distinto desfasaje, resultado en la alteración de la morfología de la señal de interés.
 
 \subsection{Filtro de fase cero}
 
-La técnica de filtrado de fase cero o bidireccional, elimina el desfase temporal antes mencionado. Esta técnica consiste en procesar los datos en forma directa e inversa en el dominio del tiempo: 
+El filtrado de fase cero o bidireccional, es una técnica que elimina el desfase temporal antes mencionado, procesando los datos en forma directa e inversa en el dominio del tiempo:
 \begin{enumerate}
     \item Se filtra el vector de la señal original $x_1[n]$ en sentido directo, obteniendo $x_2[n]$.
     \item Se invierten las muestras del vector $x_2[n]$, obteniendo $x'_2[n]$.
@@ -37,21 +37,22 @@ La técnica de filtrado de fase cero o bidireccional, elimina el desfase tempora
     \item Se invierten las muestras del vector $x_3[n]$, resultando $x'_3[n]$ alineado en el tiempo con la señal de entrada original $x_1[n]$.
 \end{enumerate}
 
-Dado que la información pasa dos veces por el algoritmo del filtrado, se duplica la atenuación de las frecuencias filtradas y se duplica de tiempo de cálculo en comparación con un filtrado unidireccional. No obstante, este incremento en el procesamiento es aceptable frente al significativo beneficio de preservar la integridad temporal y morfológica de los datos.
+Por lo que, debe considerarse que al pasar dos veces la información por el algoritmo del filtrado, se duplica la atenuación de las frecuencias filtradas, y se duplica de tiempo de cálculo en comparación con un filtrado unidireccional.
 
 \section{Ajuste de curvas e interpolación}
 
-Dado que los datos adquiridos por el osciloscopio, por más avanzado que sea, no dejan de ser puntos discretos que representan una señal continua, que además poseen ruido electromagnético y errores de cuantización. Si bien todos estos fenómenos se pueden atenuar, no se pueden eliminar por completo, por lo tanto, es necesario aplicar técnicas de ajuste de curvas (regresión) para obtener la función que mejor modele los datos, e interpolación para luego extraer los parámetros característicos del impulso.
+Dado que los datos adquiridos por el osciloscopio, son puntos discretos que representan una señal continua, que posee ruido electromagnético y errores de cuantización. Si bien todos estos fenómenos se pueden atenuar, no se pueden eliminar por completo, por lo tanto, es necesario aplicar técnicas de ajuste de curvas (regresión) para obtener la función que mejor modele el comportamiento de los datos. Mientras que, para obtener los valores ubicados entre dos muestras de la señal discreta, se debe recurrir a la interpolación.
 
 \subsection{Ajuste de curvas (regresión)}
 
-El ajuste de curvas es un proceso matemático que consiste en encontrar la función matemática que mejor represente la tendencia general de una distribución de datos. Su objetivo es minimizar el error global de las predicciones, lo que significa que la curva pasa cerca de los puntos, pero no necesariamente toca ninguno de ellos. Este método es especialmente útil cuando los datos no son completamente exactos, presentan dispersión o contienen errores de medición, como ocurre con las señales adquiridas en ensayos eléctricos.
+El ajuste de curvas es un proceso matemático que consiste en encontrar la función matemática que mejor represente la tendencia general de una distribución de datos. Su objetivo es minimizar el error global de las predicciones, lo que significa que la curva pasa cerca de los puntos, pero no necesariamente toca alguno de ellos. Este método es especialmente útil cuando los datos no son completamente exactos, presentan dispersión o contienen errores de medición, como ocurre con las señales adquiridas en ensayos eléctricos.
 
-Ahora bien, el tipo de función a ajustar debe ser elegido cuidadosamente para que represente adecuadamente la morfología del impulso, ya que este método para su ejecución require que se indique una función de base, sin ella no se puede realizar el ajuste porque no se puede evaluar el error al no tener una función de referencia. En este sentido, la norma IEC 60060-1 establece que la onda debe ajustarse a una función de doble exponencial (\autoref{Eq:DobleExponencial}), para caracterizar adecuadamente el comportamiento del impulso.
+Ahora bien, el tipo de función a ajustar es importante para que represente adecuadamente la morfología del impulso, ya que este método para su ejecución require que se indique una función de base, sin ella no se puede realizar el ajuste porque no se puede evaluar el error al no tener una función de referencia. En este sentido, la norma IEC 60060-1 \cite{iec60060_1} establece que la onda debe ajustarse a una función de doble exponencial (ecuación \ref{eq:doble_exponencial}), para caracterizar adecuadamente el comportamiento del impulso.
 \begin{equation}
     u_d(t) = U \cdot \left( e^{-\dfrac{t-t_d}{\tau_1}} - e^{-\dfrac{t-t_d}{\tau_2}} \right)
-    \label{Eq:DobleExponencial}
+    \label{eq:doble_exponencial}
 \end{equation}
+
 Donde:\\
 $u_d(t)$: función de tensión.\\
 $t$: tiempo.\\
@@ -59,15 +60,16 @@ $U$, $\tau_1$, $\tau_2$ y $t_d$: parámetros a encontrar mediante el ajuste.\\
 
 
 Para encontrar los parámetros de la función de doble exponencial, se utiliza el \textbf{método de mínimos cuadrados}, que es ampliamente usado en ingeniería para ajustar modelos a datos experimentales.
-Este método busca minimizar la suma de los cuadrados de los residuos (la distancia vertical entre cada punto de dato observado y el punto correspondiente en la curva calculada). Matemáticamente, esto se expresa como:
+Este método busca minimizar la suma de los cuadrados de los residuos ($S_r$), que es la distancia vertical entre cada dato observado y el punto correspondiente en la curva calculada. Matemáticamente, esto se expresa como:
 \begin{equation}
     S_r = \sum_{i=1}^{N} (y_{i,medicion} - y_{i,modelo})^2
 \end{equation}
-Donde $y_{i,medicion}$ son los valores observados, $y_{i,modelo}$ son los valores calculados por la función de doble exponencial, y $N$ es el número total de datos observados.
+Donde $y_{i,medicion}$ son los valores registrados, $y_{i,modelo}$ son los valores calculados por el ajuste de curva, y $N$ es el número total de datos observados.
 
-Se utilizan los errores al cuadrado (en lugar de sumar simplemente los errores o sus valores absolutos) para evitar que las discrepancias positivas y negativas se cancelen entre sí, y también para asegurar que haya una única solución matemática óptima sin darle un peso desmedido a valores atípicos extremos.
+Se utilizan los errores al cuadrado, en lugar de sumar los errores o sus valores absolutos, para evitar que las discrepancias positivas y negativas se cancelen entre sí, y también para asegurar que haya una única solución matemática óptima sin darle un peso desmedido a valores atípicos extremos.
 
 \subsubsection{Tipos de regresión}
+
 La regresión se clasifica principalmente por la relación matemática que hay entre las variables y el modelo:
 
 \textbf{Regresión Lineal Simple:} Los datos muestran una tendencia constante o proporcional, que se ajusta mediante una línea recta.
@@ -85,7 +87,7 @@ Para resolver los problemas de regresión, especialmente los no lineales, existe
 
 \textbf{Métodos de optimización iterativa:} Cuando la ecuación no se puede linealizar, se usan algoritmos numéricos que parten de un valor inicial (semilla) y lo mejoran paso a paso.
 
-Existen muchos algoritmos de optimización disponibles, cada uno con sus ventajas y desventajas, pero debido a que en este trabajo se aplica la recomendación de la norma IEC 60060-1, se describe el modelo más relevante, el \textbf{Algoritmo de Levenberg-Marquardt (LM)}. El cual a su vez es considerado el estándar de la industria para regresiones no lineales. Es una técnica híbrida donde utiliza un factor de amortiguamiento dinámico (λ), que regula la convergencia, cuando los parámetros están lejos de la solución óptima o si el paso falla y el error aumenta, λ crece obligando al algoritmo a comportarse como \textit{Descenso de Gradiente}, de pasos pequeños, seguros y robusto. Mientras que, a medida que se acerca a la solución, y el error disminuye, λ se hace más pequeño de manera que el algoritmo aproveche la velocidad de \textit{Gauss-Newton}. Matemáticamente, esto se expresa como:
+Existen muchos algoritmos de optimización, cada uno con sus ventajas y desventajas, pero en este trabajo se adoptó la recomendación de la norma IEC 60060-1 \cite{iec60060_1}, por lo que, se pasa a describir ese modelo directamente, el \textbf{Algoritmo de Levenberg-Marquardt (LM)}. El cual, a su vez, es considerado el estándar de la industria para regresiones no lineales. Es una técnica híbrida donde utiliza un factor de amortiguamiento dinámico (λ), que regula la convergencia, cuando los parámetros están lejos de la solución óptima o si el paso falla y el error aumenta, λ crece obligando al algoritmo a comportarse como el método de \emph{Descenso de Gradiente}, de pasos pequeños, seguros y robusto. Mientras que, a medida que se acerca a la solución, y el error disminuye, λ se hace más pequeño de manera que el algoritmo aproveche la velocidad del método de \emph{Gauss-Newton}. Matemáticamente, esto se expresa como:
 \begin{equation}
     w_{i+1} = w_i - \left( J^T J + \lambda diag(J^T J) \right)^{-1} (J^T e)
 \end{equation}
@@ -99,7 +101,7 @@ $J^T J$: matriz de Hessiana aproximada, compuesta por las segundas derivadas, qu
 $diag(J^T J)$: matriz diagonal. Escala cada parámetro según la curvatura local de la función.\\
 $J^T e$: vector gradiente de la función error. Indica la dirección de máxima pendiente.\\
 
-\noindent Si $\boldsymbol{\lambda \rightarrow 0}$, el algoritmo se comporta como el \textbf{Método de Gauss-Newton} donde asume que la función de error es localmente cuadrática y utiliza expansiones de series de Taylor para aproximarse al mínimo de forma muy rápida, pero puede ser inestable y fallar si los valores iniciales elegidos están muy lejos del óptimo. Resultando:
+\noindent Si $\boldsymbol{\lambda \rightarrow 0}$, el algoritmo se comporta como el \textbf{Método de Gauss-Newton}, donde asume que la función de error es localmente cuadrática, y utiliza expansiones de series de Taylor para aproximarse al mínimo de forma muy rápida, pero puede ser inestable y fallar si los valores iniciales elegidos están muy lejos del óptimo. Resultando:
 \begin{equation}
     w_{i+1} = w_i - \left( J^T J \right)^{-1} (J^T e)
 \end{equation}
@@ -116,7 +118,8 @@ En el metodo de descenso del gradiente $\alpha$ es un escalar, pero en el algori
 \end{equation}
 
 \subsection{Interpolación}
-Debido a que, como se dijo antes, los datos adquiridos por el osciloscopio son puntos discretos que representan una señal continua, es necesario aplicar técnicas de interpolación para obtener valores intermedios entre los puntos muestreados. Esto es necesario para encontrar puntos como $U_{30}$ y $U_{90}$, que pueden no coincidir exactamente con los datos de datos adquiridos.
+
+Debido a que, como se indicó antes, los datos adquiridos por el osciloscopio son puntos discretos que representan una señal continua, es necesario aplicar técnicas de interpolación para obtener valores intermedios entre los puntos muestreados. Esto es necesario para encontrar puntos como $U_{30}$ y $U_{90}$, que pueden no coincidir exactamente con los datos de datos adquiridos.
 
 La interpolación polinomial es un proceso matemático que consiste en determinar el único polinomio de grado $n$ que pasa por los $n+1$ puntos de datos conocidos, permitiendo así calcular los valores intermedios. Existen varios métodos de interpolación, cada uno con sus propias características y aplicaciones, entre los más comunes se encuentran:
 

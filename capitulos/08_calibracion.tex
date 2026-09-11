@@ -1,21 +1,20 @@
 \newpage
-\chapter{Calibración del software}
+\chapter{Calibración del \emph{software}}
 \label{ch:calibracion_software}
 \vspace{3\baselineskip}
 
-
-El módulo calibración constituye el entorno de validación normativa del software de procesamiento de impulsos atmosféricos, y debe evaluar los algoritmos del motor de cálculo, en forma independiente de cualquier otro módulo del software.
+El módulo calibración constituye el entorno de validación normativa del \emph{software} de procesamiento de impulsos atmosféricos, y evalúa los algoritmos del motor de cálculo, en forma independiente de cualquier otro módulo del \emph{software}.
 
 \section{Análisis de incertidumbre según IEC 61083-2}
 \label{subsec:analisis_incertidumbre_iec61083_2}
 
-Debido a que el algoritmo de cálculo forma parte integral del sistema digital de medición, debe cuantificarse su contribución a la incertidumbre global. Para ello, la norma IEC 61083-2 \cite{iec61083_2} indica que la evaluación del software debe realizarse mediante la inyección de registros digitales de ondas patrón provistos por el generador de datos de prueba (\emph{Test Data Generator}, TDG) suministrado por la misma, para compararlos con sus valores de referencia ($x_{\text{REF}}$) y sus respectivas incertidumbres expandidas ($U_x$).
+Debido a que el algoritmo de cálculo forma parte integral del sistema digital de medición, debe cuantificarse su contribución a la incertidumbre global. Para ello, la norma IEC 61083-2 \cite{iec61083_2} indica que la evaluación del \emph{software} debe realizarse mediante la inyección de registros digitales de ondas patrón provistos por el generador de datos de prueba (\emph{Test Data Generator}, TDG) suministrado por la misma, para compararlos con sus valores de referencia ($x_{\text{REF}}$) y sus respectivas incertidumbres expandidas ($U_x$).
 
 Además, establece dos evaluaciones complementarias:
 
 \begin{enumerate}
-    \item \textbf{Verificación de límites de aceptación}: Comprobación de que las desviaciones relativas entre los valores calculados por el software, y los valores de referencia no superen las tolerancias estipuladas en el Anexo A de la norma \cite{iec61083_2}, que pueden observarse en la tabla \ref{tab:tolerancias_iec61083}.
-    \item \textbf{Cuantificación de la incertidumbre estándar del software}: En el Anexo B de la norma \cite{iec61083_2} describe un procedimiento para determinar la incertidumbre combinada, para un conjunto de formas de onda selecciondas (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), con el algoritmo del software que se va a evaluar .
+    \item \textbf{Verificación de límites de aceptación}: Comprobación de que las desviaciones relativas entre los valores calculados por el \emph{software}, y los valores de referencia no superen las tolerancias estipuladas en el Anexo A de la norma \cite{iec61083_2}, que pueden observarse en la tabla \ref{tab:tolerancias_iec61083}.
+    \item \textbf{Cuantificación de la incertidumbre estándar del \emph{software}}: En el Anexo B de la norma \cite{iec61083_2} describe un procedimiento para determinar la incertidumbre combinada, para un conjunto de formas de onda selecciondas (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), con el algoritmo del \emph{software} que se va a evaluar .
 \end{enumerate}
 
 \begin{table}[H]
@@ -61,14 +60,14 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
 
     Luego, valida que no supere la tolerancia máxima especificada en la norma \cite{iec61083_2}.
 
-    \item \textbf{Cálculo de la incertidumbre estándar del software:}
+    \item \textbf{Cálculo de la incertidumbre estándar del \emph{software}:}
     
     Posteriormente, se calculan los dos componentes de la incertidumbre estándar, para cada parámetro evaluado.
 
     \begin{enumerate}
         \item \textbf{Componente de incertidumbre del algoritmo:}
         
-        El primer componente $u_\text{B71}$ representa la incertidumbre estándar tipo A del software, y determina la máxima desviación observada en el conjunto de $n$ formas de onda evaluadas. Asumiendo una distribución de probabilidad rectangular para los errores computacionales, la incertidumbre estándar relativa se determina mediante la ecuación:
+        El primer componente $u_\text{B71}$ representa la incertidumbre estándar tipo A del \emph{software}, y determina la máxima desviación observada en el conjunto de $n$ formas de onda evaluadas. Asumiendo una distribución de probabilidad rectangular para los errores computacionales, la incertidumbre estándar relativa se determina mediante la ecuación:
 
         \begin{equation}
             u_\text{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i=1}^{n} \left| \frac{x_i - x_{\text{REF},i}}{x_{\text{REF},i}} \right|
@@ -91,7 +90,7 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
             \label{eq:ub72}
         \end{equation}
 
-        Finalmente, la incertidumbre estándar combinada del software $u_\text{B7}$ se obtiene mediante la suma cuadrática de ambos componentes según la ecuación:
+        Finalmente, la incertidumbre estándar combinada del \emph{software} $u_\text{B7}$ se obtiene mediante la suma cuadrática de ambos componentes según la ecuación:
 
         \begin{equation}
             u_\text{B7} = \sqrt{u_\text{B71}^2 + u_\text{B72}^2}
@@ -101,5 +100,5 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
     
     \item \textbf{Generación del certificado:}
     
-    Una vez concluidos los cálculos de incertidumbre, genera un reporte en formato PDF con los resultados del análisis, para su trazabilidad metrológica conforme a la norma \cite{iec61083_2}. Donde indica, características del software evaluado, los valores calculados y el desvío de cada parámetro, para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
+    Una vez concluidos los cálculos de incertidumbre, genera un reporte en formato PDF con los resultados del análisis, para su trazabilidad metrológica conforme a la norma \cite{iec61083_2}. Donde indica, características del \emph{software} evaluado, los valores calculados y el desvío de cada parámetro, para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
 \end{enumerate}
