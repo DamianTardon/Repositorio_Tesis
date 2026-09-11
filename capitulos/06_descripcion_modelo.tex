@@ -2,19 +2,23 @@
 \chapter{Implementación del Software}
 \vspace{3\baselineskip}
 
-\section{Arquitectura general}
-\label{subsec:estructura_arquitectura}
+\section{Arquitectura de software adoptada}
+\label{sec:arquitectura_adoptada}
 
-El diseño estructural del software se fundamenta en una separación de responsabilidades, que permite desarrollar y evaluar de forma independiente cada parte del sistema. Con este objetivo, se adoptó el patrón de diseño arquitectónico MVP, el cual divide el sistema en tres capas lógicas bien definidas: la Vista, el Modelo y el Presentador. Esta organización asegura el desacoplamiento de componentes, facilitando la escalabilidad del sistema ante la incorporación de otros modelos de osciloscopios o métodos adicionales de análisis.
+El sistema se diseñó con el patrón arquitectónico MVP, con el objetivo de separar las responsabilidades de la lógica de presentación, la lógica de negocio, y la gestión de eventos, lo que permite desarrollar y evaluar de forma independiente cada parte del sistema. Este desacoplamiento de componentes, facilita la escalabilidad del sistema ante la incorporación de otros modelos de osciloscopios, métodos adicionales de análisis, etc.
 
-La división de tareas facilita la validación algorítmica y control de la incertidumbre matemática especificados en la norma \cite{iec61083_2}, permitiendo someter los algoritmos a ensayos automatizados, aislados de cualquier interfaz gráfica de usuario.
+Los componentes de la arquitectura se distribuyen de la siguiente manera:
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.5\linewidth]{img/arquitectura_instrumentacion.pdf}
-    \caption{Diagrama de bloque de la arquitectura.}
-    \label{fig:Lab_1_Circ_1_V1-esquema}
-\end{figure}
+\begin{itemize}
+    \item \textbf{Vista:} Maneja exclusivamente la representación visual del software y la interacción del usuario. Se mantiene completamente independiente de la lógica de adquisición y procesamiento, emitiendo señales que son capturadas por el presentador para desencadenar las acciones correspondientes.
+    \item \textbf{Modelo:} Está compuesto por tres módulos:
+    \begin{enumerate}
+        \item \textbf{Controlador de hardware}: Traduce las acciones requeridas a comandos que el osciloscopio pueda interpretar.
+        \item \textbf{Persistencia de la información}: Gestiona el almacenamiento y recuperación de los datos.
+        \item \textbf{Motor de cálculos}: Realiza el procesamiento digital de señales.
+    \end{enumerate}
+    \item \textbf{Presentador:} Actúa como orquestador conectando las señales emitidas por la Vista con los elementos de la capa Modelo, y actualizando la interfaz gráfica con los resultados obtenidos.
+\end{itemize}
 
 \subsection{Capa de presentación: Vista}
 \label{subsec:vista}
@@ -31,15 +35,15 @@ El \textbf{Modelo} representa el núcleo funcional del software, abarcando el co
 Esta capa se subdivide en tres submódulos independientes especializados:
 
 \begin{enumerate}
-    \item \textbf{Abstracción de hardware}: Implementada en el módulo \textbf{GWInstekGDS1000AU}. Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
-    \item \textbf{Persistencia y gestión de archivos}: Administrada por el módulo \textbf{FileManager}. Maneja la creación y el acceso al sistema de archivos. Su función principal es el almacenamiento en bases de datos utilizando el formato HDF5. Asimismo, gestiona la exportación de resultados a hojas de cálculo tipo CSV o XLSX.
-    \item \textbf{Procesamiento digital de señales}: Llevado a cabo por el módulo matemático \textbf{LightningImpulseAnalyzer}. Constituye el motor matemático del sistema. Es responsable de acondicionar la señal y extraer sus parámetros característicos según la norma \cite{iec60060_1}.
+    \item \textbf{Abstracción de hardware}: Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
+    \item \textbf{Persistencia y gestión de archivos}: Maneja la creación y el acceso al sistema de archivos. Su función principal es el almacenamiento en bases de datos utilizando el formato HDF5. Asimismo, gestiona la exportación de resultados a hojas de cálculo tipo CSV o XLSX.
+    \item \textbf{Procesamiento digital de señales}: Llevado a cabo por el módulo matemático. Constituye el motor matemático del sistema. Es responsable de acondicionar la señal y extraer sus parámetros característicos según la norma \cite{iec60060_1}.
 \end{enumerate}
 
 \subsection{Capa de coordinación: Presentador}
 \label{subsec:presentador}
 
-El \textbf{Presentador}, es implementado en el módulo \textbf{MainPresenter}, y actúa como coordinador de la arquitectura MVP. Tiene como responsabilidad orquestar la interacción entre la interfaz visual y los motores lógico-físicos.
+El \textbf{Presentador}, actúa como coordinador de la arquitectura MVP. Tiene como responsabilidad orquestar la interacción entre la interfaz visual y los motores lógico-físicos.
 
 \section{Orquestador del sistema}
 \label{sec:orquestador_sistema}
@@ -93,7 +97,7 @@ En esta sección se expone la implementación controlador del osciloscopio, cuya
 \subsection{Interfaz de comunicación y capa de abstracción de hardware}
 \label{subsec:interfaz_fisica_hal}
 
-A nivel de \emph{software}, para evitar el acoplamiento directo del código de la aplicación con las llamadas al sistema de bajo nivel (capa física de transmisión), se implementa una Capa de Abstracción de Hardware (HAL, \emph{Hardware Abstraction Layer}), bajo la Arquitectura VISA. Esta capa de abstracción permite que los comandos de consulta (\textit{queries}) y configuración (\textit{writes}) permanezcan independientes de la interfaz de hardware utilizada (sea USB, GPIB, Ethernet o RS-232), permitiendo actualizaciones de la instrumentación sin necesidad de modificar el código del presentador.
+A nivel de \emph{software}, para evitar el acoplamiento directo del código de la aplicación con las llamadas al sistema de bajo nivel (capa física de transmisión), se implementa una capa de abstracción de hardware (HAL, \emph{Hardware Abstraction Layer}), bajo la arquitectura VISA. Esta capa de abstracción permite que los comandos de consulta (\textit{queries}) y configuración (\textit{writes}) permanezcan independientes de la interfaz de hardware utilizada (sea USB, GPIB, Ethernet o RS-232), permitiendo actualizaciones de la instrumentación sin necesidad de modificar el código del presentador.
 
 El controlador inicializa el administrador de recursos, y ejecuta un escaneo automático para buscar algún dispositivo conectado, que tenga un descriptor de recurso lógico VISA, como el siguiente:
 \begin{align*}
@@ -357,7 +361,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
         R[n] = U_{\text{corregida}}[n] - U_\text{b}[n]
     \end{equation}
     \item \textbf{Filtrado digital de fase cero}: 
-    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR a la curva residual ($R[n]$). Para reducir el ruido de muy alta frecuencia relacionado a la interferencia electromagnética, sin perder oscilaciones propias del ensayo.
+    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR (que cumpla con la ecuación \ref{eq:func_tension_ensayo} de la norma \cite{iec60060_1}) a la curva residual ($R[n]$). Para reducir el ruido de muy alta frecuencia relacionado a la interferencia electromagnética, sin perder oscilaciones propias del ensayo.
     \item \textbf{Curva de tensión de ensayo}: Se sintetiza la curva de ensayo ($U_\text{t}[n]$) sumando algebraicamente la curva base analítica con la residual filtrada:
     \begin{equation}
         \label{eq:curva_ensayo}
@@ -406,7 +410,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
 \section{Gestión de la base de datos}
 \label{sec:gestion_base_datos}
 
-Los registros generados durante los ensayos de impulsos atmosféricos de alta tensión requieren un sistema de almacenamiento fiable y trazable. Para ello, el módulo de persistencia denominado \textbf{FileManager}, maneja de forma centralizada la persistencia de datos en disco, protegiendo la integridad de las formas de onda originales y los resultados analíticos calculados, evitando pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
+Los registros generados durante los ensayos de impulsos atmosféricos de alta tensión requieren un sistema de almacenamiento fiable y trazable. Para ello, el módulo de persistencia, maneja de forma centralizada la persistencia de datos en disco, protegiendo la integridad de las formas de onda originales y los resultados analíticos calculados, evitando pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
 
 \subsection{Flujo de almacenamiento}
 \label{subsec:flujo_almacenamiento}
@@ -430,17 +434,16 @@ Posteriormente, el módulo de almacenamiento, graba la información en disco, im
 \end{enumerate}
 
 \subsubsection{Exportación de resultados}
-\label{subsec:estructura_base_datos}
+\label{subsubsec:exportar_resultados}
 
 Para exportar los resultados a hojas de cálculo que faciliten su manipulación en programas comerciales para la elaboración de informes, el módulo permite la extracción del historial completo de los impulsos aplicados al elemento bajo ensayo, hacia hojas de cálculo utilizando los formatos de extensión \textbf{CSV} o \textbf{XLSX}.
 
 Aunque previamente convierte la escala física de los resultados: las bases de tiempo se convierten de segundos (\unit{\second}) a microsegundos (\unit{\micro\second}) y las tensiones de volts (\unit{\volt}) a kilovolts (\unit{\kilo\volt}).
 
-
 \subsection{Sistema de ficheros en disco}
 \label{subsec:estructura_ficheros_disco}
 
-Una vez que el operador haya seleccionado un directorio raíz para el proyecto, la creación de carpetas se automatiza aplicando el árbol de directorios de la \autoref{fig:estructura_carpetas}, asignando espacios físicos en disco para la información.
+Una vez que el operador haya seleccionado un directorio raíz para el proyecto, la creación de carpetas se automatiza aplicando el árbol de directorios de la figura \ref{fig:estructura_carpetas}, asignando espacios físicos en disco para la información.
 
 \begin{figure}[H]
     \centering
@@ -485,7 +488,7 @@ Donde:
 
 La información se almacena de manera estructurada y comprimida, en único archivo con formato \textbf{HDF5}, que actúa como una base datos independiente para cada elemento bajo ensayo.
 
-Este formato organiza internamente el archivo como un sistema de ficheros, distribuyendo los datos en grupos que actúan como carpetas, aplicando la estructura de la \autoref{fig:estructura_base_datos}.
+Este formato organiza internamente el archivo como un sistema de ficheros, distribuyendo los datos en grupos que actúan como carpetas, aplicando la estructura de la figura \ref{fig:estructura_base_datos}.
 
 \begin{figure}[H]
     \centering

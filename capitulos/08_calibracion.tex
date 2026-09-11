@@ -1,5 +1,5 @@
 \newpage
-\chapter{Calibracion del software}
+\chapter{Calibración del software}
 \label{ch:calibracion_software}
 \vspace{3\baselineskip}
 
@@ -24,17 +24,20 @@ Además, establece dos evaluaciones complementarias:
     \label{tab:tolerancias_iec61083}
     \begin{tabular}{@{}lll@{}}
         \toprule
-        \textbf{Tipo de Impulso} & \textbf{Parámetro Físico} & \textbf{Tolerancia Máxima}           \\ \midrule
-        Completo (LI)            & Valor Pico ($U_\text{t}$)        & $\pm\SI{0,10}{\percent}$             \\ \cmidrule(l){2-3} 
-                                 & Tiempo de Frente ($T_1$)  & $\pm\SI{2,0}{\percent}$              \\ \cmidrule(l){2-3} 
-                                 & Tiempo de Cola ($T_2$)    & $\pm\SI{1,0}{\percent}$              \\ \cmidrule(l){2-3} 
-                                 & Sobrepasamiento (OS) & $\pm\SI{1,0}{\percent}$ (Absoluto)   \\ \midrule
-        Cortado (LIC)            & Tiempo de Corte ($T_\text{C}$)   & $\pm\SI{2,0}{\percent}$              \\ \bottomrule
+        \textbf{Tipo de Impulso} & \textbf{Parámetro Físico}      & \textbf{Tolerancia Máxima} \\ \midrule
+        Completo (LI)            & Valor Pico ($U_\text{t}$)      & $\pm\SI{0,10}{\percent}$   \\ \cmidrule(l){2-3}
+                                 & Tiempo de Frente ($T_1$)       & $\pm\SI{2}{\percent}$      \\ \cmidrule(l){2-3}
+                                 & Tiempo de Cola ($T_2$)         & $\pm\SI{1,0}{\percent}$    \\ \cmidrule(l){2-3}
+                                 & Sobrepasamiento (OS)           & $\pm\SI{1,0}{}$ (Absoluto) \\ \midrule
+        Cortado (LIC)            & Valor Pico ($U_\text{t}$)      & $\pm\SI{1,0}{\percent}$    \\ \cmidrule(l){2-3}
+                                 & Tiempo de Frente ($T_1$)       & $\pm\SI{2}{\percent}$      \\ \cmidrule(l){2-3}
+                                 & Tiempo de Corte ($T_\text{C}$) & $\pm\SI{2,0}{\percent}$    \\ \cmidrule(l){2-3}
+                                 & Sobrepasamiento (OS)           & $\pm\SI{1,0}{}$ (Absoluto) \\ \bottomrule
     \end{tabular}
 \end{table}
 
 \section{Procedimiento de calibración}
-\label{sec:mecanismo_trabajo}
+\label{sec:procedimiento_calibracion}
 
 La calibración automática se ejecuta aplicando la siguiente secuencia de trabajo:
 

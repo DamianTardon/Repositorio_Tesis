@@ -6,54 +6,38 @@ Este capítulo detalla los fundamentos teóricos de los sistemas de adquisición
 
 A lo largo de las siguientes secciones, se analizan los conceptos básicos necesarios para entender el funcionamiento de un osciloscopio.
 
-\section{Arquitectura de osciloscopios de almacenamiento digital}
-Antes de procesar digitalmente las señales, es necesario capturarlas adecuadamente. Para ello se utiliza un instrumento de medición electrónico denominado, osciloscopio de almacenamiento digital (DSO, \emph{Digital Storage Oscilloscope}). El cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y análisis posterior. Por esto es útil comprender su arquitectura, ya que su diseño y limitaciones impactan directamente en la calidad de los datos adquiridos y, por ende, en el análisis posterior.
+\section{Osciloscopio de almacenamiento digital}
 
-La señal ingresa por un circuito analógico de acondicionamiento de entrada, para dirigirse al bloque del convertidor Analógico-Digital (ADC, \emph{Analog-Digital Converter}) que se encarga de realizar el muestreo y cuantización a una tasa definida por la base de tiempo. Luego, se almacena en la memoria del osciloscopio, para finalmente presentarla en pantalla.
+El osciloscopio de almacenamiento digital (DSO, \emph{Digital Storage Oscilloscope}), es un instrumento de medición electrónico, el cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y posterior análisis.
 
-A continuación, se describen los parámetros más relevantes relacionados con la adquisición de señales, que deben ser considerados al momento de configurar el osciloscopio para capturar impulsos de alta tensión.
+Su funcionamiento consiste en que la señal ingresa por un circuito analógico de acondicionamiento de entrada, para dirigirse al bloque del convertidor analógico-digital (ADC, \emph{Analog-Digital Converter}) que muestrea y cuantiza la señal a una tasa definida por la base de tiempo. Luego, se almacena la verisón digitalizada en la memoria del osciloscopio, para finalmente presentarla en pantalla.
 
-\subsection{Muestreo de señales}
-La conversión analógica-digital se basa en el \textbf{Teorema de Muestreo} de Nyquist-Shannon, el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, para evitar el fenómeno destructivo del aliasing (cuando la velocidad de muestreo es insuficiente, pueden aparecer erróneamente componentes de frecuencia más bajas que la de la señal real, denominadas “Alias”). Matemáticamente, se define como:
+A continuación, se describen sus parámetros más relevantes, que deben ser considerados al momento de seleccionar el osciloscopio para capturar impulsos de alta tensión.
+
+\textbf{Muestreo de señales:} Consiste en tomar valores de una señal analógica continua a intervalos regulares de tiempo para transformarla en una señal discreta de valores continuos (infinitos valores posibles). La conversión analógica-digital se basa en el teorema de muestreo, el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, ya que si la velocidad de muestreo es insuficiente, pueden aparecer el fenómeno destructivo del \enquote{aliasing} que muestra erróneamente componentes de frecuencias menores que la señal real, denominadas “Alias”. Matemáticamente, se define:
 \begin{equation}
     f_s > 2 f_{max}
 \end{equation}
 
-\subsection{Resolución vertical}
-La resolución del eje vertical de un osciloscopio digital está vinculada con la resolución del ADC que tiene internamente. 
-Mientras que la resolución de un ADC está dada por la cantidad de bits ($N$) del mismo. Consierando que la tensión de entrada varia entre cero y un valor máximo $(V_{max})$, matemáticamente, puede expresarse:
+\textbf{Resolución vertical:} La resolución del eje vertical de un osciloscopio está vinculada con la resolución del ADC que tiene internamente, la cual está dada por la cantidad de bits ($N$) del mismo. Consierando que la tensión de entrada varia entre cero y un valor máximo $(V_{max})$, matemáticamente, puede expresarse:
 \begin{equation}
     V_{res} = \dfrac{V_{max}}{2^N}
 \end{equation}
-Como el valor máximo de la tensión de entrada puede variar dependiendo de la escala vertical del osciloscopio, conviene expresar la resolución como un porcentaje del valor de plena escala.
-\begin{equation}
-    \text{Resolución \%} = \dfrac{100}{2^N}
-\end{equation}
 
-\subsection{Cuantización de señales}
-Mientras que el muestreo discretiza el eje temporal, la \textbf{cuantización} divide el eje de amplitudes. Este proceso introduce un error numérico inherente denominado \textbf{error de cuantización}, ocasionado por la aproximación del valor real al nivel discreto más cercano. El tamaño del paso de cuantización o resolución del LSB (Bit Menos Significativo, por sus siglas en inglés) está dado por:
+\textbf{Cuantización de señales:} Consiste de convertir el valor de amplitud continuo en un valor discreto,  dentro de una escala predeterminada. Este proceso introduce un error numérico inherente denominado \textbf{error de cuantización}, ocasionado por la aproximación del valor real al nivel discreto más cercano. El tamaño del paso de cuantización o resolución del LSB (Bit Menos Significativo, por sus siglas en inglés) está dado por:
 \begin{equation}
     q = \dfrac{V_{FSR}}{2^N}
 \end{equation}
 Donde $V_{FSR}$ representa el rango dinámico de escala completa (FSR) (relación entre el valor máximo y el valor mínimo de la señal que se puede capturar o representar), y $N$ es la resolución en bits del convertidor.
 
-\subsection{Longitud de memoria}
-El osciloscopio posee una \textbf{longitud de memoria} finita para almacenar datos, que junto con la frecuencia de muestreo, determina la ventana temporal total de captura, es decir, el tiempo que el osciloscopio puede registrar datos a una frecuencia de muestreo dada.
+\textbf{Longitud de memoria}: El osciloscopio posee una memoria finita ($N_{record}$) para almacenar datos, que junto con la frecuencia de muestreo, determina la ventana de tiempo ($T_{acq}$) que puede registrar datos, a una frecuencia de muestreo ($f_s$) dada.
 \begin{equation}
     T_{acq} = \dfrac{N_{record}}{f_s}
 \end{equation}
-Donde:\\
-$T_{acq}$: tiempo total de adquisición.\\
-$N_{record}$: longitud de registro.\\
-$f_s$: frecuencia de muestreo máxima.
 
-Por lo tanto, al momento de configurar el osciloscopio debe asegurarse de que el tiempo de adquisición sea suficiente para capturar el fenómeno completo. Normalmente, estos tres parámetros se ajustan automáticamente mediante la escala de tiempo, por eso es necesario entender que dicha escala debe configurarse acorde a la duración total del fenómeno a capturar. Luego, hay algunos equipos que permiten modificar manualmente la frecuencia de muestreo, para una misma escala de tiempo, pero son menos comunes de encontrar.
+\textbf{Ancho de banda:} Es un parámetro que se mide en \unit{MHz} o \unit{GHz}, e indica la frecuencia máxima a la que puede responder con precisión. Para garantizar una representación fiel de la señal, el ancho de banda debe ser superior a la frecuencia máxima de la señal que se desea medir.
 
-\subsection{Ancho de banda}
-El \textbf{ancho de banda} es un parámetro importante del osciloscopio, que se mide en \SI{}{MHz} o \SI{}{GHz}, e indica la frecuencia máxima a la que puede responder con precisión. Para garantizar una representación fiel de la señal, el ancho de banda debe ser superior a la frecuencia máxima de la señal que se desea medir.
-
-\subsection{Velocidad de muestreo}
-La \textbf{velocidad de muestreo} es una medida de la resolución en el tiempo, que se mide en \SI{}{MSa/s} o \SI{}{GSa/s}, e indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas.
+\textbf{Velocidad de muestreo:} Es una medida de la resolución en el tiempo, que se mide en \unit{MSa/s} o \unit{GSa/s}, e indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas.
 
 \section{Estándares de comunicación de instrumentos}
 
@@ -93,7 +77,6 @@ Los descriptores de recursos VISA por lo general, tienen la siguiente gramática
     \end{itemize}
 \end{itemize}
 
-
 A continuación, se presentan ejemplos de descriptores de recursos VISA para cada tipo de interfaz física comúnmente utilizada en la adquisición de señales:
 
 \begin{table}[H]
@@ -117,52 +100,5 @@ A continuación, se presentan ejemplos de descriptores de recursos VISA para cad
         \texttt{0x0957} & ID del fabricante.      \\
         \texttt{0x17A6} & ID del producto.        \\
         \texttt{MY503}  & Número de serie único.  \\ \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[H]
-    \centering
-    \caption{Ejemplo de descriptor para GPIB (General Purpose Interface Bus)}
-    \begin{tabular}{@{}ll@{}}
-        \toprule
-        \multicolumn{2}{c}{\textbf{\texttt{GPIB0::14::INSTR}}}         \\ \midrule
-        \texttt{GPIB0} & Controlador lógico GPIB.             \\
-        \texttt{14}    & Dirección primaria. Rango de 0 a 30. \\ \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[H]
-    \centering
-    \caption{Ejemplo de descriptor para TCPIP (LXI - VXI-11)}
-    \begin{tabular}{@{}ll@{}}
-        \toprule
-        \multicolumn{2}{c}{\textbf{\texttt{TCPIP0::192.168.1.100::inst0::INSTR}}} \\ \midrule
-        \texttt{TCPIP0}        & Controlador lógico TCPIP.       \\
-        \texttt{192.168.1.100} & Dirección IPv4 del instrumento. \\
-        \texttt{inst0}         & Nombre lógico de dispositivo.   \\ \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[H]
-    \centering
-    \caption{Ejemplo de descriptor para TCPIP (Socket - Raw)}
-    \begin{tabular}{@{}ll@{}}
-        \toprule
-        \multicolumn{2}{c}{\textbf{\texttt{TCPIP0::192.168.1.100::5025::SOCKET}}} \\ \midrule
-        \texttt{TCPIP0}        & Controlador lógico *Sockets* TCP. \\
-        \texttt{192.168.1.100} & Dirección IPv4 del instrumento.   \\
-        \texttt{5025}          & Puerto TCP específico.            \\ \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{table}[H]
-    \centering
-    \caption{Ejemplo de descriptor para PXI (PCI eXtensions for Instrumentation)}
-    \begin{tabular}{@{}ll@{}}
-        \toprule
-        \multicolumn{2}{c}{\textbf{\texttt{PXI0::15::0::INSTR}}} \\ \midrule
-        \texttt{PXI0} & Controlador lógico PXI.                   \\
-        \texttt{15}   & Bus PCI                                   \\
-        \texttt{0}    & Posición física o lógica del dispositivo. \\ \bottomrule
     \end{tabular}
 \end{table}

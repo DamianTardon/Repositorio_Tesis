@@ -2,11 +2,11 @@
 \chapter{Fundamentos del Ensayo de impulso (1,2/50\textmu s)}
 \vspace{3\baselineskip}
 
-El presente capítulo establece el marco normativo y conceptual para el desarrollo del software de adquisición y análisis de impulsos de alta tensión. En primera instancia, se definen los conceptos básicos, y los parámetros de la onda de impulso atmosférico tipo rayo \SI[parse-numbers=false]{1,2/50}{\micro\second}, tomando como base la norma IEC 60060-1 [X]. Posteriormente, se detallan los procedimientos algorítmicos para el cálculo de dichos parámetros temporales y de amplitud. Finalmente, se exponen los requisitos técnicos exigidos por la norma IEC 61083-2 [X] para la validación de software de evaluación y los principios fundamentales para la estimación de la incertidumbre en sistemas de medición digital.
+El presente capítulo establece el marco normativo y conceptual necesario para el desarrollo del software de adquisición y análisis de impulsos de alta tensión. En primera instancia, se definen los conceptos básicos, y los parámetros de la onda de impulso atmosférico tipo rayo \qty[parse-numbers=false]{1,2/50}{\micro\second}. Posteriormente, se detallan los procedimientos algorítmicos para el cálculo de dichos parámetros temporales y de amplitud. Finalmente, se exponen los requisitos técnicos exigidos por la norma IEC 61083-2 \cite{iec61083_2} para la validación de software de evaluación y los principios fundamentales para la estimación de la incertidumbre en sistemas de medición digital.
 
-\section{Términos para ensayos de impulso de tensión tipo rayo}
+\section{Definiciones del ensayo de impulso de tensión tipo rayo}
 
-Antes de definir la onda de impulso tipo rayo, es necesario establecer una serie de términos relacionados con los ensayos de impulso de tensión, que serán necesarios para entender las magnitudes analizadasen el software y en la interpretación de los resultados. Estos términos están definidos en la norma IEC 60060-1 [X] y se exponen a continuación:
+Los siguientes términos son un extracto en la norma IEC 60060-1 \cite{iec60060_1}:
 
 \textbf{Tensión de impulso:} Es una tensión transitoria aperiódica aplicada intencionalmente, que usualmente se eleva rápidamente a un valor de cresta y luego cae más lentamente a cero.
 
@@ -24,89 +24,82 @@ Antes de definir la onda de impulso tipo rayo, es necesario establecer una serie
 
 \textbf{Curva residual $R(t)$:} Es la diferencia entre la curva registrada y la curva base.
 
-\textbf{Valor extremo $U_e$:} Es el valor máximo de la curva registrada medido desde el nivel de base en el mismo sentido que el impulso aplicado.
+\textbf{Valor extremo $U_\text{e}$:} Es el valor máximo de la curva registrada medido desde el nivel de base en el mismo sentido que el impulso aplicado.
 
-\textbf{Máximo de la curva base $U_b$:} Es el valor máximo de la curva base.
+\textbf{Máximo de la curva base $U_\text{b}$:} Es el valor máximo de la curva base.
 
-\textbf{Función de tensión de ensayo:} Es una función de amplitud-frecuencia que se define para representar la respuesta del aislamiento a impulsos con sobreelevación (overshoot), dada por la \autoref{Eq:Func_Tension_Ensayo}, donde $f$ es la frecuencia en \SI{}{\mega\hertz}.
+\textbf{Función de tensión de ensayo:} Es una función de amplitud-frecuencia que se define para representar la respuesta del aislamiento a impulsos con sobreelevación (overshoot), dada por la \autoref{eq:func_tension_ensayo}, donde $f$ es la frecuencia en \qty{}{\mega\hertz}.
 
 \begin{equation}
         k(f) = \frac{1}{1+2,2 \cdot f^2}
-        \label{Eq:Func_Tension_Ensayo}
+        \label{eq:func_tension_ensayo}
 \end{equation}
 Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión residual permite el cálculo del valor de la tensión de ensayo de la tensión de impulso tipo rayo completa equivalente.
 
 \textbf{Curva residual filtrada (Rf(t)):} Es la curva residual filtrada por la función de tensión de ensayo.
 
-\textbf{Curva de tensión de ensayo $u_t(t)$:} Es la suma de la curva base con la curva residual filtrada. Es una representación matemática del proceso de filtrado y no es una entidad física o un impulso equivalente.
+\textbf{Curva de tensión de ensayo:} Es la suma de la curva base con la curva residual filtrada. Es una representación matemática del proceso de filtrado y no es una entidad física o un impulso equivalente.
 
-\textbf{Valor de la tensión de ensayo $U_t$:} Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.
+\textbf{Valor de la tensión de ensayo $U_\text{t}$:} Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.
 
-\textbf{Magnitud de la sobreelevación $\beta$:} Es la diferencia entre el valor extremo de la curva registrada ($U_e$) y el valor máximo de la curva base ($U_b$).
+\textbf{Magnitud de la sobreelevación $\beta$:} Es la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$) y el valor máximo de la curva base ($U_\text{b}$).
 
 \textbf{Magnitud relativa de la sobreelevación $\beta'$:} Es la relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.
 
-\textbf{Tiempo de frente $T_1$:} Es un parámetro virtual definido como 1/0,6 veces el intervalo $T_{AB}$ entre los instantes en que el impulso es \SI{30}{\percent} y \SI{90}{\percent} del valor de cresta en la curva de tensión de ensayo.
+\textbf{Tiempo de frente $T_1$:} Es un parámetro virtual definido como $1/0,6$ veces el intervalo $T_{AB}$ entre los instantes en que el impulso es \qty{30}{\percent} y \qty{90}{\percent} del valor de cresta en la curva de tensión de ensayo.
+
+\begin{equation}
+    T_1 = \frac{T_{AB}}{0,6} = \frac{t_{90} - t_{30}}{0,6}
+\end{equation}
 
 \textbf{Origen virtual $O_1$:} Es un instante que precede al punto A de la curva de tensión de ensayo en un tiempo $0,3 * T_1$.
 
-\textbf{Tiempo hasta el semi-valor $T_2$:} Es un parámetro virtual definido como el intervalo de tiempo entre el origen virtual, $O_1$, y el instante en que la curva de tensión de ensayo ha disminuido a la mitad del valor de cresta de la tensión de ensayo.
+\textbf{Tiempo hasta el semi-valor $T_2$:} Es un parámetro virtual definido como el intervalo de tiempo entre el origen virtual ($O_1$), y el instante en que la curva de tensión de ensayo ha disminuido a la mitad del valor de cresta de la tensión de ensayo ($U_\text{t}$).
 
 \textbf{Tensión de impulso tipo rayo cortada:} Es un impulso tipo rayo que es interrumpido en el frente, cresta o cola por una descarga disruptiva, causando una caída súbita de la tensión.
 
-\textbf{Instante de corte:} Es el instante en el que la extrapolación de la línea entre los puntos del \SI{70}{\percent} y \SI{10}{\percent} (C y D) en el colapso de la tensión cruza el nivel inmediatamente anterior al colapso.
+\textbf{Instante de corte:} Es el instante en el que la extrapolación de la línea entre los puntos del \qty{70}{\percent} y \qty{10}{\percent} (C y D) en el colapso de la tensión cruza el nivel inmediatamente anterior al colapso.
 
 \textbf{Tiempo de corte $T_C$:} Es el intervalo de tiempo entre el origen virtual $O_1$ del pulso y el instante relevante.
 
 \section{Onda de impulso atmosférico}
 
 \subsection{Onda plena}
-De acuerdo con la norma IEC 60060-1 [X], la tensión de impulso tipo rayo estándar u \enquote{Onda plena} es una tensión de impulso tipo rayo completa y suave, que tiene un tiempo de frente de \SI[parse-numbers=false]{1,2}{\micro\second}, y un tiempo hasta el semi-valor de \SI[parse-numbers=false]{50}{\micro\second}, y se describe como un impulso \SI[parse-numbers=false]{1,2/50}{\micro\second}. Esta onda se caracteriza mediante los siguientes parámetros:
 
-\noindent \textbf{Valor pico ($U_t$):} Es el valor máximo absoluto de tensión alcanzado por el impulso registrado. Si existen oscilaciones superpuestas en la cresta, el valor pico se determina a partir de una \enquote{curva base}.
+De acuerdo con la norma IEC 60060-1 \cite{iec60060_1}, la tensión de impulso tipo rayo estándar u \enquote{Onda plena} es una tensión de impulso tipo rayo completa y suave, que tiene un tiempo de frente ($T_1$) de \qty{1,2}{\micro\second}, y un tiempo hasta el semi-valor ($T_2$) de \qty{50}{\micro\second}, y se describe como un impulso \qty[parse-numbers=false]{1,2/50}{\micro\second}.
 
-\noindent \textbf{Tiempo de frente ($T_1$):} Es un parámetro virtual definido como $1/0,6$ veces el intervalo de tiempo comprendido entre los instantes en los que la tensión alcanza el $\SI{30}{\percent}$ y el $\SI{90}{\percent}$ del valor pico.
-
-\begin{equation}
-    T_1 = \frac{T_{AB}}{0,6} = \frac{t_{90} - t_{30}}{0,6}
-\end{equation}
-\noindent \textbf{Tiempo de cola ($T_2$):} Es un parámetro virtual que representa el intervalo de tiempo transcurrido desde el origen virtual ($O_1$) hasta el instante en que la curva de tensión de ensayo ha disminuido al $\SI{50}{\percent}$ de su valor de cresta ($U_t$).
-
-\noindent \textbf{Magnitud relativa de la sobreelevación ($\beta'$):} La relación entre la magnitud de la sobreelevación y el valor extremo, usualmente expresada como un porcentaje.
-
-
-Para que un impulso sea considerado como \enquote{impulso tipo rayo estándar}, comúnmente denominado como impulso \SI[parse-numbers=false]{1,2/50}{\micro\second}, la norma establece que debe tener un tiempo de frente $(T_1)$ de \SI{1,2}{\micro\second},  y un tiempo hasta el semi-valor $(T_2)$ de \SI{50}{\micro\second}. Adicionalmente, la norma establece las tolerancias que acepta en los parámetros medidos, indicados en la \autoref{Tab:Tolerancias_impulso}:
+Adicionalmente, la norma establece las tolerancias que acepta en los parámetros medidos, indicados en la tabla \ref{tab:tolerancias_impulso}:
 
 \begin{table}[H]
     \centering
     \caption{Tolerancias de la onda de impulso según IEC 60060-1.}
-    \label{Tab:Tolerancias_impulso}
+    \label{tab:tolerancias_impulso}
     \begin{tabular}{@{}ll@{}}
         \toprule
-        \textbf{Parámetro}                 & \textbf{Tolerancia}                                                                           \\ \midrule
-        Tensión de ensayo ($U_t$)          & $\pm \SI{3}{\percent}$                                                                        \\ \midrule
-        Tiempo de frente ($T_1$)           & $\pm \SI{30}{\percent}$                                                                       \\
-                                           & y para equipos con $U_m > \SI{800}{\kilo\volt}$: $\SI{-30}{\percent}$ hasta $\SI{+100}{\percent}$ \\ \midrule
-        Tiempo hasta el semi-valor ($T_2$) & $\pm \SI{20}{\percent}$                                                                       \\ \midrule
-        Sobreelevación (OS)                & $\le \SI{10}{\percent}$                                                                       \\ \bottomrule
+        \textbf{Parámetro}                 & \textbf{Tolerancia}                                                                                     \\ \midrule
+        Tensión de ensayo ($U_\text{t}$)   & $\pm \qty{3}{\percent}$                                                                                 \\ \midrule
+        Tiempo de frente ($T_1$)           & $\pm \qty{30}{\percent}$                                                                                \\
+                                           & y para equipos con $U_\text{m} > \qty{800}{\kilo\volt}$: $\qty{-30}{\percent}$ a $+\qty{100}{\percent}$ \\ \midrule
+        Tiempo hasta el semi-valor ($T_2$) & $\pm \qty{20}{\percent}$                                                                                \\ \midrule
+        Sobreelevación (OS)                & $\le \qty{10}{\percent}$                                                                                \\ \bottomrule
     \end{tabular}
 \end{table}
 
 \subsection{Onda Cortada}
 
-Un impulso tipo rayo estándar cortado u \enquote{Onda cortada}, se denomina así cuando es interrumpido por un entrehierro externo con un tiempo de corte entre \SI{2}{\micro\second} y \SI{5}{\micro\second}. Las características del colapso de tensión durante el corte se determinan por el instante del valor \SI{70}{\percent} y \SI{10}{\percent} de la tensión de impulso aplicada antes del colapso.
-La duración del colapso de tensión debe ser mucho más rápida que el tiempo de frente del impulso.
+Un impulso tipo rayo estándar cortado u \enquote{Onda cortada}, se denomina así cuando es interrumpido por un entrehierro externo con un tiempo de corte ($T_\text{C}$) entre \qty{2}{\micro\second} y \qty{5}{\micro\second}. Las características del colapso de tensión durante el corte se determinan por el instante del valor \qty{70}{\percent} y \qty{10}{\percent} de la tensión de impulso aplicada antes del colapso.
+La duración del colapso de tensión debe ser mucho más rápida que el tiempo de frente ($T_1$) del impulso.
 
 \section{Ensayo de impulso}
 
 El ensayo de impulso es una prueba de alta tensión y corta duración, utilizada para verificar la rigidez dieléctrica y el aislamiento de equipos eléctricos, tales como, transformadores, seccionadores y celdas de media tensión, entre otros.
 
-El impulso tipo rayo se produce usualmente mediante un generador de impulsos Marx, el cual consiste esencialmente en un número de capacitores que se cargan en paralelo desde una fuente de tensión continua de baja tensión, que luego se conmutan en serie, y se descargan a través del objeto de ensayo.
+El impulso tipo rayo se produce mediante un generador de impulsos Marx, el cual consiste en un conjunto de capacitores que se cargan en paralelo desde una fuente de tensión continua de baja tensión, que luego se descargan en serie a través del objeto bajo ensayo.
 
-El ensayo de impulso, a nivel general, se realiza aplicando un número determinado de impulsos al objeto bajo ensayo, y registrando la respuesta del mismo mediante un sistema de adquisición de datos, compuesto por un divisor de tensión (resistivo o capacitivo), un atenuador y un oscilocopio digital.
+El ensayo de impulso, a nivel general, se realiza aplicando una cierta cantidad de impulsos al objeto bajo ensayo, y registrando la respuesta del mismo, mediante un sistema de adquisición de datos, compuesto por un divisor de tensión (resistivo o capacitivo), un atenuador coaxial y un oscilocopio digital.
 
-El análisis de los parámetros del impulso registrado permite evaluar la capacidad del equipo para soportar sobretensiones transitorias, y determinar su capacidad de aislamiento.
+El análisis de los parámetros del impulso registrado permite evaluar la capacidad del equipo para soportar sobretensiones transitorias referidas a descargas atmosféricas, y determinar su capacidad de aislamiento.
 
-La norma IEC 60060-1, en su Anexo B, describe un método para el cálculo de los parámetros de las ondas de impulso tipo rayo estándar (plenas y cortadas) con o sin sobreelevación u oscilaciones superpuestas. Este método se basa en la estimación de una curva base, que representa la forma idealizada de un impulso tipo rayo sin oscilaciones, y el cálculo de una curva residual, que representa las oscilaciones superpuestas. Posteriormente, se aplica un filtro definido por la función de tensión de ensayo (\autoref{Eq:Func_Tension_Ensayo}) para obtener la curva de tensión de ensayo, de la cual se calculan los parámetros del impulso.
+La norma IEC 60060-1, en su Anexo B, describe un método para el cálculo de los parámetros de las ondas de impulso tipo rayo estándar (plenas y cortadas) con o sin sobreelevación u oscilaciones superpuestas. Este método se basa en la estimación de una curva base, que representa la forma idealizada de un impulso tipo rayo sin oscilaciones, y el cálculo de una curva residual, que representa las oscilaciones superpuestas. Posteriormente, se aplica un filtro definido por la función de tensión de ensayo (ecuación \ref{eq:func_tension_ensayo}) para obtener la curva de tensión de ensayo, de la cual se calculan los parámetros del impulso.
 
 Mientras que, en el Anexo D de la misma norma, contiene una guía de implementación de software para la analizar la onda impulso. Particularmente, sobre el método de ajuste de la curva base, y la aplicación del filtro digital con la función de tensión de ensayo.
