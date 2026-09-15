@@ -46,7 +46,7 @@ Donde, el paso de cuantización ($q$), depende del rango dinámico de escala com
 
 \textbf{Velocidad de muestreo:} Es una medida de la resolución en el tiempo, ya que indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas. Se mide en \unit{MSa/s} o \unit{GSa/s}.
 
-\section{Estándares de comunicación de instrumentos electrónicos}
+\section{Estándares de comunicación}
 
 En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos desde la memoria del osciloscopio hacia la computadora requiere de interfaces físicas estandarizadas, y protocolos lógicos de control.
 
@@ -95,6 +95,7 @@ A continuación, se presentan dos ejemplos de descriptores de recursos VISA:
         \texttt{ASRL1} & Controlador lógico RS-232 o UART.                  \\
                        & Mapeado por el sistema al puerto físico (ej. COM1) \\ \bottomrule
     \end{tabular}
+    \label{tab:descriptor_asrl}
 \end{table}
 
 \begin{table}[H]
@@ -108,4 +109,5 @@ A continuación, se presentan dos ejemplos de descriptores de recursos VISA:
         \texttt{0x17A6} & ID del producto.        \\
         \texttt{MY503}  & Número de serie único.  \\ \bottomrule
     \end{tabular}
+    \label{tab:descriptor_usb}
 \end{table}

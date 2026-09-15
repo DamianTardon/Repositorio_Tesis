@@ -2,55 +2,19 @@
 \chapter{Implementación del \emph{software}}
 \vspace{3\baselineskip}
 
-\section{Arquitectura de \emph{software} adoptada}
+\section{Arquitectura adoptada}
 \label{sec:arquitectura_adoptada}
 
 El sistema se diseñó con el patrón arquitectónico MVP, con el objetivo de separar las responsabilidades de la lógica de presentación, la lógica de negocio, y la gestión de eventos, lo que permite desarrollar y evaluar de forma independiente cada parte del sistema. Este desacoplamiento de componentes, facilita la escalabilidad del sistema ante la incorporación de otros modelos de osciloscopios, métodos adicionales de análisis, etc.
 
-Los componentes de la arquitectura se distribuyen de la siguiente manera:
+\section{Capa de coordinación: Presentador}
+\label{sec:capa_presentador}
 
-\begin{itemize}
-    \item \textbf{Vista:} Maneja exclusivamente la representación visual del \emph{software} y la interacción del usuario. Se mantiene completamente independiente de la lógica de adquisición y procesamiento, emitiendo señales que son capturadas por el presentador para desencadenar las acciones correspondientes.
-    \item \textbf{Modelo:} Está compuesto por tres módulos:
-    \begin{enumerate}
-        \item \textbf{Controlador de \emph{hardware}}: Traduce las acciones requeridas a comandos que el osciloscopio pueda interpretar.
-        \item \textbf{Persistencia de la información}: Gestiona el almacenamiento y recuperación de los datos.
-        \item \textbf{Motor de cálculos}: Realiza el procesamiento digital de señales.
-    \end{enumerate}
-    \item \textbf{Presentador:} Actúa como orquestador conectando las señales emitidas por la Vista con los elementos de la capa Modelo, y actualizando la interfaz gráfica con los resultados obtenidos.
-\end{itemize}
-
-\subsection{Capa de presentación: Vista}
-\label{subsec:vista}
-
-La \textbf{Vista} maneja de forma exclusiva la representación visual del sistema y la captura de las interacciones del operador. Ya que, solo declara estáticamente la disposición y propiedades de los componentes gráficos.
-
-Esta capa se caracteriza por no tener referencias directas hacia la lógica de adquisición física o los algoritmos de procesamiento digital de señales. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, la Vista emite eventos en forma de señales, que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
-
-\subsection{Capa de lógica y datos: Modelo}
-\label{subsec:modelo}
-
-El \textbf{Modelo} representa el núcleo funcional del \emph{software}, abarcando el control del instrumental de laboratorio, la lógica de cálculo metrológico y la administración de la persistencia de datos.
-
-Esta capa se subdivide en tres submódulos independientes especializados:
-
-\begin{enumerate}
-    \item \textbf{Abstracción de \emph{hardware}}: Encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
-    \item \textbf{Persistencia y gestión de archivos}: Maneja la creación y el acceso al sistema de archivos. Su función principal es el almacenamiento en bases de datos utilizando el formato HDF5. Asimismo, gestiona la exportación de resultados a hojas de cálculo tipo CSV o XLSX.
-    \item \textbf{Procesamiento digital de señales}: Llevado a cabo por el módulo matemático. Constituye el motor matemático del sistema. Es responsable de acondicionar la señal y extraer sus parámetros característicos según la norma \cite{iec60060_1}.
-\end{enumerate}
-
-\subsection{Capa de coordinación: Presentador}
-\label{subsec:presentador}
-
-El \textbf{Presentador}, actúa como coordinador de la arquitectura MVP. Tiene como responsabilidad orquestar la interacción entre la interfaz visual y los motores lógico-físicos.
-
-\section{Orquestador del sistema}
-\label{sec:orquestador_sistema}
-
-El módulo del presentador actúa como el núcleo de coordinación central del programa. Su función principal consiste en desvincular de forma absoluta la interfaz de usuario de las capas de cálculo, control de \emph{hardware} y persistencia de archivos. No ejecuta ninguna tarea de forma autónoma, sino que, conecta y transfiere información entre las diferentes capas del sistema.
+El módulo del \textbf{Presentador} actúa como el núcleo de coordinación central del programa. Su función principal consiste en vincular la interfaz de usuario, el motor de cálculos, el control de \emph{hardware} y la persistencia de archivos. No ejecuta ninguna tarea de forma autónoma, sino que, conecta y transfiere información entre las diferentes capas del sistema.
 
 \subsection{Coordinación de la interfaz gráfica}
+\label{subsec:coordinacion_gui}
+
 La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a presentar la pantalla y capturar las acciones del operador técnico. Las interacciones entre el presentador y esta capa se rigen de la siguiente manera:
 \begin{itemize}
     \item \textbf{Recepción de eventos}: Cuando el usuario interactúa con la interfaz (por ejemplo, al modificar las variables ambientales de laboratorio, cambiar los factores de atenuación o presionar el botón de inicio de captura), el presentador intercepta asíncronamente estas acciones para activar los flujos correspondientes.
@@ -59,6 +23,8 @@ La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a
 \end{itemize}
 
 \subsection{Coordinación de la capa de abstracción de \emph{hardware}}
+\label{subsec:coordinacion_hardware}
+
 La comunicación con el osciloscopio digital se realiza a través de un módulo especializado de abstracción de \emph{hardware}, coordinado por el presentador:
 \begin{itemize}
     \item \textbf{Configuración del instrumental}: El presentador indica a la capa de \emph{hardware} los parámetros que el operador estableció en la interfaz gráfica para configurar el instrumento, tales como, las escalas verticales y horizontal, el origen de los ejes verticales y horizontal, el disparo en modo único (\emph{single-shot}) del osciloscopio.
@@ -67,6 +33,8 @@ La comunicación con el osciloscopio digital se realiza a través de un módulo 
 \end{itemize}
 
 \subsection{Coordinación de la lógica matemática}
+\label{subsec:coordinacion_calculos}
+
 Una vez obtenidos los vectores de tensión y corriente, el presentador los transfiere al motor de cálculo:
 \begin{itemize}
     \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
@@ -75,6 +43,8 @@ Una vez obtenidos los vectores de tensión y corriente, el presentador los trans
 \end{itemize}
 
 \subsection{Coordinación del gestor de archivos}
+\label{subsec:coordinacion_archivos}
+
 El presentador se comunica con el módulo de gestión de archivos para almacenanar los resultados de los ensayos:
 \begin{itemize}
         \item \textbf{Validación de datos de entrada:} Para evitar fallos de cálculo y errores operativos, el presentador restringe el ingreso de datos en la interfaz, mediante validadores numéricos que bloquean caracteres no válidos o valores fuera de rango, antes de interactuar con los módulos correspondientes, previniendo las siguientes fallas:
@@ -89,20 +59,30 @@ El presentador se comunica con el módulo de gestión de archivos para almacenan
     \item \textbf{Exportación a planillas externas}: Cuando el operador solicita exportar los resultados, delega al gestor de archivos la conversión de datos a hojas de cálculo.
 \end{itemize}
 
-\section{Controlador de \emph{hardware}}
-\label{sec:controlador_osciloscopio}
 
-El controlador del osciloscopio, tiene como función general abstraer las operaciones de bajo nivel, permitiendo desacoplar la comunicación con el dispositivo del resto del sistema.
+\section{Capa de lógica y datos: Modelo}
+\label{sec:capa_modelo}
 
-\subsection{Interfaz de comunicación y capa de abstracción de \emph{hardware}}
-\label{subsec:interfaz_fisica_hal}
+El \textbf{Modelo} representa el núcleo funcional del \emph{software}, abarcando el control del instrumental de laboratorio, la lógica de cálculo y la administración de la persistencia de datos.
+
+Esta capa se subdivide en tres submódulos independientes especializados:
+\begin{enumerate}
+    \item \textbf{Controlador de \emph{hardware}}.
+    \item \textbf{Persistencia de la información}.
+    \item \textbf{Motor de cálculos}.
+\end{enumerate}
+
+\subsection{Controlador de \emph{hardware}}
+\label{subsec:controlador_osciloscopio}
+
+El módulo \textbf{Controlador de \emph{hardware}}, tiene como función abstraer las operaciones de bajo nivel, permitiendo desacoplar la comunicación con el dispositivo, del resto del sistema. Para ello, encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
+
+\subsubsection{Interfaz de comunicación y capa de abstracción de \emph{hardware}}
+\label{subsubsec:interfaz_fisica_hal}
 
 A nivel de \emph{software}, para evitar el acoplamiento directo del código de la aplicación con las llamadas al sistema de bajo nivel (capa física de transmisión), se implementa una capa de abstracción de \emph{hardware} (HAL, \emph{Hardware Abstraction Layer}), bajo la arquitectura VISA. Esta capa de abstracción permite que los comandos de consulta (\textit{queries}) y configuración (\textit{writes}) permanezcan independientes de la interfaz de \emph{hardware} utilizada (sea USB, GPIB, Ethernet o RS-232), permitiendo actualizaciones de la instrumentación sin necesidad de modificar el código del presentador.
 
-El controlador inicializa el administrador de recursos, y ejecuta un escaneo automático para buscar algún dispositivo conectado, que tenga un descriptor de recurso lógico VISA, como el siguiente:
-\begin{align*}
-    \texttt{ASRL1::INSTR}
-\end{align*}
+El controlador inicializa el administrador de recursos, y ejecuta un escaneo automático para buscar algún dispositivo conectado, que tenga un descriptor de recurso lógico VISA, como los ejemlos de las tablas \ref{tab:descriptor_asrl} y \ref{tab:descriptor_usb}.
 
 Si encuentra al menos un dispositivo direccionable, se conecta al mismo. La comunicación inicia instanciando el administrador de recursos VISA de Python (PyVISA), acompañado de la biblioteca \texttt{pyvisa-py} para asegurar un entorno multiplataforma sin depender de bibliotecas nativas propietarias.
 
@@ -138,8 +118,8 @@ Por otro lado, a nivel físico, la conexión se realiza a través de un puerto U
 \end{align*}
 Donde \texttt{COM1} identifica el número de puerto serie virtual asignado por el sistema operativo.
 
-\subsection{Sistema de adquisición y acondicionamiento}
-\label{subsec:arquitectura_flujo}
+\subsubsection{Sistema de adquisición y acondicionamiento}
+\label{subsubsec:arquitectura_flujo}
 
 La adquisición del impulso de alta tensión desde el generador Marx, hasta el almacenamiento en la computadora, se estructuran de la siguiente forma:
 
@@ -157,14 +137,14 @@ La señal eléctrica, debe ser adaptada en amplitud antes de ingresar al oscilos
 
 Para el canal de tensión (CH1), la señal se deriva utilizando un divisor de tensión resistivo, acoplado en cascada serie con un atenuador coaxial, por lo que el factor de atenuación equivalente resulta:
 \begin{equation}
-    \label{eq:atenuacion_tension}
     A_{\text{CH1}} = \text{Divisor} \times \text{Atenuador}
+    \label{eq:atenuacion_tension}
 \end{equation}
 
 Para el canal de corriente (CH2), la descarga atraviesa una resistencia shunt conectada en serie con el elemento bajo ensayo, de la cual se toma su tensión a bornes, acoplada a un atenuador que reduce su magnitud a niveles adecuados.
 \begin{equation}
-    \label{eq:atenuacion_corriente}
     A_{\text{CH2}} = R_\text{Shunt} \times \text{Atenuador}
+    \label{eq:atenuacion_corriente}
 \end{equation}
 
 Ambas señales llegan al instrumento por medio de cables coaxiales de \qty{50}{\ohm}, para reducir acoplamientos electromagnéticos parásitos (EMI).
@@ -190,7 +170,7 @@ Las señales eléctricas que ingresan a los bornes analógicos del osciloscopio,
 Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{Debido a discrepancias entre la estructura de datos obtenida del instrumento y el manual del fabricante, se adoptó un script provisto por el soporte técnico del fabricante.}\footnote{El manual de programación de la serie GDS-1000B complementa los detalles para manipular esta estructura.\cite{gds1000b_ProgrammingManual}}:
 
 \begin{equation*}\label{eq:formato_memoria}
-\text{\texttt{\# A B C D E}}
+    \text{\texttt{\# A B C D E}}
 \end{equation*}
 \begin{enumerate}
     \item[\texttt{\#:}] [\num{1} byte] Caracter ASCII que indica el inicio de la cabecera.
@@ -211,25 +191,24 @@ Una vez finalizada la descarga de datos, el presentador ordena al controlador de
 
 Con el vector de valores enteros brutos decodificado, primero se aplica la ecuación \eqref{eq:reconstruccion_tension} para reconstruir la forma de onda que llegó a bornes del osciloscopio, considerando la escala vertical configurada al momento de la captura, y el Factor AD = \num{25} definido en el manual de programación del fabricante \cite{gds1000au_ProgrammingManual}:
 \begin{equation}
-\label{eq:reconstruccion_tension}
-\text{Onda sin escalar}[n] = \text{Datos brutos}[n] \times \frac{{\text{V/div}}}{\text{Factor AD}}
+    \text{Onda sin escalar}[n] = \text{Datos brutos}[n] \times \frac{{\text
+    {V/div}}}{\text{Factor AD}}
+    \label{eq:reconstruccion_tension}
 \end{equation}
 A continuación, para obtener las magnitudes reales aplicadas al objeto bajo ensayo, se multiplica escalarmente los vectores de tensión y corriente, por sus respectivos factores de atenuación, cargados por el usuario en los campos pertinentes de la ventana, aplicando la siguiente ecuación:
 \begin{equation}
-\label{eq:reconstruccion_tension_total}
-{\text{Onda escalada}}[n] = \text{Onda sin escalar}[n] \times A_{\text{CH<X>}}
+    {\text{Onda escalada}}[n] = \text{Onda sin escalar}[n] \times A_{\text{CH<X>}}
+    \label{eq:reconstruccion_tension_total}
 \end{equation}
 Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en amperes, \unit{\ampere}), se transfieren al módulo de procesamiento matemático para determinar sus parámetros normativos: tiempo de frente $T_1$, tiempo de cola $T_2$, valor de cresta $U_{\text{t}}$ y sobreimpulso OS, conforme a los requerimientos de la norma \cite{iec60060_1}.
 
-\section{Motor de cálculo: procesamiento de señales y ajuste de curvas}
-\label{sec:motor_calculo}
+\subsection{Motor de cálculo}
+\label{subsec:motor_calculo}
 
-Este componente constituye el núcleo matemático del \emph{software}, y es responsable de obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}.
+Este componente constituye el núcleo matemático del \emph{software}, y es responsable de realizar el procesamiento digital de señales para obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}. Ha sido diseñado exclusivamente para cumplir con las normas IEC 60060-1 \cite{iec60060_1} y 61083-2 \cite{iec61083_2}.
 
-El motor de cálculo ha sido diseñado exclusivamente para cumplir con las normas IEC 60060-1 \cite{iec60060_1} e IEC 61083-2-1 \cite{iec61083_2}, aplicando criterios de modularidad, que permiten su validación automatizada e independiente del resto de la aplicación.
-
-\subsection{Flujo algorítmico de cálculo}
-\label{sec:flujo_algoritmico}
+\subsubsection{Flujo algorítmico de cálculo}
+\label{subsubsec:flujo_algoritmico}
 
 Este proceso se divide en tres fases operativas: preprocesamiento común, clasificación dinámica y reconstrucción de la señal.
 
@@ -239,28 +218,29 @@ Esta etapa es común a todos los registros adquiridos.
 \begin{enumerate}
     \item \textbf{Eliminación de offset}: Se calcula el valor de tensión continua ($V_{\text{offset}}$) promediando estadísticamente una ventana de datos adquiridos ($N_{\text{pretrigger}}$) en el instante previo al disparo (``pre-trigger''), donde la curva registrada ($U_\text{e}[n]$) es nula.
     \begin{equation}
-        \label{eq:calculo_offset}
         V_{\text{offset}} = \frac{1}{N_{\text{pretrigger}}} \sum_{n=1}^{N_{\text{pretrigger}}} U_\text{e}[n]
+        \label{eq:calculo_offset}
     \end{equation}
     El vector de tensión corregida se calcula como:
     \begin{equation}
-        \label{eq:eliminacion_offset}
         U_{\text{corregida}}[n] = U_\text{e}[n] - V_{\text{offset}}
+        \label{eq:eliminacion_offset}
     \end{equation}
     \item \textbf{Normalización de polaridad}: Dado que los impulsos pueden ser de polaridad positiva o negativa, el algoritmo detecta el sentido del impulso evaluando el signo de la muestra extrema:
     \begin{equation}
+        \text{polaridad} = \text{sign}(\text{arg max} |U_{\text{corregida}}
+        [n]|)
         \label{eq:buscar_polaridad}
-        \text{polaridad} = \text{sign}(\text{arg max} |U_{\text{corregida}}[n]|)
     \end{equation}
     El vector de tensión corregida se multiplica por este término para simplificar el resto del procesamiento, asegurando que el análisis sea exclusivamente en el semiplano positivo:
     \begin{equation}
-        \label{eq:normalizacion_polaridad}
         U_{\text{abs}}[n] = \text{polaridad} \cdot U_{\text{corregida}}[n]
+        \label{eq:normalizacion_polaridad}
     \end{equation}
     \item \textbf{Normalización unitaria}: Se normaliza la amplitud al dominio unitario respecto a su valor de cresta.
     \begin{equation}
-        \label{eq:onda_normalizada}
         U_{\text{norm}}[n] = \frac{U_{\text{abs}}[n]}{\max(U_{\text{abs}}[n])}
+        \label{eq:onda_normalizada}
     \end{equation}
 \end{enumerate}
 
@@ -273,18 +253,7 @@ En este punto, el flujo se divide según si debe procesar un impulso de referenc
 Se asume que la onda es plena y se procede al ajuste paramétrico.
 \begin{enumerate}[resume]
     \item \textbf{Segmentación de datos}: Se selecciona una ventana de datos en el intervalo comprendido entre el \qty{20}{\percent} en el flanco de subida y el \qty{40}{\percent} en la cola de descarga del impulso.
-    \item \textbf{Ajuste de curva base}: Se realiza un ajuste paramétrico no lineal sobre la ventana de muestras, utilizando el algoritmo de \textbf{Levenberg-Marquardt}, teniendo como modelo de estimación la función de doble exponencial:
-    \begin{equation}
-        \label{eq:modelo_doble_exponencial}
-        u_d[n] = U \cdot \left( e^{-\frac{t - t_d}{\tau_1}} - e^{-\frac{t - t_d}{\tau_2}} \right)
-    \end{equation}
-    Donde los coeficientes desconocidos a determinar son:
-    \begin{itemize}
-        \item $U$ el parámetro de amplitud escalar.
-        \item $\tau_1$ la constante de tiempo de descarga.
-        \item $\tau_2$ la constante de tiempo de carga.
-        \item $t_d$ el retardo temporal del origen virtual.
-    \end{itemize}
+    \item \textbf{Ajuste de curva base}: Se realiza un ajuste paramétrico no lineal sobre las muestras tomadas, utilizando el algoritmo de \textbf{Levenberg-Marquardt}, teniendo como modelo de estimación la función de doble exponencial, de la ecuación \ref{eq:doble_exponencial}.
 \end{enumerate}
 
 \textbf{Caso B: Análisis de ensayo (LI vs. LIC)}
@@ -297,13 +266,13 @@ Si evalúa una onda de ensayo, se inyectan los parámetros de la onda de referen
     \end{equation}
     \item \textbf{Alineación del eje temporal}: Se obtiene el vector temporal alineado del impulso de ensayo, $t_\text{aligned}[n]$, partiendo de su vector temporal original $t[n]$, al que se lo desplaza la cantidad $t_L$.
     \begin{equation}
-        \label{eq:eje_alineado}
         t_\text{aligned}[n] = t[n] + t_L
+        \label{eq:eje_alineado}
     \end{equation}
     \item \textbf{Clasificación del impulso}: Se calcula la diferencia absoluta punto a punto entre el impulso de ensayo y el de referencia, usando sus vectores normalizados en amplitud.
     \begin{equation}
-        \label{eq:umbral_desviacion}
         | U_{\text{norm, i}}[n] - U_{\text{norm, ref}}[n] | > umbral
+        \label{eq:umbral_desviacion}
     \end{equation}
 \end{enumerate}
 
@@ -319,23 +288,24 @@ Si la desviación supera el umbral, la onda se clasifica como \textbf{impulso co
         \overline{U_\text{ref}} = \frac{1}{N} \sum_{n = k_{30\%}}^{k_{80\%}} U_\text{ref}[n]
     \end{equation}
     \begin{equation}
-        \label{eq:factor_escala_e}
         E = \frac{\overline{U_\text{i}}}{\overline{U_\text{ref}}}
+        \label{eq:factor_escala_e}
     \end{equation}
     \item \textbf{Escalado de la curva base}: Debido a que la descarga disruptiva hace colapsar el ajuste por el corte abrupto de la señal, se sintetiza la curva base de la onda de referencia $U_\text{b, ref}[n]$, y se escala en amplitud con el factor de escala $E$.
     \begin{equation}
-        \label{eq:curva_base_lic}
         U_\text{b, i}[n] = E \cdot U_\text{b, ref}[n]
+        \label{eq:curva_base_lic}
     \end{equation}
     \item \textbf{Tiempo de corte}: Se analiza la cola del impulso, minimizando la derivada primera para localizar el sector de máxima pendiente de caída:
     \begin{equation}
-        \label{eq:gradiente_colapso}
         n_\text{abrupto} = \text{arg min}\left(\frac{\text{d} U_{\text{cola}}[n]}{\text{d} t}\right)
+        \label{eq:gradiente_colapso}
     \end{equation}
     El inicio del colapso se encuentra evaluando el punto de inflexión local mediante la derivada segunda:
     \begin{equation}
+        n_\text{inflexion} = \text{arg min}\left(\frac{\text{d}^2 U_\text
+        {cola}[n]}{\text{d}^2 t}\right)
         \label{eq:punto_inflexión}
-        n_\text{inflexion} = \text{arg min}\left(\frac{\text{d}^2 U_\text{cola}[n]}{\text{d}^2 t}\right)
     \end{equation}
     Con ese índice se obtiene la tensión del colapso:
     \begin{equation}
@@ -343,11 +313,11 @@ Si la desviación supera el umbral, la onda se clasifica como \textbf{impulso co
     \end{equation}
     Se calculan los instantes correspondientes al \qty{70}{\percent} y al \qty{10}{\percent} de $U_\text{colapso}$ sobre el flanco descendente, para extrapolar linealmente el instante de corte, para el nivel de $U_{\text{colapso}}$:
     \begin{equation}
-        t_c = t_{70} + (U_{\text{colapso}} - U_{70}) \left(\frac{t_{10} - t_{70}}{U_{10} - U_{70}}\right)
+        t_\text{C} = t_{70} + (U_{\text{colapso}} - U_{70}) \left(\frac{t_{10} - t_{70}}{U_{10} - U_{70}}\right)
     \end{equation}
     Finalmente, se calcula el tiempo de corte respecto al origen virtual:
     \begin{equation}
-        T_c = t_c - O_1
+        T_\text{C} = t_\text{C} - O_1
     \end{equation}
 \end{enumerate}
 
@@ -357,63 +327,63 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
 \begin{enumerate}[resume]
     \item \textbf{Cálculo de curva residual}: Se obtiene como la diferencia algebraica entre la curva corregida ($U_{\text{corregida}}[n]$) y la curva base ($U_\text{b}[n]$) construída con los parámetros obtenidos del ajuste:
     \begin{equation}
-        \label{eq:curva_residual}
         R[n] = U_{\text{corregida}}[n] - U_\text{b}[n]
+        \label{eq:curva_residual}
     \end{equation}
     \item \textbf{Filtrado digital de fase cero}: 
-    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR (que cumpla con la ecuación \ref{eq:func_tension_ensayo} de la norma \cite{iec60060_1}) a la curva residual ($R[n]$). Para reducir el ruido de muy alta frecuencia relacionado a la interferencia electromagnética, sin perder oscilaciones propias del ensayo.
+    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR (con la característica de la ecuación \ref{eq:func_tension_ensayo}) a la curva residual ($R[n]$). Para reducir el ruido de muy alta frecuencia relacionado a la interferencia electromagnética, sin perder oscilaciones propias del ensayo.
     \item \textbf{Curva de tensión de ensayo}: Se sintetiza la curva de ensayo ($U_\text{t}[n]$) sumando algebraicamente la curva base analítica con la residual filtrada:
     \begin{equation}
-        \label{eq:curva_ensayo}
         U_\text{t}[n] = U_\text{b}[n] + R_f[n]
+        \label{eq:curva_ensayo}
     \end{equation}
     \item \textbf{Cálculo de parámetros característicos}: A partir de la curva de tensión de ensayo $U_\text{t}[n]$, se calculan los parámetros normativos. Dado que la señal procesada es de tiempo discreto, hay valores analíticos que pueden no corresponder con las muestras obtenidas, por lo que para encontrarlos se realiza una interpolación lineal.
     \begin{itemize}
-        \item \textbf{Valor de cresta} ($U_\text{t}$): Es la amplitud máxima de la curva de tensión de ensayo $U_\text{t}[n]$:
+        \item \textbf{Valor de la tensión de ensayo} ($U_\text{t}$): Como se normalizó la polaridad para que en el análsis sean todas positivas las ondas, con buscar el máximo es suficiente.
         \begin{equation}
-            \label{eq:valor_cresta}
             U_\text{t} = \text{max}(U_\text{t}[n])
+            \label{eq:valor_cresta}
         \end{equation}
-        \item \textbf{Tiempo de frente} ($T_1$): Se calcula como el cociente del intervalo temporal transcurrido entre los instantes $t_{30}$ y $t_{90}$ (correspondientes al \qty{30}{\percent} y \qty{90}{\percent} de $U_\text{t}$ respectivamente), dividido por $\num{0.6}$:
+        \item \textbf{Tiempo de frente} ($T_1$): Se calcula aplicando la definición de la ecuación \ref{eq:tiempo_frente}:
         \begin{equation}
-            \label{eq:tiempo_frente}
             T_1 = \frac{t_{90} - t_{30}}{\num{0.6}}
+            \label{eq:tiempo_frente_2}
         \end{equation}
-        \item \textbf{Origen virtual} ($O_1$): El inicio ficticio de la descarga eléctrica se calcula:
+        \item \textbf{Origen virtual} ($O_1$): El inicio ficticio de la descarga eléctrica se calcula aplicando la definición de la ecuación \ref{eq:origen_virtual}:
         \begin{equation}
-            \label{eq:origen_virtual}
-            O_1 = t_{30} - \num{0.5} \cdot (t_{90} - t_{30})
+            O_1 = t_{30} - 0.5 \cdot (t_{90} - t_{30})
+            \label{eq:origen_virtual_2}
         \end{equation}
         \item \textbf{Tiempo de cola} ($T_2$): El intervalo temporal entre el origen virtual $O_1$ y el instante $t_{50}$, correspondiente al \qty{50}{\percent} de $U_\text{t}$ en el flanco descendente de la onda, se calcula:
         \begin{equation}
-            \label{eq:tiempo_cola}
             T_2 = t_{50} - O_1
+            \label{eq:tiempo_cola}
         \end{equation}
         \item \textbf{Sobreimpulso relativo} ($\text{OS}\%$): Se calcula como la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$):
         \begin{equation}
-            \label{eq:max_curva_registrada}
             U_\text{e} = \max(U_\text{e}[n])
+            \label{eq:max_curva_registrada}
         \end{equation}
         y el valor máximo de la curva base ($U_\text{b}$):
         \begin{equation}
-            \label{eq:max_curva_base}
             U_\text{b} = \max(U_\text{b}[n])
+            \label{eq:max_curva_base}
         \end{equation}
         expresado en porcentaje:
         \begin{equation}
-            \label{eq:sobreimpulso_relativo}
             \text{OS}\% = \frac{U_\text{e} - U_\text{b}}{U_\text{e}} \cdot \num{100}
+            \label{eq:sobreimpulso_relativo}
         \end{equation}
     \end{itemize}
 \end{enumerate}
 
-\section{Gestión de la base de datos}
-\label{sec:gestion_base_datos}
+\subsection{Gestión de la base de datos}
+\label{subsec:gestion_base_datos}
 
-Los registros generados durante los ensayos de impulsos atmosféricos de alta tensión requieren un sistema de almacenamiento fiable y trazable. Para ello, el módulo de persistencia, maneja de forma centralizada la persistencia de datos en disco, protegiendo la integridad de las formas de onda originales y los resultados analíticos calculados, evitando pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
+El módulo de \textbf{Persistencia de la información}, tiene como función principal administrar de forma centralizada la bases de datos en disco, utilizando el formato HDF5. Así como también, gestionar la exportación de resultados a hojas de cálculo tipo CSV o XLSX. Además, también debe proteger la integridad de las formas de onda originales, y los resultados analíticos calculados, como también, evitar pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
 
-\subsection{Flujo de almacenamiento}
-\label{subsec:flujo_almacenamiento}
+\subsubsection{Flujo de almacenamiento}
+\label{subsubsec:flujo_almacenamiento}
 
 El flujo de guardado inicia cuando el operador acciona el comando en la interfaz gráfica, entonces, el Presentador ejecuta una secuencia de validación:
 \begin{enumerate}
@@ -440,8 +410,8 @@ Para exportar los resultados a hojas de cálculo que faciliten su manipulación 
 
 Aunque previamente convierte la escala física de los resultados: las bases de tiempo se convierten de segundos (\unit{\second}) a microsegundos (\unit{\micro\second}) y las tensiones de volts (\unit{\volt}) a kilovolts (\unit{\kilo\volt}).
 
-\subsection{Sistema de ficheros en disco}
-\label{subsec:estructura_ficheros_disco}
+\subsubsection{Sistema de ficheros en disco}
+\label{subsubsec:estructura_ficheros_disco}
 
 Una vez que el operador haya seleccionado un directorio raíz para el proyecto, la creación de carpetas se automatiza aplicando el árbol de directorios de la figura \ref{fig:estructura_carpetas}, asignando espacios físicos en disco para la información.
 
@@ -483,8 +453,8 @@ Donde:
     \item \texttt{HHMMSS}: Indica el horario en formato Hora-Minutos-Segundos.
 \end{itemize}
 
-\subsection{Estructura de la base de datos}
-\label{subsec:estructura_base_datos}
+\subsubsection{Estructura de la base de datos}
+\label{subsubsec:estructura_base_datos}
 
 La información se almacena de manera estructurada y comprimida, en único archivo con formato \textbf{HDF5}, que actúa como una base datos independiente para cada elemento bajo ensayo.
 
@@ -541,3 +511,192 @@ Este formato organiza internamente el archivo como un sistema de ficheros, distr
     \caption{Estructura jerárquica de la base de datos.}
     \label{fig:estructura_base_datos}
 \end{figure}
+
+
+\section{Capa de visualización: Vista}
+\label{sec:capa_vista}
+
+La \textbf{Vista} maneja de forma exclusiva la representación visual del sistema y la captura de las interacciones del operador. Ya que, solo declara estáticamente la disposición y propiedades de los componentes gráficos. Ante cualquier interacción física del usuario, como el accionamiento de botones o la inserción de datos, emite señales que son interceptadas por el Presentador para desencadenar el flujo correspondiente.
+
+La interfaz gráfica se modeló empleando la herramienta de diseño \textbf{Qt Designer} \cite{qt_designer}, que sirve para diseñar interfaces gráficas visualmente (arrastrando y soltando objetos). Luego, una vez finalizado el diseño de la ventana, se compila a código de Python mediante el compilador de la biblioteca \textbf{PySide6} \cite{pyside6}, asegurando la compatibilidad con el resto del programa.
+
+\subsection{Características de la GUI}
+\label{sec:caracteristicas_gui}
+
+El desarrollo de la GUI parte de la premisa de que debe ser simple y contener lo mínimo necesario para que los operadores destinatarios del programa, puedan configurar de manera remota el osciloscopio interactuando con la interfaz gráfica.
+
+El diseño de la GUI se estructuró en retroalimentación directa con los técnicos de laboratorio, encargados del ensayo de impulso atmosférico tipo rayo, que plantearon los siguientes requerimientos:
+
+\begin{itemize}
+    \item Registrar datos del elemento bajo ensayo.
+    \item Registrar de condiciones ambientales (temperatura, humedad y presión).
+    \item Control centralizado del osciloscopio digital (ajuste de escalas, bases de tiempo, posición del cursor y modos de disparo).
+    \item Almacenar la información manualmente.
+    \item Exportar resultados a hojas de cálculo.
+\end{itemize}
+
+En base a esos requisitos se desarrolló la interfaz, la cual puede observarse en las figuras \ref{fig:GUI_1366x768} y \ref{fig:GUI_1920x1080}, que tiene la capacidad de autoajustar sus dimensiones al tamaño de la pantalla, siendo particularmente diseñado para las dos configuraciones más comunes al momento de este desarrollo, que son $1366 \times 768$ px y $1920 \times 1080$ px.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/GUI_1366x768.png}
+    \caption{GUI en tamaño 1366x768 px.}
+    \label{fig:GUI_1366x768}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/GUI_1920x1080.png}
+    \caption{GUI en tamaño 1920x1080 px.}
+    \label{fig:GUI_1920x1080}
+\end{figure}
+
+\subsection{Diagrama funcional}
+
+Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un recorrido lógico de trabajo en la ventana.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/GUI_Bloques.png}
+    \caption{Flujo de trabajo.}
+    \label{fig:recorrido_gui}
+\end{figure}
+
+\begin{enumerate}
+    \item \textbf{Datos del ensayo}: Sirve para cargar los datos relacionados a la trazabilidad del laboratorio sobre del elemento que se va a ensayar.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/GUI_1_datos_ensayo.png}
+        \caption{Bloque de Datos de ensayo.}
+        \label{fig:GUI_1_Datos_ensayo}
+    \end{figure}
+    \item \textbf{Condiciones ambientales}: Donde el operador introduce parámetros termodinámicos de referencia como la temperatura, presión y humedad. Estos valores son esenciales para la posterior corrección atmosférica de la tensión de ensayo $U_t$ de acuerdo con la norma \textbf{IEC 60060-1} \cite{iec60060_1}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/GUI_2_condiciones_ambientales.png}
+        \caption{Bloque de Condiciones ambientales.}
+        \label{fig:GUI_2_condiciones_ambientales}
+    \end{figure}
+    \item \textbf{Atenuaciones del sistema}: Para ingresar los factores de atenuación de los divisores resistivos y atenuadores coaxiales, correspondientes al sistema de medición.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/GUI_3_atenuaciones.png}
+        \caption{Bloque de Atenuaciones del sistema de medición.}
+        \label{fig:GUI_3_atenuaciones}
+    \end{figure}
+    \item \textbf{Configuraciones del osciloscopio}: Agrupa los comandos de control del instrumento
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_4_control_osciloscopio.png}
+        \caption{Bloque de Control del instrumento.}
+        \label{fig:GUI_4_control_osciloscopio}
+    \end{figure}
+    \item \textbf{Ensayo}: Permite al usuario ejecutar la adquisición de señal, guardar los registros en la base de datos y realizar la exportación en formatos planos como Excel o CSV.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/GUI_5_opciones_ensayo.png}
+        \caption{Bloque de Opciones de ensayo.}
+        \label{fig:GUI_5_opciones_ensayo}
+    \end{figure}
+    \item \textbf{Resultados del ensayo}: Este panel renderiza dinámicamente en una tabla los parámetros de la onda calculados tras la adquisición ($U_t$, $T_1$, $T_2$ o $T_c$ y $OS\%$).
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{img/GUI_6_resultados_ensayo.png}
+        \caption{Bloque de Resultados de ensayo.}
+        \label{fig:GUI_6_resultados_ensayo}
+    \end{figure}
+    \item \textbf{Gráfico de ondas}: El área de mayor tamaño de la pantalla se reservó para el renderizado de las curvas de tensión y corriente.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_7_grafico.png}
+        \caption{Bloque de Gráfico.}
+        \label{fig:GUI_7_grafico}
+    \end{figure}
+\end{enumerate}
+
+\subsection{Ejemplo de uso}
+
+A modo de ejemplo se presenta a continuación, una guía paso a paso del flujo de trabajo a realizar por el operario, desde que inicia el programa hasta que exporta los resultados.
+
+\begin{enumerate}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_1_crear_sesion.png}
+        \caption{Creación de directorio del ensayo.}
+        \label{fig:GUI_uso_1_crear_sesion}
+    \end{figure}
+    \item [\textbf{Paso 1:}] Completar los campos del elemento a ensayar.
+    \item [\textbf{Paso 2:}] Accionar el botón \enquote{Crear/Abrir Carpeta} para crear una nueva carpeta.
+    \item [\textbf{Paso 3:}] Buscar la ruta donde se creará la carpeta.
+    \item [\textbf{Paso 4:}] Crear la carpeta.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/GUI_uso_2_sesion_creada.png}
+        \caption{Notificación de creación de carpeta exitosa.}
+        \label{fig:GUI_uso_2_sesion_creada}
+    \end{figure}
+    \item [\textbf{Paso 5:}] Confirmar que se creó correctamente la carpeta del ensayo.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/GUI_uso_3_cargar_condiciones.png}
+        \caption{Edición de campos a completar.}
+        \label{fig:GUI_uso_3_cargar_condiciones}
+    \end{figure}
+    \item [\textbf{Paso 6:}] Cargar las condiciones ambientales.
+    \item [\textbf{Paso 7:}] Habilitar (tildar) la edición de los campos de las atenuaciones.
+    \item [\textbf{Paso 8:}] Completar los campos de las atenuaciones.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/GUI_uso_4_deshabilitar_atenuaciones.png}
+        \caption{Deshabilitación de edición de campos de atenuaciones.}
+        \label{fig:GUI_uso_4_deshabilitar_atenuaciones}
+    \end{figure}
+    \item [\textbf{Paso 9:}] Deshabilitar (destildar) la edición de los campos de las atenuaciones.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_5_configurar_instrumento.png}
+        \caption{Configuración del osciloscopio.}
+        \label{fig:GUI_uso_5_configurar_instrumento}
+    \end{figure}
+    \item [\textbf{Paso 10:}] Conectar el osciloscopio a un puerto USB de la computadora y accionar el botón de búsqueda del instrumento. Cuando lo detecta, se conecta automáticamente.
+    \emph{Nota: si conecta el instrumento antes de abrir el programa, se conectará automáticamente desde el inicio.}
+    \item [\textbf{Paso 11:}] Habilitar/deshabilitar los canales del osciloscopio que se vayan a usar.
+    \item [\textbf{Paso 12:}] Configurar los parámetros del osciloscopio.
+    \item [\textbf{Paso 13:}] Accionar el botón \enquote{Iniciar} para comenzar la captura del impuslo.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_6_guardar_onda.png}
+        \caption{Guardado de impulso.}
+        \label{fig:GUI_uso_6_guardar_onda}
+    \end{figure}
+    \item [\textbf{Paso 14:}] Accionar el botón \enquote{Guardar}, para almacenar permanentemente la onda.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_7_onda_guardada.png}
+        \caption{Ejemplo de onda guardada.}
+        \label{fig:GUI_uso_7_onda_guardada}
+    \end{figure}
+    Luego de guardar la onda, se puede mover la leyenda para que no interfiera con el gráfico. Y también, se puede ampliar/alejar el gráfico con la rueda el \emph{mouse}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_8_historial.png}
+        \caption{Historial de impulsos guardados.}
+        \label{fig:GUI_uso_8_historial}
+    \end{figure}
+    \item [\textbf{Paso 15:}] \textbf{(Opcional)} Accionar el botón \enquote{Ver Ondas} para ver el historial de ondas almacenadas. Donde se encuentran las opciones de mostrar/ocultar todas las ondas en simultáneo, o también se puede mostrar/ocultar individualmente cada una, seleccionando en la lista desplegable.
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_9_normalizar_ondas.png}
+        \caption{Gráfico normalizado a valor unitario.}
+        \label{fig:GUI_uso_9_normalizar_ondas}
+    \end{figure}
+    \item [\textbf{Paso 16:}] \textbf{(Opcional)} Accionar los botones de opciones \enquote{Real} o \enquote{Normalizado}, para ver las ondas en su magnitud real o escalada a valor unitario respectivamente.
+        \begin{figure}[H]
+        \centering
+        \includegraphics[width=1\textwidth]{img/GUI_uso_10_exportar.png}
+        \caption{Ejemplo de exportación de resultados.}
+        \label{fig:GUI_uso_10_exportar}
+    \end{figure}
+    \item [\textbf{Paso 17:}] Al finalizar la captura de impulsos, accionar el botón \enquote{Exportar}, para obtener los resultados en hojas de cálculo.
+    \item [\textbf{Paso 18:}] Por defecto ya genera un nombre para el archivo saliente, pero puede modificarse. Luego, seleccionar el formato de salida deseado y accionar el botón \enquote{Guardar}.
+\end{enumerate}

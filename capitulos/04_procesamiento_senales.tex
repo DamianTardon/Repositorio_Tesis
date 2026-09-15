@@ -52,12 +52,17 @@ Ahora bien, el tipo de función a ajustar es importante para que represente adec
     u_d(t) = U \cdot \left( e^{-\dfrac{t-t_d}{\tau_1}} - e^{-\dfrac{t-t_d}{\tau_2}} \right)
     \label{eq:doble_exponencial}
 \end{equation}
+Donde:
+\begin{itemize}[label={}, leftmargin=*]
+    \item $u_d(t)$: función de tensión.
+    \item $t$: tiempo.
 
-Donde:\\
-$u_d(t)$: función de tensión.\\
-$t$: tiempo.\\
-$U$, $\tau_1$, $\tau_2$ y $t_d$: parámetros a encontrar mediante el ajuste.\\
-
+    Donde los coeficientes desconocidos a encontrar mediante el ajuste son:
+    \item $U$ el parámetro de amplitud escalar.
+    \item $\tau_1$ la constante de tiempo de descarga.
+    \item $\tau_2$ la constante de tiempo de carga.
+    \item $t_d$ el retardo temporal del origen virtual.
+\end{itemize}
 
 Para encontrar los parámetros de la función de doble exponencial, se utiliza el \textbf{método de mínimos cuadrados}, que es ampliamente usado en ingeniería para ajustar modelos a datos experimentales.
 Este método busca minimizar la suma de los cuadrados de los residuos ($S_r$), que es la distancia vertical entre cada dato observado y el punto correspondiente en la curva calculada. Matemáticamente, esto se expresa como:
@@ -91,26 +96,31 @@ Existen muchos algoritmos de optimización, cada uno con sus ventajas y desventa
 \begin{equation}
     w_{i+1} = w_i - \left( J^T J + \lambda diag(J^T J) \right)^{-1} (J^T e)
 \end{equation}
-Donde:\\
-$w_{i+1}$: vector de parámetros actualizado.\\
-$w_i$: vector de parámetros actual.\\
-$\lambda$: factor de amortiguamiento.\\
-$e$: vector de residuos o errores.\\
-$J$: matriz Jacobiana, formada por las primeras derivadas parciales de los errores respecto a los parámetros del modelo.\\
-$J^T J$: matriz de Hessiana aproximada, compuesta por las segundas derivadas, que modelan la curvatura general de la función de error.\\
-$diag(J^T J)$: matriz diagonal. Escala cada parámetro según la curvatura local de la función.\\
-$J^T e$: vector gradiente de la función error. Indica la dirección de máxima pendiente.\\
+Donde:
+\begin{itemize}[label={}, leftmargin=*]
+    \item $w_{i+1}$: vector de parámetros actualizado.
+    \item $w_i$: vector de parámetros actual.
+    \item $\lambda$: factor de amortiguamiento.
+    \item $e$: vector de residuos o errores.
+    \item $J$: matriz Jacobiana, formada por las primeras derivadas parciales de los errores respecto a los parámetros del modelo.
+    \item $J^T J$: matriz de Hessiana aproximada, compuesta por las segundas derivadas, que modelan la curvatura general de la función de error.
+    \item $diag(J^T J)$: matriz diagonal. Escala cada parámetro según la curvatura local de la función.
+    \item $J^T e$: vector gradiente de la función error. Indica la dirección de máxima pendiente.
+\end{itemize}
 
-\noindent Si $\boldsymbol{\lambda \rightarrow 0}$, el algoritmo se comporta como el \textbf{Método de Gauss-Newton}, donde asume que la función de error es localmente cuadrática, y utiliza expansiones de series de Taylor para aproximarse al mínimo de forma muy rápida, pero puede ser inestable y fallar si los valores iniciales elegidos están muy lejos del óptimo. Resultando:
-\begin{equation}
-    w_{i+1} = w_i - \left( J^T J \right)^{-1} (J^T e)
-\end{equation}
-Si $\boldsymbol{\lambda \rightarrow \infty}$, se comporta como el \textbf{Descenso del gradiente}, que  actualiza los coeficientes moviéndose en la dirección donde el error desciende más rápido. Es muy robusto, es difícil que diverja, pero su convergencia puede ser muy lenta.
-\begin{equation}
-    w_{i+1} = w_i - \alpha (J^T e)
-\end{equation}
-Donde:\\
-$\alpha$: tamaño de paso de avance de la iteración.
+\begin{itemize}[leftmargin=*]
+    \item Si $\boldsymbol{\lambda \rightarrow 0}$, el algoritmo se comporta como el \textbf{Método de Gauss-Newton}, donde asume que la función de error es localmente cuadrática, y utiliza expansiones de series de Taylor para aproximarse al mínimo de forma muy rápida, pero puede ser inestable y fallar si los valores iniciales elegidos están muy lejos del óptimo. Resultando:
+    \begin{equation}
+        w_{i+1} = w_i - \left( J^T J \right)^{-1} (J^T e)
+    \end{equation}
+    \item Si $\boldsymbol{\lambda \rightarrow \infty}$, se comporta como el \textbf{Descenso del gradiente}, que  actualiza los coeficientes moviéndose en la dirección donde el error desciende más rápido. Es muy robusto, es difícil que diverja, pero su convergencia puede ser muy lenta.
+    \begin{equation}
+        w_{i+1} = w_i - \alpha (J^T e)
+    \end{equation}
+    Donde:
+
+    $\alpha$: tamaño de paso de avance de la iteración.
+\end{itemize}
 
 En el metodo de descenso del gradiente $\alpha$ es un escalar, pero en el algoritmo de Levenberg-Marquardt, resulta una matriz diagonal que escala cada parámetro de forma independiente, por lo tanto:
 \begin{equation}
@@ -127,11 +137,13 @@ La interpolación polinomial es un proceso matemático que consiste en determina
 \begin{equation}
     f_1(x) = f(x_0) + \frac{f(x_1) - f(x_0)}{x_1 - x_0} (x - x_0)
 \end{equation}
-Donde:\\
-$f_1(x)$: polinomio de interpolación de primer grado.\\
-$f(x_0)$: punto de origen.\\
-$\dfrac{f(x_1) - f(x_0)}{x_1 - x_0}$: pendiente de la recta.\\
-$(x - x_0)$: distancia desde el punto de origen hasta el objetivo.
+Donde:
+\begin{itemize}[label={}, leftmargin=*]
+    \item $f_1(x)$: polinomio de interpolación de primer grado.
+    \item $f(x_0)$: punto de origen.
+    \item $\dfrac{f(x_1) - f(x_0)}{x_1 - x_0}$: pendiente de la recta.
+    \item $(x - x_0)$: distancia desde el punto de origen hasta el objetivo.
+\end{itemize}
 
 \textbf{Interpolación Polinomial:} Utiliza un polinomio de grado $n$ para pasar por $n+1$ puntos. Puede proporcionar una aproximación más precisa, pero es propenso a oscilaciones si el grado del polinomio es demasiado alto o si los puntos están mal distribuidos. Matemáticamente puede generalizarse como:
 \begin{align*}

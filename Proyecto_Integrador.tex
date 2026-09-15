@@ -82,14 +82,14 @@
 \pagestyle{fancy}
 
 \pagenumbering{roman}
-%\input{capitulos/00_portada.tex}
-%\input{capitulos/00_acta_tribunal.tex}
-%\input{capitulos/00_acta_director.tex}
-%\input{capitulos/00_dedicatoria.tex}
-%\input{capitulos/00_agradecimientos.tex}
-%\input{capitulos/00_resumen.tex}
+%\input{capitulos/00a_portada.tex}
+%\input{capitulos/00b_acta_tribunal.tex}
+%\input{capitulos/00c_acta_director.tex}
+%\input{capitulos/00d_dedicatoria.tex}
+%\input{capitulos/00e_agradecimientos.tex}
+%\input{capitulos/00f_resumen.tex}
 
-%\tableofcontents
+\tableofcontents
 
 \cleardoublepage
 %\listoftables
@@ -100,8 +100,8 @@
 \addcontentsline{toc}{chapter}{\listfigurename}
 
 \cleardoublepage
-%\input{capitulos/00_simbolos_convenciones.tex}
-\addcontentsline{toc}{chapter}{c}
+%\input{capitulos/00g_simbolos_convenciones.tex}
+\addcontentsline{toc}{chapter}{Lista de Símbolos}
 
 \newpage
 \pagenumbering{arabic}
@@ -121,13 +121,13 @@
 % ===========================================================================================
 \part{MARCO METODOLÓGICO}
 \input{capitulos/06_descripcion_modelo.tex}
-\input{capitulos/07_diseno_gui.tex}
-\input{capitulos/08_calibracion.tex}
+\input{capitulos/07_calibracion.tex}
 
 
 % ====================================================================================
 \part{RESULTADOS Y CONCLUSIONES}
-
+\input{capitulos/08_resultados.tex}
+%\input{capitulos/09_conclusiones.tex}
 
 % BIBLIOGRAFÍA =================================================================================================
 \cleardoublepage
