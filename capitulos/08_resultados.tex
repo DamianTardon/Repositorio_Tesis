@@ -6,10 +6,19 @@
 En este apartado se exponen los resultados de las calibraciones realizadas al programa desarrollado, aplicando el procedimiento descripto en el capítulo \ref{ch:calibracion_software}.
 
 \section{Análisis de precisión}
+\label{sec:analisis_precision}
 
-En este apartado se observan las tablas comparativas con los resultados obtenidos al analizar el mismo conjunto de datos con cada uno de los métodos, con su error de medición asociado. En donde \enquote{Manual} es el análisis de impulsos aplicando el método descripto en el Anexo C de la norma IEC 60060-1 \cite{iec60060_1} para impulsos con resolución de \num{8} bit, lo que implica tomar los datos registrados, y leerlos con algún programa de cálculo como Excel u otro equivalente para extraer sus parámetros. Mientras que \enquote{\num{8} bit} y \enquote{\num{16} bit} son impulsos que tienen dichas resoluciones de interés, ya que \num{8} bit es la resolución que tiene el osciloscopio empleado, mientras que \num{16} bit es la máxima resolución que ofrece el TDG, lo cual sirve para apreciar la máxima precisión que puede alcanzar el software si mejora la calidad de los datos adquiridos.
+En este apartado se analizó la diferencia de precisión que se puede tener con el método usado actualmente el Laboratorio de Alta Tensión, contra el software desarrollado en el presente trabajo. Para ello, se compararon los resultados obtenidos al analizar el mismo conjunto de impulsos generados con el TDG \cite{iec61083_2}, en tres variantes:
+\begin{enumerate}
+    \item \textbf{Manual}: Se graficó cada impulso, y se lo analizó aplicando el método descripto en el Anexo C de la norma IEC 60060-1 \cite{iec60060_1}. Para este caso, se usó la versión de las ondas de 8 bit, ya que se corresponde con la resolución que se usa actualmente en el laboratorio.
+    \item \textbf{8 bit}: Se generó con el TDG los impulsos de referencia con una resolución de \num{8} bit, acorde a la resolución del osciloscopio \cite{gds1000au_UserManual} empleado en este trabajo.
+    \item \textbf{16 bit}: Se generó con el TDG los impulsos de referencia con una resolución de \num{16} bit que es la máxima disponible, para evaluar cómo se comporta el software en caso de que use un osciloscopio con mayor resolución.
+\end{enumerate}
+
+El TDG tiene un total de \num{29} casos de impulsos plenos (LI), y \num{5} de impulsos cortados (LIC), de los cuales se seleccionaron \num{5} LI y \num{2} LIC, que son los más representativos de lo que se observa habitualmente en el laboratorio.
 
 \subsection{Ondas plenas}
+\label{subsec:precision_onda_plena}
 
 \begin{table}[H]
     \centering
@@ -31,7 +40,7 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
     \centering
     \begin{tabular}{@{}lrrrrrrrr@{}}
         \toprule
-        \multicolumn{9}{c}{\textbf{Tiempo de frente, T1}}                                                                                                                 \\ \midrule
+        \multicolumn{9}{c}{\textbf{Tiempo de frente, $T_1$}}                                                                                                                 \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
         LI-A1         & 0.840         & 2.0              & 0.833           & 0.79              & 0.840          & -0.048            & 0.840           & -0.029            \\ \midrule
         LI-M5         & 2.746         & 2.0              & 2.000           & 27.17             & 2.750          & 0.162             & 2.750           & 0.161             \\ \midrule
@@ -39,7 +48,7 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
         LI-M8         & 1.515         & 2.0              & 1.533           & -1.21             & 1.519          & 0.291             & 1.485           & 0.013             \\ \midrule
         LI-M12        & 1.292         & 2.0              & 1.233           & 4-54              & 1.289          & -0.271            & 1.293           & 0.100             \\ \bottomrule
     \end{tabular}
-    \caption{Resultados de T1 para impulsos LI}
+    \caption{Resultados de $T_1$ para impulsos LI}
     \label{tab:resultados_t1_li}
 \end{table}
 
@@ -47,7 +56,7 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
     \centering
     \begin{tabular}{@{}lrrrrrrrr@{}}
         \toprule
-        \multicolumn{9}{c}{\textbf{Tiempo de cola, T2}}                                                                                                                   \\ \midrule
+        \multicolumn{9}{c}{\textbf{Tiempo de cola, $T_2$}}                                                                                                                   \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
         LI-A1         & 60.16         & 1.0              & 60.05           & 0.18              & 60.22          & 0.097             & 60.15           & -0.009            \\ \midrule
         LI-M5         & 42.11         & 1.0              & 61.61           & -46.31            & 42.10          & -0.016            & 42.11           & -0.002            \\ \midrule
@@ -55,7 +64,7 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
         LI-M8         & 49.36         & 1.0              & 49.55           & -0.38             & 49.27          & -0.178            & 49.36           & -0.001            \\ \midrule
         LI-M12        & 52.27         & 1.0              & 52.93           & -1.26             & 52.39          & 0.233             & 52.27           & -0.008            \\ \bottomrule
     \end{tabular}
-    \caption{Resultados de T2 para impulsos LI}
+    \caption{Resultados de $T_2$ para impulsos LI}
     \label{tab:resultados_t2_li}
 \end{table}
 
@@ -77,6 +86,7 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
 
 
 \subsection{Ondas cortadas}
+\label{subsec:precision_onda_cortadas}
 
 \begin{table}[H]
     \centering
@@ -95,12 +105,12 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
     \centering
     \begin{tabular}{@{}lrrrrrrrr@{}}
         \toprule
-        \multicolumn{9}{c}{\textbf{Tiempo de frente, T1}}                                                                                                                 \\ \midrule
+        \multicolumn{9}{c}{\textbf{Tiempo de frente, $T_1$}}                                                                                                                 \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
         LIC-M4        & 1.305         & 2.0              & 1.283           & 1.66              & 1.310          & 0.358             & 1.305           & -0.001            \\ \midrule
         LIC-M5        & 0.857         & 2.0              & 0.767           & 10.54             & 0.870          & 1.499             & 0.868           & 1.275             \\ \bottomrule
     \end{tabular}
-    \caption{Resultados de T1 para impulsos LIC}
+    \caption{Resultados de $T_1$ para impulsos LIC}
     \label{tab:resultados_t1_lic}
 \end{table}
 
@@ -130,4 +140,33 @@ En este apartado se observan las tablas comparativas con los resultados obtenido
     \label{tab:resultados_os_lic}
 \end{table}
 
-\section{Análisis de tiempos}
+\section{Análisis de tiempo de demora}
+\label{sec:analisis_tiempo}
+
+En este apartado se analizó el tiempo que lleva con el método usado actualmente el Laboratorio de Alta Tensión, contra el software desarrollado en el presente trabajo. Para ello, se capturaron 5 impulsos plenos en el laboratorio, con cada método, y se cronometró el tiempo desde que se dispara el impulso hasta que se terminan de calcular todos los parámetros de la onda ($U_\text{t}$, $T_1$, $T_2$ y $OS\%$). A continuación, se presenta la tabla comparativa.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{@{}ccc@{}}
+        \toprule
+                            & \textbf{Manual} & \textbf{Software} \\ \midrule
+        \textbf{Tiempo [s]} & 150             & 2                 \\ \bottomrule
+    \end{tabular}
+    \caption{Comparativa de tiempos entre el análisis manual y el software.}
+    \label{tab:tiempo_manual_software}
+\end{table}
+
+\section{Incertidumbre estándar del \emph{software}}
+\label{sec:incertidumbre_software}
+
+Aplicando el procedimiento de la sección \ref{sec:procedimiento_calibracion}, se obtuvo los siguientes resultados para los grupos de impulsos analizados.
+
+\subsection{Incertidumbre para LI}
+\label{subsec:incertidumbre_software_li}
+
+En este caso, se analizó los \num{29} casos LI.
+
+\subsection{Incertidumbre para LIC}
+\label{subsec:incertidumbre_software_lic}
+
+En este caso, se analizó solo \num{2} casos LIC, correspondientes a los impulsos cortados en la cola.
