@@ -3,3 +3,37 @@
 \label{ch:conclusiones}
 \vspace{3\baselineskip}
 
+
+\section{Conclusiones}
+
+En el presente trabajo se desarrolló e implementó un sistema integral de software para la automatización, captura, procesamiento y evaluación metrológica de ensayos de tensión de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1,2/50}{\micro\second}) conforme a las exigencias de las normas \textbf{IEC 60060-1} e \textbf{IEC 61083-2}.
+
+A partir del diseño, calibración y evaluación comparativa del sistema, se llegó a las siguientes conclusiones:
+
+\begin{itemize}
+    \item \textbf{Mejora sustancial en la eficiencia operativa:} El sistema desarrollado redujo el tiempo de cálculo de los parámetros normativos de una onda de impulso ($U_\text{t}$, $T_1$, $T_2$, $T_\text{C}$ y $\text{OS}\%$) de \textbf{150 segundos} (requeridos en la metodología de trazado manual actual) a solo \textbf{2 segundos} por impulso.
+    Cabe destacar que dicha estimación manual no contempla el tiempo adicional requerido en la consolidación gráfica posterior, la cual implica exportar los datos brutos a un software externo (como Microsoft Excel) para superponer e integrar múltiples impulsos en un mismo gráfico. Mientras que, el software desarrollado elimina la dependencia de herramientas de terceros al ofrecer la selección, superposición y visualización directa de las ondas ensayadas listas para su exportación, optimizando significativamente la dinámica global de trabajo en el Laboratorio de Alta Tensión.
+
+    \item \textbf{Precisión y cumplimiento normativo:} La evaluación mediante las ondas patrón del TDG, demostró que el software cumple con los límites de aceptación paramétricos estipulados en la norma \textbf{IEC 61083-2}. A diferencia del método manual, que presentó errores desproporcionados en ondas con alta frecuencia superpuesta o cortes abruptos (superando el \num{20}\% de error en ciertos parámetros), el motor numérico desarrollado mantuvo los errores relativos de cálculo por debajo de los umbrales normativos en todas las pruebas.
+
+    \item \textbf{Cuantificación de la incertidumbre del software:} El análisis de calibración normativo permitió cuantificar la incertidumbre estándar del software para resoluciones verticales de 8 bit (correspondiente al osciloscopio utilizado en el desarrollo y en el laboratorio) y de 16 bit (máxima resolución disponible en el TDG). Se constató que el incremento en la resolución de cuantización reduce la componente de incertidumbre del algoritmo, ratificando la solidez matemática del motor numérico independientemente del instrumental utilizado.
+
+    \item \textbf{Robustez del procesamiento digital de señales:} La combinación de métodos de regresión no lineal mediante el algoritmo de Levenberg-Marquardt (con estimación automática de semillas según el Anexo D de la IEC 60060-1), y el filtrado bidireccional IIR de fase cero (diseñado para compensar la doble atenuación), garantizó la correcta reconstrucción de la curva de tensión de ensayo, y la separación de sobreelevaciones sin distorsión de fase ni desplazamientos temporales.
+
+    \item \textbf{Arquitectura desacoplada y disponibilidad operacional:} La adopción del patrón arquitectónico \textbf{Model-View-Presenter (MVP)}, combinada con una capa de abstracción de hardware bajo el estándar \textbf{VISA/PyVISA} mediante comunicación serie virtual CDC-ACM, y un esquema de sondeo asíncrono no bloqueante, aseguró la reactividad permanente de la interfaz gráfica en todo momento. Asimismo, la estructura de almacenamiento jerárquico en formato \textbf{HDF5} con respaldos redundantes en texto plano (\textbf{CSV}), garantiza la trazabilidad metrológica e integridad de los datos de ensayo.
+\end{itemize}
+
+\section{Trabajos futuros}
+
+Sobre la base de este desarrollo, y con el propósito de expandir las capacidades operativas y metrológicas del Laboratorio de Alta Tensión, se proponen las siguientes líneas de desarrollo futuro:
+
+\begin{enumerate}
+    \item \textbf{Incorporación del módulo de corrección atmosférica de $U_\text{t}$:}
+    Implementar el cálculo automático del factor de corrección atmosférica ($K_\text{t}$) de acuerdo con la norma \textbf{IEC 60060-1}, integrando directamente las ecuaciones de corrección por densidad de aire y humedad, con las variables ambientales (temperatura, presión y humedad), que actualmente el sistema ya registra y almacena en la base de datos HDF5.
+
+    \item \textbf{Ampliación del algoritmo para impulsos cortados en el frente:}
+    Desarrollar e incorporar en la Fase II del motor de cálculo, un algoritmo de análisis para ondas interrumpidas en el frente, completando la cobertura total de los casos de prueba de impulsos cortados contemplados en la norma IEC 61083-2.
+
+    \item \textbf{Integración de hardware de mayor resolución vertical:}
+    Aprovechar la modularidad de la capa de abstracción de hardware (HAL/VISA), para integrar osciloscopios de 10, 12 o 16 bits de resolución vertical, minimizando el error de cuantización en la etapa de digitalización.
+\end{enumerate}
