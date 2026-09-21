@@ -167,7 +167,7 @@ Las señales eléctricas que ingresan a los bornes analógicos del osciloscopio,
 \subsubsection{Desempaquetado de datos}
 \label{subsec:desempaquetado_datos}
 
-Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{Debido a discrepancias entre la estructura de datos obtenida del instrumento y el manual del fabricante, se adoptó un script provisto por el soporte técnico del fabricante.}\footnote{El manual de programación de la serie GDS-1000B complementa los detalles para manipular esta estructura.\cite{gds1000b_ProgrammingManual}}:
+Luego de que el osciloscopio digitalice la señal, el presentador ordena la descarga de los datos brutos (\emph{RAW}) de los canales habilitados, y recibe un bloque de datos, compuestos por el encabezado y el vector de datos de la onda, que cumple con la siguiente estructura\footnote{Debido a discrepancias entre la estructura de datos obtenida del instrumento y el manual del fabricante, se adoptó un script provisto por el soporte técnico del fabricante.}\footnote{Ante la falta de algunos detalles de la estructura de memoria interna en su manual original, se recurrió al manual de la serie GDS-1000B como documentación técnica complementaria dada la equivalencia de su arquitectura y firmware. \cite{gds1000b_ProgrammingManual}}:
 
 \begin{equation*}\label{eq:formato_memoria}
     \text{\texttt{\# A B C D E}}
@@ -254,6 +254,16 @@ Se asume que la onda es plena y se procede al ajuste paramétrico.
 \begin{enumerate}[resume]
     \item \textbf{Segmentación de datos}: Se selecciona una ventana de datos en el intervalo comprendido entre el \qty{20}{\percent} en el flanco de subida y el \qty{40}{\percent} en la cola de descarga del impulso.
     \item \textbf{Ajuste de curva base}: Se realiza un ajuste paramétrico no lineal sobre las muestras tomadas, utilizando el algoritmo de \textbf{Levenberg-Marquardt}, teniendo como modelo de estimación la función de doble exponencial, de la ecuación \ref{eq:doble_exponencial}.
+    Para garantizar la convergencia, el vector de parámetros iniciales se estima apartir de:
+    \begin{itemize}
+        \item $U$: Se asigna igual al valor pico de la onda analizada.
+        \item $t_d$: Se toma el primer punto del arreglo segmentado para el ajuste.
+        \item $\tau_1$ y $\tau_2$: Se adoptan las constantes de tiempo sugeridas por el Anexo D de la norma IEC 60060-1 \cite{iec60060_1}:
+        \begin{itemize}
+            \item $\tau_1 = \qty{70}{\micro\second}$
+            \item $\tau_2 = \qty{0.4}{\micro\second}$
+        \end{itemize}
+    \end{itemize}
 \end{enumerate}
 
 \textbf{Caso B: Análisis de ensayo (LI vs. LIC)}
@@ -331,7 +341,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
         \label{eq:curva_residual}
     \end{equation}
     \item \textbf{Filtrado digital de fase cero}: 
-    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR (con la característica de la ecuación \ref{eq:func_tension_ensayo}) a la curva residual ($R[n]$). Para reducir el ruido de muy alta frecuencia relacionado a la interferencia electromagnética, sin perder oscilaciones propias del ensayo.
+    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR a la curva residual ($R[n]$). Como este filtrado procesa la señal dos veces, la atenuación del filtro se diseña a la mitad en amplitud, de modo que al completar la secuencia bidireccional, la respuesta atenuada combinada coincida exactamente con la función de tensión de ensayo de la ecuación \ref{eq:func_tension_ensayo}.
     \item \textbf{Curva de tensión de ensayo}: Se sintetiza la curva de ensayo ($U_\text{t}[n]$) sumando algebraicamente la curva base analítica con la residual filtrada:
     \begin{equation}
         U_\text{t}[n] = U_\text{b}[n] + R_f[n]
@@ -460,6 +470,8 @@ La información se almacena de manera estructurada y comprimida, en único archi
 
 Este formato organiza internamente el archivo como un sistema de ficheros, distribuyendo los datos en grupos que actúan como carpetas, aplicando la estructura de la figura \ref{fig:estructura_base_datos}.
 
+Cabe aclarar, que el canal de corriente (CH2) no se somete a ningún procesamiento matemático por indicación de la norma \cite{iec60060_1}, limitándose el software a su acondicionamiento, escalamiento físico y representación gráfica. No obstante, dentro del grupo de CH2, el conjunto de datos ensayo contiene una copia del vector bruto escalado únicamente para mantener la simetría estructural con el canal de tensión (CH1) dentro del esquema de almacenamiento.
+
 \begin{figure}[H]
     \centering
     \begin{forest}
@@ -570,7 +582,7 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
         \caption{Bloque de Datos de ensayo.}
         \label{fig:GUI_1_Datos_ensayo}
     \end{figure}
-    \item \textbf{Condiciones ambientales}: Donde el operador introduce parámetros termodinámicos de referencia como la temperatura, presión y humedad. Estos valores son esenciales para la posterior corrección atmosférica de la tensión de ensayo $U_t$ de acuerdo con la norma \textbf{IEC 60060-1} \cite{iec60060_1}.
+    \item \textbf{Condiciones ambientales}: Donde el operador introduce parámetros termodinámicos de referencia como la temperatura, presión y humedad. Estos valores son esenciales para la posterior corrección atmosférica\footnote{En la versión actual del software, la corrección del valor de tensión de ensayo $U_t$ se realiza manualmente por el personal del laboratorio.} de la tensión de ensayo $U_t$ de acuerdo con la norma \textbf{IEC 60060-1} \cite{iec60060_1}.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.8\textwidth]{img/GUI_2_condiciones_ambientales.png}

@@ -84,7 +84,7 @@ Los descriptores de recursos VISA por lo general, tienen la siguiente gramática
     \end{itemize}
 \end{itemize}
 
-A continuación, se presentan dos ejemplos de descriptores de recursos VISA:
+A continuación, se presentan un ejemplo de descriptor de recursos VISA para puerto serie:
 
 \begin{table}[H]
     \centering
@@ -96,18 +96,4 @@ A continuación, se presentan dos ejemplos de descriptores de recursos VISA:
                        & Mapeado por el sistema al puerto físico (ej. COM1) \\ \bottomrule
     \end{tabular}
     \label{tab:descriptor_asrl}
-\end{table}
-
-\begin{table}[H]
-    \centering
-    \caption{Ejemplo de descriptor para USB (Universal Serial Bus)}
-    \begin{tabular}{@{}ll@{}}
-        \toprule
-        \multicolumn{2}{c}{\textbf{\texttt{USB0::0x0957::0x17A6::MY503::INSTR}}} \\ \midrule
-        \texttt{USB0}   & Controlador lógico USB. \\
-        \texttt{0x0957} & ID del fabricante.      \\
-        \texttt{0x17A6} & ID del producto.        \\
-        \texttt{MY503}  & Número de serie único.  \\ \bottomrule
-    \end{tabular}
-    \label{tab:descriptor_usb}
 \end{table}
