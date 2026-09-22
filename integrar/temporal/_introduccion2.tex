@@ -1,0 +1,180 @@
+\newpage
+
+\chapter{Introducción} \label{ch:introduccion}
+
+\vspace{3\baselineskip}
+
+El presente capítulo expone la fundamentación general del Proyecto Integrador, detallando el contexto técnico de los ensayos de \textbf{alta tensión}, la problemática operacional identificada en el laboratorio, los objetivos generales y específicos planteados, la metodología de desarrollo adoptada y la estructura organizativa de la memoria técnica.
+
+\section{Introducción} \label{sec:introduccion_gral}
+
+El desarrollo del presente Proyecto Integrador se enmarca en la necesidad de modernizar y optimizar la infraestructura de adquisición y procesamiento de datos del Laboratorio de Alta Tensión (LAT) de la Facultad de Ciencias Exactas, Físicas y Naturales de la Universidad Nacional de Córdoba. En el ámbito de la ingeniería de \textbf{alta tensión}, la verificación del comportamiento dieléctrico de los equipamientos eléctricos representa un requerimiento indispensable para garantizar la seguridad y confiabilidad del sistema eléctrico de potencia.
+
+Los ensayos de \textbf{impulso atmosférico} (\qty[parse-numbers=false]{1.2/50}{\micro\second}) permiten simular las sobretensiones transitorias de origen atmosférico a las que se ven expuestos elementos como transformadores, seccionadores y celdas de media tensión. La ejecución e interpretación de estos ensayos se encuentra estrictamente regulada por la norma \textbf{IEC 60060-1} \cite{iec60060_1}, la cual establece los criterios teóricos y los procedimientos de cálculo para determinar los parámetros característicos de la forma de onda, mientras que la norma \textbf{IEC 61083-2} \cite{iec61083_2} define las tolerancias metrológicas e incertidumbres admisibles para los sistemas digitales de medición y \textbf{software} de procesamiento.
+
+El presente trabajo aborda el diseño, la implementación y la validación metrológica de un \textbf{software} integral capaz de automatizar el control de un \textbf{osciloscopio digital}, la captura asíncrona de señales, el procesamiento digital de la curva registrada mediante técnicas de regresión no lineal y filtrado digital de fase cero, y la gestión de la persistencia de datos bajo esquemas jerárquicos normalizados.
+
+\section{Antecedentes} \label{sec:antecedentes}
+
+Históricamente, el Laboratorio de Alta Tensión disponía de un instrumento dedicado específicamente al registro y análisis de señales transitorias de \textbf{alta tensión}. Debido al agotamiento de su vida útil y a la obsolescencia de sus componentes electrónicos, dicho equipo sufrió una falla irrecuperable. Ante la imposibilidad económica de adquirir un sistema comercial dedicado de adquisición de impulsos —cuyo costo resulta sumamente elevado—, el laboratorio adaptó un procedimiento alternativo de medición utilizando un \textbf{osciloscopio digital} comercial (\cite{gds1000au_ProgrammingManual}, \cite{gds1000au_driver}).
+
+Bajo este esquema temporal, la señal de tensión proveniente del generador de impulsos Marx era atenuada mediante un \textbf{divisor resistivo} y un atenuador coaxial de \qty{50}{\ohm}, mientras que la corriente era capturada a través de una \textbf{resistencia shunt}. El operador debía digitalizar la onda en el osciloscopio, guardar el registro en una unidad de almacenamiento USB externa y transferir manualmente los datos brutos a una computadora de escritorio para su procesamiento analítico mediante hojas de cálculo comerciales.
+
+Este procedimiento manual presentaba severas limitaciones operativas:
+\begin{itemize}
+    \item \textbf{Tiempos de procesamiento excesivos}: El análisis de una única onda requería un tiempo promedio de \qty{150}{\second}, lo que ralentizaba la dinámica de ensayo cuando se aplicaban secuencias de múltiples impulsos consecutivos.
+    \item \textbf{Vulnerabilidad a errores humanos}: La extracción manual de los parámetros característicos a partir de tablas de puntos discreta aumentaba el riesgo de discrepancias numéricas, especialmente ante la presencia de ruido electromagnético o sobreelevaciones de alta frecuencia.
+    \item \textbf{Carencia de trazabilidad estructurada}: La información quedaba dispersa en archivos independientes, sin un registro centralizado que vinculara los metadatos del ensayo, las condiciones ambientales del laboratorio y las curvas brutas digitalizadas.
+\end{itemize}
+
+\section{Relevancia de trabajo} \label{sec:relevancia}
+
+La relevancia de este Proyecto Integrador radica en restituir y elevar la capacidad metrológica del Laboratorio de Alta Tensión mediante una solución de ingeniería de \textbf{software} propia, de bajo costo y alto rendimiento. Desde el punto de vista metrológico, la implementación de los algoritmos numéricos especificados en los Anexos B y D de la norma \textbf{IEC 60060-1} \cite{iec60060_1} asegura la correcta separación de la \textbf{curva base} y la \textbf{curva residual}, garantizando que la evaluación de la tensión de ensayo ($U_\text{t}$), el tiempo de frente ($T_1$), el tiempo de cola ($T_2$), el tiempo de corte ($T_\text{C}$) y el sobreimpulso relativo ($\text{OS}\%$) cumplan rigurosamente con los límites normativos.
+
+Desde una perspectiva operacional, el sistema desarrollado reduce el tiempo de cómputo de los parámetros de la onda de \qty{150}{\second} a únicamente \qty{2}{\second} por impulso, eliminando la necesidad de software de terceros y permitiendo la visualización, superposición y comparación inmediata de múltiples curvas registradas en tiempo real. Asimismo, la integración de una base de datos jerárquica bajo el estándar \textbf{HDF5} con respaldos redundantes en formato \textbf{CSV} garantiza la preservación e integridad de la información técnica frente a eventuales fallos de alimentación o del sistema operativo.
+
+\section{Motivación para la elección del tema} \label{sec:motivacion}
+
+La elección de este tema de Proyecto Integrador responde al desafío interdisciplinario de integrar el procesamiento digital de señales (\textbf{DSP}), la arquitectura de \textbf{software} orientada a objetos, la comunicación de instrumentos de medida y la metrología de \textbf{alta tensión}. La oportunidad de aplicar patrones de diseño arquitectónicos modernos, tales como el patrón \textbf{Modelo-Vista-Presentador} (\textbf{MVP}), y desarrollar una capa de abstracción de \textbf{hardware} (\textbf{HAL}) sobre la arquitectura \textbf{VISA} (\textbf{PyVISA}) representa una experiencia formativa de alto valor profesional en el área de la ingeniería electrónica.
+
+Asimismo, existe una clara motivación institucional orientada a dotar al laboratorio universitario de un sistema autónomo, escalable y mantenible en el tiempo, capaz de adaptarse a la incorporación futura de osciloscopios de mayor resolución vertical (\qty{10}{bit}, \qty{12}{bit} o \qty{16}{bit}) sin requerir reestructuraciones drásticas en el código fuente de la aplicación.
+
+\section{Formulación del problema} \label{sec:formulacion_problema}
+
+El problema central que resuelve este trabajo se formula mediante el siguiente interrogante de ingeniería: ¿Cómo diseñar e implementar un sistema de \textbf{software} automatizado, robusto y metrológicamente validado que permita controlar la adquisición asíncrona de señales en un \textbf{osciloscopio digital} comercial mediante comandos \textbf{SCPI}, procesar las formas de onda de \textbf{impulso atmosférico} (\qty[parse-numbers=false]{1.2/50}{\micro\second}) garantizando el cumplimiento de las tolerancias de las normas \textbf{IEC 60060-1} e \textbf{IEC 61083-2}, y gestionar la persistencia trazable de los datos sin comprometer la reactividad de la interfaz gráfica de usuario?
+
+\section{Objetivo} \label{sec:objetivos}
+
+A continuación se formalizan los objetivos que guían el desarrollo del presente Proyecto Integrador.
+
+\subsection{Objetivo General} \label{subsec:objetivo_general}
+
+Diseñar, desarrollar e implementar un \textbf{software} que automatice la digitalización, el almacenamiento y el análisis de ondas de \textbf{impulso atmosférico} (\qty[parse-numbers=false]{1.2/50}{\micro\second}), en conformidad con las normas \textbf{IEC 60060-1} \cite{iec60060_1} e \textbf{IEC 61083-2} \cite{iec61083_2}, con el propósito de optimizar el procedimiento manual existente, reduciendo los tiempos de análisis y aumentando la confiabilidad metrológica de los resultados.
+
+\subsection{Objetivos Específicos} \label{subsec:objetivos_especificos}
+
+Para alcanzar el objetivo general, se establecieron los siguientes objetivos específicos:
+
+\begin{enumerate}
+    \item Evaluar las especificaciones normativas de la norma \textbf{IEC 60060-1} \cite{iec60060_1} para establecer los parámetros característicos a registrar y calcular en impulsos plenos y cortados.
+    \item Examinar las prestaciones técnicas de los osciloscopios disponibles en el laboratorio (\cite{gds1000au_ProgrammingManual}, \cite{gds1000au_driver}) para determinar su viabilidad en la adquisición de ondas transitorias y la comunicación con una PC mediante el protocolo \textbf{VISA}.
+    \item Diseñar la lógica de automatización para el control del instrumento mediante instrucciones \textbf{SCPI} sobre un puerto serie virtual \textbf{CDC-ACM}.
+    \item Crear una interfaz gráfica de usuario (\textbf{GUI}) responsiva e intuitiva mediante \textbf{PySide6} y \textbf{Qt Designer} para la configuración del instrumento, la gestión de sesiones de trabajo y la captura de datos.
+    \item Desarrollar el motor numérico de procesamiento digital de señales aplicando algoritmos de ajuste paramétrico no lineal de \textbf{Levenberg-Marquardt} y filtrado digital \textbf{IIR} de fase cero.
+    \item Implementar la persistencia de datos mediante un esquema jerárquico en formato \textbf{HDF5}, con respaldos redundantes en texto plano (\textbf{CSV}) y exportación de informes a planillas de cálculo (\textbf{XLSX}).
+    \item Validar metrológicamente el funcionamiento del \textbf{software} mediante la inyección de ondas patrón del generador de datos de prueba (\textbf{TDG}) estipulado en la norma \textbf{IEC 61083-2} \cite{iec61083_2} y la ejecución de ensayos reales en el laboratorio.
+\end{enumerate}
+
+\section{Metodología} \label{sec:metodologia}
+
+Para dar cumplimiento a los objetivos propuestos, se adoptó un enfoque metodológico estructurado en seis fases consecutivas:
+
+\begin{enumerate}
+    \item \textbf{Revisión normativa y formalización matemática}: Estudio detallado de los procedimientos de cálculo de la norma \textbf{IEC 60060-1} \cite{iec60060_1} para la reconstrucción de la \textbf{curva de tensión de ensayo} ($U_\text{t}[n]$) y de las exigencias de incertidumbre de la norma \textbf{IEC 61083-2} \cite{iec61083_2}.
+    \item \textbf{Diseño de la capa de abstracción de hardware (HAL)}: Implementación de la comunicación serie sobre \textbf{PyVISA}, empaquetando comandos \textbf{SCPI} con finalizadores \texttt{LF} e interpretación del encabezado de la memoria interna del instrumento.
+    \item \textbf{Arquitectura de software e interfaz gráfica}: Modelado de la aplicación bajo el patrón \textbf{MVP}, separando la \textbf{Vista} pasiva (desarrollada en \textbf{Qt Designer}), el \textbf{Presentador} coordinador y el \textbf{Modelo} funcional, incorporando un hilo asíncrono para la espera no bloqueante del disparo del osciloscopio.
+    \item \textbf{Desarrollo del motor de cálculos DSP}: Programación de los algoritmos de acondicionamiento (eliminación de \emph{offset}, normalización de polaridad), estimación de semillas y ajuste no lineal mediante \textbf{Levenberg-Marquardt}, filtrado bidireccional \textbf{IIR} e interpolación lineal de instantes temporales.
+    \item \textbf{Gestión de persistencia de datos}: Estructuración de la base de datos \textbf{HDF5} comprimida, vinculando metradatos, condiciones ambientales y vectores de señal, e implementación del generador de respaldos en \textbf{CSV} e informes en \textbf{XLSX}.
+    \item \textbf{Calibración y ensayos de precisión}: Evaluación del algoritmo utilizando las \num{29} formas de onda de impulso pleno (\textbf{LI}) y los registros de impulso cortado (\textbf{LIC}) del \textbf{TDG}, cuantificando la incertidumbre estándar del \textbf{software} ($u_{B7}$) y comparando los tiempos operativos respecto del método manual.
+\end{enumerate}
+
+\section{Orientación al lector sobre el informe} \label{sec:orientacion_lector}
+
+La presente memoria técnica se encuentra organizada en nueve capítulos, cuyo contenido se sintetiza a continuación:
+
+\begin{itemize}
+    \item \textbf{Capítulo 1: Introducción}: Presenta la introducción general, los antecedentes del problema, la relevancia técnica, la motivación, los objetivos, la metodología y la estructura del trabajo.
+    \item \textbf{Capítulo 2: Fundamentos normativos de alta tensión}: Aborda los conceptos teóricos del ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), las definiciones de la norma \textbf{IEC 60060-1} \cite{iec60060_1} y el principio de funcionamiento del generador Marx.
+    \item \textbf{Capítulo 3: Instrumentación y adquisición de señales}: Describe el funcionamiento del \textbf{osciloscopio digital}, los fenómenos de muestreo y cuantización, las interfaces de comunicación, el protocolo \textbf{VISA} y la sintaxis de comandos \textbf{SCPI}.
+    \item \textbf{Capítulo 4: Procesamiento digital de señales}: Detalla las técnicas de filtrado digital (\textbf{FIR}, \textbf{IIR} y fase cero), el método de ajuste por mínimos cuadrados no lineales mediante el algoritmo de \textbf{Levenberg-Marquardt} y los esquemas de interpolación.
+    \item \textbf{Capítulo 5: Arquitectura del software}: Analiza los patrones arquitectónicos de software (\textbf{MVC}, \textbf{MVP}, \textbf{MVVM}) y fundamenta la selección del patrón \textbf{MVP} para garantizar el desacoplamiento y la mantenibilidad del sistema.
+    \item \textbf{Capítulo 6: Descripción del modelo e implementación}: Expone la estructura detallada de los módulos del programa, el flujo asíncrono de adquisición, la organización de la base de datos \textbf{HDF5} y el manual de uso de la interfaz gráfica.
+    \item \textbf{Capítulo 7: Calibración del software}: Describe el procedimiento normativo de la \textbf{IEC 61083-2} \cite{iec61083_2} para la calibración del motor de cálculo mediante el generador de datos de prueba (\textbf{TDG}) y el análisis de incertidumbre.
+    \item \textbf{Capítulo 8: Resultados}: Presenta las tablas comparativas de precisión entre el método manual y el software, la evaluación del tiempo operativo de cómputo y las componentes de incertidumbre obtenidas.
+    \item \textbf{Capítulo 9: Conclusiones y trabajos futuros}: Detalla las conclusiones generales del trabajo, el cumplimiento de los objetivos planteados y las líneas de desarrollo propuestas para la expansión del sistema.
+\end{itemize}
+
+\newpage
+\section*{Referencias Bibliográficas}
+
+\begin{filecontents*}{\jobname.bib}
+@misc{iec60060_1,
+  title        = {High-voltage test techniques - Part 1: General definitions and test requirements},
+  author       = {{International Electrotechnical Commission}},
+  organization = {IEC},
+  number       = {IEC 60060-1:2010},
+  year         = {2010}
+}
+
+@misc{iec61083_2,
+  title        = {Instruments and software used for measurement in high-voltage and high-current tests - Part 2: Requirements for software for tests with impulse voltages and currents},
+  author       = {{International Electrotechnical Commission}},
+  organization = {IEC},
+  number       = {IEC 61083-2:2013},
+  year         = {2013}
+}
+
+@misc{gds1000au_ProgrammingManual,
+  title        = {GDS-1000A-U Series Digital Storage Oscilloscope Programming Manual},
+  author       = {{Good Will Instrument Co., Ltd.}},
+  organization = {GW Instek},
+  url          = {https://www.gwinstek.com},
+  note         = {Accedido en 2026}
+}
+
+@misc{gds1000b_ProgrammingManual,
+  title        = {GDS-1000B Series Digital Storage Oscilloscope Programming Manual},
+  author       = {{Good Will Instrument Co., Ltd.}},
+  organization = {GW Instek},
+  url          = {https://www.gwinstek.com},
+  note         = {Accedido en 2026}
+}
+
+@misc{gds1000au_driver,
+  title        = {GDS-1000A-U Series USB Driver},
+  author       = {{Good Will Instrument Co., Ltd.}},
+  organization = {GW Instek},
+  url          = {https://www.gwinstek.com},
+  note         = {Accedido en 2026}
+}
+\end{filecontents*}
+
+@misc{iec60060_1,
+  title        = {High-voltage test techniques - Part 1: General definitions and test requirements},
+  author       = {{International Electrotechnical Commission}},
+  organization = {IEC},
+  number       = {IEC 60060-1:2010},
+  year         = {2010}
+}
+
+@misc{iec61083_2,
+  title        = {Instruments and software used for measurement in high-voltage and high-current tests - Part 2: Requirements for software for tests with impulse voltages and currents},
+  author       = {{International Electrotechnical Commission}},
+  organization = {IEC},
+  number       = {IEC 61083-2:2013},
+  year         = {2013}
+}
+
+@misc{gds1000au_ProgrammingManual,
+  title        = {GDS-1000A-U Series Digital Storage Oscilloscope Programming Manual},
+  author       = {{Good Will Instrument Co., Ltd.}},
+  organization = {GW Instek},
+  url          = {https://www.gwinstek.com},
+  note         = {Accedido en 2026}
+}
+
+@misc{gds1000b_ProgrammingManual,
+  title        = {GDS-1000B Series Digital Storage Oscilloscope Programming Manual},
+  author       = {{Good Will Instrument Co., Ltd.}},
+  organization = {GW Instek},
+  url          = {https://www.gwinstek.com},
+  note         = {Accedido en 2026}
+}
+
+@misc{gds1000au_driver,
+  title        = {GDS-1000A-U Series USB Driver},
+  author       = {{Good Will Instrument Co., Ltd.}},
+  organization = {GW Instek},
+  url          = {https://www.gwinstek.com},
+  note         = {Accedido en 2026}
+}
