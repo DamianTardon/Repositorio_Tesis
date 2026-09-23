@@ -82,7 +82,7 @@ El módulo \textbf{Controlador de \emph{hardware}}, tiene como función abstraer
 
 A nivel de \emph{software}, para evitar el acoplamiento directo del código de la aplicación con las llamadas al sistema de bajo nivel (capa física de transmisión), se implementa una capa de abstracción de \emph{hardware} (HAL, \emph{Hardware Abstraction Layer}), bajo la arquitectura VISA. Esta capa de abstracción permite que los comandos de consulta (\textit{queries}) y configuración (\textit{writes}) permanezcan independientes de la interfaz de \emph{hardware} utilizada (sea USB, GPIB, Ethernet o RS-232), permitiendo actualizaciones de la instrumentación sin necesidad de modificar el código del presentador.
 
-El controlador inicializa el administrador de recursos, y ejecuta un escaneo automático para buscar algún dispositivo conectado, que tenga un descriptor de recurso lógico VISA, como los ejemlos de las tablas \ref{tab:descriptor_asrl} y \ref{tab:descriptor_usb}.
+El controlador inicializa el administrador de recursos, y ejecuta un escaneo automático para buscar algún dispositivo conectado, que tenga un descriptor de recurso lógico VISA, como el ejemplo de la tabla \ref{tab:descriptor_asrl}.
 
 Si encuentra al menos un dispositivo direccionable, se conecta al mismo. La comunicación inicia instanciando el administrador de recursos VISA de Python (PyVISA), acompañado de la biblioteca \texttt{pyvisa-py} para asegurar un entorno multiplataforma sin depender de bibliotecas nativas propietarias.
 
