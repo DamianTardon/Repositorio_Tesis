@@ -1,17 +1,51 @@
-Pagina de tablas
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cccccc}
+        \toprule
+        \textbf{Ancho de banda}         & 25 MHz              \\ \midrule
+        \textbf{Tasa de muestreo max.}  & 75 MSa/s            \\ \midrule
+        \textbf{Vin max.}               & 500 Vpk             \\ \midrule
+        \textbf{Longitud de memoria}    & 256 k               \\
+                                        & 1 M                 \\ \midrule
+        \textbf{Slew rate entrada}      & 4 kV/\textmu s      \\ \midrule
+        \textbf{Resolución vertical}    & 10 bit              \\ \midrule
+        \textbf{Impedancia entrada}     & 1 M\textohm \pm 1\% \\ 
+                                        & 45 pf \pm0.5pf      \\ \bottomrule
+    \end{tabular}
+    \caption{Características técnicas del osciloscopio Nicolet PowerPro 610.}
+    \label{tab:nicolet_especificaciones}
+\end{table}
 
 \begin{table}[H]
-    \begin{small}
+    \centering
+    \begin{small} % Tamaño reducido.
         \begin{tabular}{cccccc}
             \toprule
-            \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Marca}}} & \multicolumn{1}{c}{\multirow{2}{*}{\textbf{Modelo}}} & \textbf{Ancho de} & \textbf{Tasa de}  & \textbf{Manual de}    & \textbf{Compatibilidad} \\
-                                                                &                                                      & \textbf{banda}    & \textbf{muestreo} & \textbf{programación} & \textbf{VISA}           \\ \midrule
-            GW Instek                                           & GDS-1022                                             & 25 MHz            & 250 MSa/s         & Sí                    & Sí                      \\ \midrule
-            GW Instek                                           & GDS-1102A-U                                          & 100 MHz           & 1 GSa/s           & Sí                    & Sí                      \\ \midrule
-            Keysight                                            & GDS-1102A-U                                          & 100 MHz           & 1 GSa/s           & No                    & No                      \\ \midrule
-            Owon                                                & PDS7102T                                             & 100 MHz           & 500 MSa/s         & No                    & No                      \\ \bottomrule
+            \textbf{Marca} & \textbf{Modelo} & \textbf{Ancho de} & \textbf{Tasa de}  & \textbf{Manual de}    & \textbf{Compatibilidad} \\
+                           &                 & \textbf{banda}    & \textbf{muestreo} & \textbf{programación} & \textbf{VISA}           \\ \midrule
+            GW Instek      & GDS-1022        & 25 MHz            & 250 MSa/s         & Sí                    & Sí                      \\ \midrule
+            GW Instek      & GDS-1102A-U     & 100 MHz           & 1 GSa/s           & Sí                    & Sí                      \\ \midrule
+            Keysight       & DSO1052B        & 100 MHz           & 1 GSa/s           & No                    & No                      \\ \midrule
+            Owon           & PDS7102T        & 100 MHz           & 500 MSa/s         & No                    & No                      \\ \bottomrule
         \end{tabular}
         \caption{Comparativa técnica de osciloscopio disponibles.}
-        \label{tab:osciloscopio}
-    \end{small} % Tamaño reducido.
+        \label{tab:comparativa_osciloscopios}
+    \end{small}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{cccccc}
+        \toprule
+        \textbf{Ancho de banda}         & 100 MHz             \\ \midrule
+        \textbf{Tasa de muestreo max.}  & 1 GSa/s             \\ \midrule
+        \textbf{Vin max.}               & 300 Vpk             \\ \midrule
+        \textbf{Longitud de memoria}    & 4 k                 \\
+                                        & 2 M                 \\ \midrule
+        \textbf{Resolución vertical}    & 8 bit               \\ \midrule
+        \textbf{Impedancia entrada}     & 1 M\textohm \pm 2\% \\ 
+                                        & ~15 pf              \\ \bottomrule
+    \end{tabular}
+    \caption{Características técnicas del osciloscopio GW Instek GDS-1102A-U.}
+    \label{tab:gwinstek_especificaciones}
 \end{table}

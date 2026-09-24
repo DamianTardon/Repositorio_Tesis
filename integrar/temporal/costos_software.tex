@@ -1,0 +1,34 @@
+\section{Análisis comparativo de costos de software} \label{sec:comparativa_costos_software}
+
+En esta sección se evalúa la viabilidad económica y técnica de la plataforma de software para la automatización del sistema de ensayo de impulsos de alta tensión. Se contrapone el entorno comercial propietario \textbf{National Instruments LabVIEW} frente al ecosistema de lenguaje \textbf{Python} basado en bibliotecas de código abierto (\emph{open source}).
+
+\subsection{Fundamentos de evaluación económica y licencias} \label{subsec:evaluacion_licencias}
+
+Históricamente, los laboratorios de ensayo de alta tensión han recurrido a licencias propietarias como \textbf{LabVIEW} para la instrumentación virtual y el control de osciloscopios mediante la interfaz \textbf{VISA}. No obstante, la adquisición de una licencia perpetua de desarrollo de \textbf{LabVIEW} representa un costo aproximado de \qty{1100}{USD} por estación de trabajo, al cual deben añadirse eventuales costos de mantenimiento, actualizaciones de software y módulos adicionales de procesamiento de señales.
+
+Por el contrario, la arquitectura desarrollada en este trabajo se fundamenta íntegramente en el ecosistema \textbf{Python}, utilizando paquetes de distribución libre y código abierto bajo licencias permissivas (BSD, MIT y LGPL). Este enfoque reduce el costo directo de licenciamiento de software a un valor exacto de \qty{0}{USD}, al tiempo que otorga independencia tecnológica frente a proveedores comerciales, acceso transparente al código fuente para auditorías metrológicas según la norma \textbf{IEC 61083-2} \cite{iec61083_2} y la posibilidad de desplegar ejecutables sin restricciones de licencias de tiempo de ejecución (\emph{run-time}).
+
+La tabla \ref{tab:comparativa_software_costos} resume el análisis comparativo entre ambas alternativas tecnológicas.
+
+\begin{table}[H]
+\centering
+\begin{small}
+\caption{Comparativa técnica y económica entre LabVIEW y el ecosistema Python.}
+\label{tab:comparativa_software_costos}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Criterio de evaluación} & \textbf{NI LabVIEW} & \textbf{Ecosistema Python} \\ \midrule
+Costo de licencia de desarrollo & $\sim$\qty{1100}{USD} (Perpetua) & \qty{0}{USD} (Gratuito / Open Source) \\ \midrule
+Costo de licencias de despliegue & Variable / Requerido & \qty{0}{USD} (Ilimitado) \\ \midrule
+Transparencia del código fuente & Propietario (Caja negra) & Totalmente accesible y auditable \\ \midrule
+Librerías GUI y Control & NI-VISA / LabVIEW GUI & PyVISA \cite{gds1000au_driver} / PySide6 / Qt Designer \\ \midrule
+Procesamiento numérico & Módulos dedicados NI & NumPy / SciPy / h5py \\ \midrule
+Mantenibilidad y portabilidad & Dependiente de versión NI & Multiplataforma (Windows/Linux) \\ \midrule
+Costo Total de Propiedad (TCO) & Elevado & \qty{0}{USD} \\ \bottomrule
+\end{tabular}
+\end{small}
+\end{table}
+
+\subsection{Cómputo global de costos del sistema} \label{subsec:computo_global}
+
+La combinación de la selección de hardware del osciloscopio \textbf{GW Instek GDS-1102A-U} junto con el entorno de software libre permite la renovación completa del sistema de adquisición del laboratorio con una erogación presupuestaria mínima, en comparación con la adquisición de un analizador comercial dedicado como el sistema \textbf{HAEFELY HiAS 744}, cuyo costo oscila entre \qty{50700}{CHF} (\qty{58305}{USD}) para la versión de \qty{11}{bit} y \qty{65000}{CHF} (\qty{74750}{USD}) para la versión de \qty{16}{bit}.

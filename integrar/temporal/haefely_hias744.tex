@@ -1,0 +1,30 @@
+\section{Evaluación del sistema patrón de adquisición de alta resolución} \label{sec:haefely_hias744}
+
+A los fines de establecer un punto de referencia sobre las máximas prestaciones tecnológicas alcanzables en la actualidad para la medición y análisis de impulsos de tensión de alta frecuencia, se examina el sistema comercial de alta resolución \textbf{HAEFELY HiAS 744} \cite{haefely_brochure}. Este instrumento representa el estándar de la industria dedicado a ensayos de sobretensiones transitorias tipo rayo de \qty[parse-numbers=false]{1,2/50}{\micro\second}, ofreciendo aislamiento galvánico completo mediante enlaces de fibra óptica y desacoplamiento de bucles de tierra.
+
+La tabla \ref{tab:haefely_hias744_comparativa} sintetiza las especificaciones técnicas y operativas de los tres modelos de la serie \textbf{HiAS 744} (\textbf{HiAS 744}, \textbf{HiAS 744-S} y \textbf{HiAS 744-REF}) basándose en las hojas de datos del fabricante \cite{haefely_datasheet}. Para la conversión monetaria de los costos nominales indicados en francos suizos (CHF) a dólares estadounidenses (USD) vigentes a septiembre de 2026, se aplica una tasa de cambio de referencia de $\qty{1}{CHF} = \qty{1,15}{USD}$.
+
+\begin{table}[H]
+\centering
+\begin{small}
+\caption{Comparativa de características técnicas y costos de los modelos HAEFELY HiAS 744.}
+\label{tab:haefely_hias744_comparativa}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Parámetro técnico} & \textbf{HiAS 744 (11-bit)} & \textbf{HiAS 744-S (16-bit)} & \textbf{HiAS 744-REF (16-bit)} \\ \midrule
+Resolución vertical A/D & \qty{11}{bit} (\qty{0,05}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) \\ \midrule
+Tasa de muestreo máxima & \qty{125}{\mega\sample\per\second} & \qty{250}{\mega\sample\per\second} & \qty{250}{\mega\sample\per\second} \\ \midrule
+Ancho de banda analógico ($-3$ dB) & $\ge \qty{50}{\mega\hertz}$ & $\ge \qty{100}{\mega\hertz}$ & $\ge \qty{100}{\mega\hertz}$ \\ \midrule
+Canales de entrada analógicos & 1 o 2 canales & 2 (ampliable a 4) & 2 (ampliable a 4) \\ \midrule
+Tiempo de subida ($t_\text{r}$) & \qty{7}{\nano\second} & \qty{3,5}{\nano\second} & \qty{3,5}{\nano\second} \\ \midrule
+Profundidad de memoria & \num{2} Mpts & \num{2} Mpts & \num{2} Mpts \\ \midrule
+Precisión onda plena y cortada & $\pm \qty{1,5}{\percent} \, U_\text{pk}$ & $\pm \qty{1,0}{\percent} \, U_\text{pk}$ & $\pm \qty{0,7}{\percent} \, U_\text{pk}$ \\ \midrule
+Precisión onda cortada en frente (LIC) & $\pm \qty{2,0}{\percent} \, U_\text{pk}$ & $\pm \qty{1,0}{\percent} \, U_\text{pk}$ & $\pm \qty{1,0}{\percent} \, U_\text{pk}$ \\ \midrule
+Incertidumbre en parámetros de tiempo & $\pm \qty{3,0}{\percent}$ & $\pm \qty{2,0}{\percent}$ & $\pm \qty{1,8}{\percent}$ \\ \midrule
+Aislamiento y comunicación & Fibra óptica (FO) & Fibra óptica (FO) & Fibra óptica (FO) \\ \midrule
+Calibración metrológica & De fábrica & De fábrica & Acreditada ISO/IEC 17025 \\ \midrule
+Costo estimado en francos suizos (CHF) & \qty{50700}{CHF} & \qty{65000}{CHF} & No especificado \\ \midrule
+Costo equivalente en dólares (USD) & \qty{58305}{USD} & \qty{74750}{USD} & No especificado \\ \bottomrule
+\end{tabular}
+\end{small}
+\end{table}

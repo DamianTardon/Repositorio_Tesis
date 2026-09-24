@@ -1,0 +1,83 @@
+\section{Selección y evaluación del hardware de adquisición} \label{sec:seleccion_hardware}
+
+En esta sección se expone el proceso de análisis, evaluación técnica y selección del instrumento de digitalización de señales empleado para la modernización del sistema de ensayo de impulso atmosférico tipo rayo de \qty[parse-numbers=false]{1,2/50}{\micro\second} en el Laboratorio de Alta Tensión. Se examinan las características del equipo patrón preexistente, se formalizan los criterios teóricos y normativos de selección, y se fundamenta la adopción del nuevo osciloscopio digital.
+
+\subsection{Análisis del osciloscopio de referencia preexistente} \label{subsec:nicolet_referencia}
+
+El Laboratorio de Alta Tensión disponía históricamente del osciloscopio \textbf{Nicolet PowerPro 610} del fabricante \emph{Nicolet Instrument Corporation}, el cual constituía el sistema dedicado de adquisición de datos para ensayos de impulso transitorio. A diferencia de los instrumentos convencionales de propósito general, este equipo integraba un procesamiento interno directo para la estimación de parámetros característicos según normas de alta tensión, operando con una resolución vertical de \qty{10}{bit}.
+
+No obstante, debido al agotamiento de su vida útil y a la obsolescencia tecnológica de sus componentes electrónicos, el instrumento sufrió una falla física irrecuperable. La tabla \ref{tab:nicolet_especificaciones} sintetiza sus especificaciones técnicas nominales, las cuales constituyen la línea base de comparación para la selección del equipamiento sustituto.
+
+\begin{table}[H]
+\centering
+\caption{Características técnicas del osciloscopio Nicolet PowerPro 610.}
+\label{tab:nicolet_especificaciones}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parámetro técnico} & \textbf{Valor nominal} \\ \midrule
+Ancho de banda & \qty{25}{\mega\hertz} \\ \midrule
+Tasa de muestreo máxima & \qty{75}{\mega\sample\per\second} \\ \midrule
+Tensión de entrada máxima ($V_{\text{in,max}}$) & \qty{500}{\volt} \\ \midrule
+Longitud de memoria & \num{256} k / \num{1} M \\ \midrule
+Velocidad de respuesta (\emph{Slew rate}) & \qty{4}{\kilo\volt\per\micro\second} \\ \midrule
+Resolución vertical del convertidor A/D & \qty{10}{bit} \\ \midrule
+Impedancia de entrada & \qty{1}{\mega\ohm} $\pm$ \qty{1}{\percent} \ / \ \qty{45}{\pico\farad} $\pm$ \qty{0,5}{\pico\farad} \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Criterios de selección y evaluación de alternativas} \label{subsec:criterios_comparativa}
+
+Ante la imposibilidad presupuestaria de adquirir un sistema comercial dedicado de adquisición de impulsos, se estableció un procedimiento de evaluación sobre las alternativas de osciloscopios digitales de propósito general disponibles en el laboratorio. La selección se fundamentó en cuatro criterios técnicos esenciales:
+
+\begin{enumerate}
+    \item \textbf{Cumplimiento de tasa de muestreo y ancho de banda}: Capacidad de capturar transitorios de alta frecuencia con tiempo de frente $T_1 = \qty{1,2}{\micro\second}$ sin distorsión por \emph{aliasing}, cumpliendo con el teorema de muestreo y la norma IEC 60060-1 \cite{iec60060_1}.
+    \item \textbf{Disponibilidad de documentación de programación y sintaxis SCPI}: Existencia de manuales de programación provistos por el fabricante que detallen la estructura de comandos para la automatización remota.
+    \item \textbf{Compatibilidad con el estándar VISA}: Soporte para la arquitectura de software de instrumentos virtuales a través de puertos de comunicación estandarizados.
+    \item \textbf{Profundidad de memoria y resolución}: Capacidad de almacenamiento de muestras suficiente para registrar ventanas completas de tiempo con alta resolución horizontal.
+\end{enumerate}
+
+La tabla \ref{tab:comparativa_osciloscopios} presenta la evaluación comparativa de las cuatro alternativas de osciloscopios analizadas en el laboratorio.
+
+\begin{table}[H]
+\centering
+\begin{small}
+\caption{Comparativa técnica de osciloscopios disponibles en el laboratorio.}
+\label{tab:comparativa_osciloscopios}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Marca} & \textbf{Modelo} & \textbf{Ancho de banda} & \textbf{Tasa de muestreo} & \textbf{Manual SCPI} & \textbf{Compatibilidad VISA} \\ \midrule
+GW Instek & GDS-1022 & \qty{25}{\mega\hertz} & \qty{250}{\mega\sample\per\second} & Sí & Sí \\ \midrule
+GW Instek & GDS-1102A-U & \qty{100}{\mega\hertz} & \qty{1}{\giga\sample\per\second} & Sí & Sí \\ \midrule
+Keysight & DSO1052B & \qty{100}{\mega\hertz} & \qty{1}{\giga\sample\per\second} & No & No \\ \midrule
+Owon & PDS7102T & \qty{100}{\mega\hertz} & \qty{500}{\mega\sample\per\second} & No & No \\ \bottomrule
+\end{tabular}
+\end{small}
+\end{table}
+
+A partir del análisis comparativo, las opciones de los fabricantes \emph{Keysight} (DSO1052B) y \emph{Owon} (PDS7102T) fueron descartadas debido a la falta de manuales de programación abiertos y la incompatibilidad con la arquitectura \textbf{VISA}, lo que impedía la automatización del control y la extracción remota de datos. 
+
+Entre los modelos del fabricante \emph{GW Instek}, el modelo \textbf{GDS-1102A-U} fue seleccionado por sobre el modelo GDS-1022 debido a su mayor ancho de banda (\qty{100}{\mega\hertz} frente a \qty{25}{\mega\hertz}) y su superior tasa de muestreo máxima (\qty{1}{\giga\sample\per\second} frente a \qty{250}{\mega\sample\per\second}), garantizando una representación significativamente más fiel de las sobretensiones transitorias y frentes rápidos de impulsos cortados.
+
+\subsection{Caracterización técnica del osciloscopio seleccionado} \label{subsec:gwinstek_caracterizacion}
+
+El osciloscopio seleccionado para la implementación del sistema automatizado es el \textbf{GW Instek GDS-1102A-U}. Este instrumento dispone de un convertidor analógico-digital de \qty{8}{bit} de resolución vertical, una longitud de memoria extendida de hasta \num{2} Mpts (\num{2} M), e interfaz de comunicación USB tipo B CDC-ACM compatible con el protocolo \textbf{VISA} y comandos \textbf{SCPI} \cite{gds1000au_ProgrammingManual}.
+
+La tabla \ref{tab:gwinstek_especificaciones} resume las especificaciones técnicas fundamentales del instrumento seleccionado.
+
+\begin{table}[H]
+\centering
+\caption{Características técnicas del osciloscopio GW Instek GDS-1102A-U.}
+\label{tab:gwinstek_especificaciones}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parámetro técnico} & \textbf{Valor nominal} \\ \midrule
+Ancho de banda & \qty{100}{\mega\hertz} \\ \midrule
+Tasa de muestreo máxima & \qty{1}{\giga\sample\per\second} \\ \midrule
+Tensión de entrada máxima ($V_{\text{in,max}}$) & \qty{300}{\volt} \\ \midrule
+Longitud de memoria de registro & \num{4} k / \num{2} M \\ \midrule
+Resolución vertical del convertidor A/D & \qty{8}{bit} \\ \midrule
+Impedancia de entrada & \qty{1}{\mega\ohm} $\pm$ \qty{2}{\percent} \ / \ $\sim$\qty{15}{\pico\farad} \\ \bottomrule
+\end{tabular}
+\end{table}
+
+La adopción de este instrumento permite sustituir al equipo histórico garantizando la continuidad de las operaciones de ensayo en el laboratorio, respaldado por la capa de abstracción de hardware (HAL) desarrollada sobre PyVISA \cite{gds1000au_driver}.

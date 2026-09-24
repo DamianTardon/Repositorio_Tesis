@@ -2,6 +2,8 @@
 \chapter{Implementación del \emph{software}}
 \vspace{3\baselineskip}
 
+En este capítulo se expone la implementación del software desarrollado para la automatización, procesamiento digital y gestión de ensayos de impulso de alta tensión, según las directivas de las normas IEC 60060-1 e IEC 61083-2. Inicialmente se encuentra la descripción del patrón arquitectónico elegido (MVP). Seguidamente se explica cómo el presentador coordina la interfaz gráfica, el control del instrumental y la persistencia de datos. A continuación, se aborda la capa del modelo, analizando el controlador de hardware que actúa de capa de abstracción de hardware (HAL) del osciloscopio. Asimismo, se explica el algoritmo del motor de cálculo matemático, para la determinación de los parámetros normativos del impulso. Luego, se describe el esquema de persistencia jerárquica de la información. Finalmente, se detalla el diseño y flujo funcional de la interfaz gráfica de usuario.
+
 \section{Arquitectura adoptada}
 \label{sec:arquitectura_adoptada}
 
