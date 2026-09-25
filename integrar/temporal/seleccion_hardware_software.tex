@@ -1,0 +1,129 @@
+\chapter{Análisis y selección de hardware y software}
+\label{ch:seleccion_hardware_software}
+
+En este capítulo se expone el análisis técnico, normativo y económico para la definición de la plataforma de adquisición de datos y el entorno de software aplicados a la modernización del laboratorio de alta tensión. Se analiza el estado histórico y actual del equipamiento del laboratorio, se evalúa el sistema comercial patrón de referencia internacional, se comparan los osciloscopios digitales disponibles, y se fundamenta la selección final tanto del hardware de medición como de la arquitectura de software desarrollada.
+
+\section{Análisis del equipamiento de referencia y estado actual del laboratorio}
+\label{sec:nicolet_owon_estado}
+
+El Laboratorio de Alta Tensión contaba históricamente con un osciloscopio dedicado Nicolet PowerPro 610, del fabricante \emph{Nicolet Instrument Corporation}. A diferencia de los instrumentos de propósito general, este equipo integraba un procesamiento interno específico para la caracterización de impulsos atmosféricos.
+
+Sin embargo, debido al agotamiento de su vida útil y a la obsolescencia componentes electrónicos, el osciloscopio Nicolet sufrió una falla física irrecuperable. La tabla \ref{tab:nicolet_especificaciones} detalla sus especificaciones técnicas nominales, las cuales sirvieron como punto de partida para la búsqueda de un sustituto.
+
+\begin{table}[H]
+    \centering
+    \caption{Características técnicas del osciloscopio de referencia Nicolet PowerPro 610.}
+    \label{tab:nicolet_especificaciones}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Parámetro técnico} & \textbf{Valor nominal} \\ \midrule
+        Ancho de banda & \qty{25}{\mega\hertz} \\ \midrule
+        Tasa de muestreo máxima ($f_\text{s}$) & \qty{75}{\mega\sample/\second} \\ \midrule
+        Tensión de entrada máxima & \qty{500}{\volt} \\ \midrule
+        Longitud de memoria de registro & \num{256} k / \num{1} M \\ \midrule
+        Resolución vertical del convertidor A/D ($N$) & \qty{10}{bit} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+A raíz de la fuera de servicio del equipo, el laboratorio adoptó el uso del osciloscopio Owon PDS7102T. Bajo esta modalidad, la adquisición se realiza capturando la señal con el instrumento para efectuar posteriormente un trazado y análisis manual de los parámetros de impulso con el software propietario del equipo. Este procedimiento artesanal resulta lento y poco preciso, puesto que carece de automatización, introduce incertidumbres por apreciación visual e impide la aplicación de los algoritmos de filtrado y ajuste indicados en la norma IEC 60060-1 \cite{iec60060_1}.
+
+\section{Alternativas comerciales}
+\label{sec:alternativas_comerciales}
+
+Para establecer la cota superior del estado del arte en la instrumentación de alta tensión, se examinó el sistema comercial dedicado HAEFELY HiAS 744 \cite{haefely_brochure}. Este equipo representa el máximo exponente tecnológico a nivel internacional para el análisis de impulso tipo rayo de \qty[parse-numbers=false]{1,2/50}{\micro\second}, cumpliendo de manera estricta los requerimientos de las normas IEC 60060-1, IEC 60060-2 e IEC 61083-2 \cite{iec61083_2}.
+
+El sistema incorpora desacoplamiento óptico mediante enlaces de fibra óptica hacia la estación de control, logrando un aislamiento galvánico total que elimina bucles de tierra y protege al operador frente a descargas destructivas.
+
+El producto se comercializa en tres variantes: el modelo base HiAS 744 con resolución de \qty{11}{bit}, el modelo de alta precisión HiAS 744-S de \qty{16}{bit}, y el modelo HiAS 744-REF de \qty{16}{bit} provisto con certificación de calibración acreditada ISO/IEC 17025. La tabla \ref{tab:haefely_hias744_comparativa} resume las especificaciones técnicas de la serie, con sus costos a septiembre de 2026 \cite{haefely_datasheet}.
+
+\begin{table}[H]
+    \centering
+    \begin{small}
+        \caption{Especificaciones técnicas y costos de la serie HAEFELY HiAS 744.}
+        \label{tab:haefely_hias744_comparativa}
+        \begin{tabular}{lccc}
+            \toprule
+            \textbf{Parámetro técnico} & \textbf{HiAS 744 (11-bit)} & \textbf{HiAS 744-S (16-bit)} & \textbf{HiAS 744-REF (16-bit)} \\ \midrule
+            Resolución vertical A/D ($N$) & \qty{11}{bit} (\qty{0,05}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) \\ \midrule
+            Tasa de muestreo máxima & \qty{125}{\mega\sample/\second} & \qty{250}{\mega\sample/\second} & \qty{250}{\mega\sample/\second} \\ \midrule
+            Ancho de banda analógico ($-3$ dB) & $\ge \qty{50}{\mega\hertz}$ & $\ge \qty{100}{\mega\hertz}$ & $\ge \qty{100}{\mega\hertz}$ \\ \midrule
+            Profundidad de memoria & \num{2} Mpts & \num{2} Mpts & \num{2} Mpts \\ \midrule
+            Incertidumbre en parámetros de tiempo & $\pm \qty{3,0}{\percent}$ & $\pm \qty{2,0}{\percent}$ & $\pm \qty{1,8}{\percent}$ \\ \midrule
+            Aislamiento e interfaz de datos & Fibra óptica (FO) & Fibra óptica (FO) & Fibra óptica (FO) \\ \midrule
+            Costo en dólares (USD) & \qty{59000}{USD} & \qty{75000}{USD} & No especificado \\ \bottomrule
+        \end{tabular}
+    \end{small}
+\end{table}
+
+\section{Evaluación de equipos disponibles}
+\label{sec:comparativa_osciloscopios_laboratorio}
+
+Frente a la restricción presupuestaria que impide adquirir un analizador comercial dedicado como el HAEFELY HiAS 744, se procedió a evaluar los cuatro osciloscopios de propósito general disponibles en el laboratorio: GW Instek GDS-1022, GW Instek GDS-1102A-U, Keysight DSO1052B y Owon PDS7102T.
+
+Para garantizar la captura adecuada de señales con tiempo de frente de impulso $T_1 = \qty{1,2}{\micro\second}$, la tasa de muestreo $f_\text{s}$ debe ser superior a \qty{833}{\kilo\sample/\second}.
+
+La selección del instrumento definitivo se realizó con base en cuatro criterios fundamentales: ancho de banda y tasa de muestreo, longitud de memoria de registro, documentación abierta de la sintaxis de comandos SCPI, y compatibilidad con VISA. La tabla \ref{tab:comparativa_osciloscopios} muestra la evaluación técnica comparativa entre las alternativas.
+
+\begin{table}[H]
+    \centering
+    \begin{small}
+        \caption{Comparativa técnica de osciloscopios disponibles en el laboratorio.}
+        \label{tab:comparativa_osciloscopios}
+        \begin{tabular}{cccccc}
+            \toprule
+            \textbf{Marca} & \textbf{Modelo} & \textbf{Ancho de banda} & \textbf{Tasa de muestreo} & \textbf{Manual SCPI} & \textbf{Compatibilidad VISA} \\ \midrule
+            GW Instek & GDS-1022 & \qty{25}{\mega\hertz} & \qty{250}{\mega\sample/\second} & Sí & Sí \\ \midrule
+            GW Instek & GDS-1102A-U & \qty{100}{\mega\hertz} & \qty{1}{\giga\sample/\second} & Sí & Sí \\ \midrule
+            Keysight & DSO1052B & \qty{100}{\mega\hertz} & \qty{1}{\giga\sample/\second} & No & No \\ \midrule
+            Owon & PDS7102T & \qty{100}{\mega\hertz} & \qty{500}{\mega\sample/\second} & No & No \\ \bottomrule
+        \end{tabular}
+    \end{small}
+\end{table}
+
+Del análisis realizado se desprende que las alternativas Keysight DSO1052B y Owon PDS7102T debieron ser descartadas debido a la ausencia de manuales de programación de comandos SCPI e incompatibilidad con la arquitectura VISA, lo que impide su integración automatizada con un entorno de software externo.
+
+Entre los osciloscopios del fabricante GW Instek, el modelo GDS-1102A-U fue seleccionado por sobre el modelo GDS-1022 debido a su mayor ancho de banda (\qty{100}{\mega\hertz} frente a \qty{25}{\mega\hertz}), y su superior frecuencia de muestreo de \qty{1}{\giga\sample/\second}, permitiendo un registro adecuado de impulsos cortados y frentes rápidos. La tabla \ref{tab:gwinstek_especificaciones} sintetiza las características del modelo seleccionado.
+
+\begin{table}[H]
+    \centering
+    \caption{Especificaciones técnicas del osciloscopio seleccionado GW Instek GDS-1102A-U.}
+    \label{tab:gwinstek_especificaciones}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Parámetro técnico} & \textbf{Valor nominal} \\ \midrule
+        Ancho de banda & \qty{100}{\mega\hertz} \\ \midrule
+        Tasa de muestreo máxima ($f_\text{s}$) & \qty{1}{\giga\sample/\second} \\ \midrule
+        Tensión de entrada máxima & \qty{300}{\volt} \\ \midrule
+        Longitud de memoria & \num{4} k / \num{2} M pts \\ \midrule
+        Resolución vertical ACD & \qty{8}{bit} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Análisis de alternativas de software}
+\label{sec:comparativa_software}
+
+Una vez definido el hardware de adquisición, se evaluaron las alternativas para el desarrollo del entorno de automatización, procesamiento digital de señales y generación de reportes. Se contrapuso el uso del software propietario comercial National Instruments LabVIEW frente al ecosistema del lenguaje de programación Python.
+
+Ambas plataformas cuentan con capacidad técnica para lograr la adquisición remota de datos vía protocolos VISA/SCPI y procesar las ondas registradas. No obstante, una licencia comercial perpetua de desarrollo de LabVIEW implica un costo de aproximadamente \qty{1100}{USD}. Asimismo, LabVIEW opera como un entorno cerrado ("caja negra"), dificultando la auditoría interna de sus algoritmos matemáticos.
+
+Por el contrario, la solución basada en Python emplea bibliotecas de código abierto (\emph{open source}) bajo licencias permisivas (BSD, MIT y LGPL) como PyVISA, NumPy, SciPy, PySide6 y h5py. Este enfoque representa un costo económico de \qty{0}{USD}, brindando transparencia absoluta al desarrollador para auditar, verificar y adaptar los algoritmos de filtrado e interpolación exigidos por la norma IEC 61083-2 \cite{iec61083_2}. La tabla \ref{tab:comparativa_software_costos} expone la comparativa técnica y económica entre ambas soluciones.
+
+\begin{table}[H]
+    \centering
+    \begin{small}
+        \caption{Comparativa técnica y económica entre NI LabVIEW y el ecosistema Python.}
+        \label{tab:comparativa_software_costos}
+        \begin{tabular}{lcc}
+            \toprule
+            \textbf{Criterio de evaluación} & \textbf{NI LabVIEW} & \textbf{Ecosistema Python} \\ \midrule
+            Costo de licencia de desarrollo & $\sim$\qty{1100}{USD} (Perpetua) & \qty{0}{USD} (Gratuito / Open Source) \\ \midrule
+            Transparencia del código fuente & Propietario (Caja negra) & Totalmente accesible y auditable \\ \midrule
+            Librerías de control y GUI & NI-VISA / LabVIEW GUI & PyVISA / PySide6 / Qt Designer \\ \midrule
+            Procesamiento numérico & Módulos dedicados NI & NumPy / SciPy / h5py \\ \midrule
+            Mantenibilidad y portabilidad & Dependiente de versión NI & Multiplataforma (Windows/Linux) \\ \midrule
+            Costo Total de Propiedad & Elevado & Nulo \\ \bottomrule
+        \end{tabular}
+    \end{small}
+\end{table}
+
+La combinación del osciloscopio GW Instek GDS-1102A-U con el entorno de software desarrollado en Python, permite dotar al laboratorio de un sistema de ensayo automatizado, preciso y trazable con una inversión económica nula en software y hardware.
