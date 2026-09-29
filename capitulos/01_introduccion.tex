@@ -8,51 +8,62 @@ El presente capítulo expone la fundamentación general del Proyecto Integrador,
 \section{Introducción}
 \label{sec:introduccion_gral}
 
-El desarrollo del presente Proyecto Integrador se enmarca en la necesidad de modernizar y optimizar el sistema de adquisición y procesamiento, del ensayo de impulso (\qty[parse-numbers=false]{1.2/50}{\micro\second}), del Laboratorio de Alta Tensión de la Facultad de Ciencias Exactas, Físicas y Naturales de la Universidad Nacional de Córdoba.
+El desarrollo del presente Proyecto Integrador se enmarca en la necesidad de modernizar y optimizar el sistema de adquisición y procesamiento del ensayo de impulso (\qty[parse-numbers=false]{1.2/50}{\micro\second}), del Laboratorio de Alta Tensión de la Facultad de Ciencias Exactas, Físicas y Naturales de la Universidad Nacional de Córdoba.
 
-En el ámbito de la ingeniería de eléctrica, la verificación de la rigidez dieléctrica de los equipamientos eléctricos, representa un requerimiento indispensable para garantizar la seguridad y confiabilidad de los sistemas eléctricos de potencia.
+En el ámbito de la ingeniería eléctrica, la verificación de la rigidez dieléctrica del equipamiento resulta un requisito crítico para la seguridad operacional de las redes de transmisión y distribución.
 
-El ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}) permite simular las sobretensiones transitorias de origen atmosférico, a las que se ven expuestos elementos como transformadores, seccionadores y celdas de media tensión, entre otros. La ejecución e interpretación de estos ensayos se encuentra estrictamente regulada por la norma IEC 60060-1 \cite{iec60060_1}, la cual establece los conceptos teóricos, y los procedimientos de cálculo para determinar los parámetros característicos de la forma de onda, mientras que la norma IEC 61083-2 \cite{iec61083_2}, define las tolerancias metrológicas e incertidumbres admisibles, para los sistemas digitales de medición y el software de procesamiento.
+El ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), cuyo esquema de montaje puede apreciarse en la figura \ref{fig:diagrama_ensayo}, permite simular las sobretensiones transitorias de origen atmosférico, a las que se ven expuestos elementos como transformadores, seccionadores y celdas de media tensión, entre otros. La ejecución e interpretación de estos ensayos se encuentra estrictamente regulada por la norma IEC 60060-1 \cite{iec60060_1}, la cual establece los conceptos teóricos, y los procedimientos de cálculo para determinar los parámetros característicos de la forma de onda, mientras que la norma IEC 61083-2 \cite{iec61083_2}, define las tolerancias metrológicas e incertidumbres admisibles, para los sistemas digitales de medición y el software de procesamiento.
 
-El presente informe aborda el diseño, la implementación y la validación metrológica de un software integral, capaz de automatizar el control de un osciloscopio digital, la captura asíncrona de señales, el procesamiento digital del impulso registrado, mediante técnicas de regresión no lineal y filtrado digital de fase cero, y la gestión de la persistencia de datos.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/montaje_ensayo/diagrama_ensayo.png}
+    \caption{Diagrama de ensayo de impulso. Fuente: Propia.}
+    \label{fig:diagrama_ensayo}
+\end{figure}
+
+El presente informe aborda el diseño, la implementación y la validación metrológica de un software integral (figura \ref{fig:esquema_solucion}), capaz de automatizar el control de un osciloscopio digital, la captura asíncrona de señales, el procesamiento digital del impulso registrado, mediante técnicas de regresión no lineal y filtrado digital de fase cero, y la gestión de la persistencia de datos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/montaje_ensayo/esquema_solucion.png}
+    \caption{Diagrama de solución propuesta. Fuente: Propia.}
+    \label{fig:esquema_solucion}
+\end{figure}
 
 \section{Antecedentes}
 \label{sec:antecedentes}
 
-Históricamente, el Laboratorio de Alta Tensión disponía del osciloscopio \emph{Nicolet PowerPro 610} del fabricante \emph{Nicolet Instrument Corporation}, el cual tenía la capacidad de procesar internamente los impulsos atmosféricos (\qty[parse-numbers=false]{1.2/50}{\micro\second}), a diferencia de los osciloscopios comunes. Debido al agotamiento de su vida útil y a la obsolescencia de sus componentes electrónicos, dicho equipo sufrió una falla irrecuperable. Ante la imposibilidad económica de adquirir un sistema comercial dedicado de adquisición de impulsos —cuyo costo resulta sumamente elevado—, el laboratorio adaptó el procedimiento alternativo de medición del Anexo C de la norma IEC 60060-1 \cite{iec60060_1}, utilizando un osciloscopio digital de uso general.
+Anteriormente, el Laboratorio de Alta Tensión disponía del osciloscopio \emph{Nicolet PowerPro 610} del fabricante \emph{Nicolet Instrument}, el cual tenía la capacidad de procesar internamente los impulsos atmosféricos (\qty[parse-numbers=false]{1.2/50}{\micro\second}), a diferencia de los osciloscopios comunes de uso general. Sin embargo, debido al agotamiento de su vida útil y a la obsolescencia de sus componentes electrónicos, dicho equipo sufrió una falla física irrecuperable.
 
-En este ensayo, la señal de tensión proveniente del generador de impulsos Marx, es atenuada mediante un divisor resistivo y un atenuador coaxial, mientras que la corriente es capturada a través de una resistencia shunt, que se conectan al osciloscopio. Bajo este esquema, el operador debe digitalizar la onda en el osciloscopio, guardar el registro en una unidad de almacenamiento USB externa, y transferir manualmente los datos brutos a una computadora de escritorio para su procesamiento analítico mediante hojas de cálculo (como \emph{Microsoft Excel}).
-
-Este procedimiento manual presenta ciertas limitaciones operativas:
-\begin{itemize}
-    \item \textbf{Tiempos de procesamiento excesivos}: El análisis de una única onda requiere un tiempo cercano a \qty{3}{\minute}, lo que ralentiza la dinámica de ensayo cuando se aplican secuencias de múltiples impulsos consecutivos.
-    \item \textbf{Vulnerabilidad a errores humanos}: La extracción manual de los parámetros característicos a partir de gráficos de puntos discretos aumenta el riesgo de discrepancias numéricas, especialmente ante la presencia de ruido electromagnético o sobreelevaciones de alta frecuencia. Además, de que queda sujeto completamente a la interpretación visual del operario a cargo.
-    \item \textbf{Carencia de trazabilidad estructurada}: La información queda dispersa en archivos independientes, sin un registro centralizado que vincule los metadatos del ensayo, las condiciones ambientales del laboratorio y las curvas digitalizadas.
-\end{itemize}
+Ante la imposibilidad económica de adquirir un sistema comercial dedicado de adquisición de impulsos —cuyo costo resulta sumamente elevado—, el laboratorio adaptó el procedimiento de medición del Anexo C de la norma IEC 60060-1~\cite{iec60060_1}, (el cual sigue vigente al momento del desarrollo de este trabajo). Bajo este esquema, el operador utiliza un osciloscopio digital de uso general para digitalizar la onda junto con una computadora portátil, usando el software propietario del instrumento, que al ser de uso general, solo dispone de cursores de posición y selección de las escalas vertical/horizontal, para determinar los parámetros de la onda visualmente, en conjunto con hojas de cálculo (como \emph{Microsoft Excel}). Luego, debe transferir los datos brutos a otra computadora de escritorio para generar los gráficos, los cuales finalmente serán insertados en un informe técnico.
 
 \section{Relevancia de trabajo}
 \label{sec:relevancia}
 
-La relevancia de este Proyecto Integrador radica en mejorar la capacidad metrológica y reducir los tiempos de trabajo, del Laboratorio de Alta Tensión, mediante una solución de bajo costo y alto rendimiento. Desde el punto de vista metrológico, la implementación de los algoritmos especificados en los Anexos B y D de la norma IEC 60060-1 \cite{iec60060_1} asegura resultados determinísticos y libres del error operativo humano, garantizando que la evaluación de los parámetros del impulso analizado cumplan rigurosamente con los límites normativos.
+La relevancia de este Proyecto Integrador radica en mejorar la capacidad metrológica y reducir los tiempos de trabajo del Laboratorio de Alta Tensión, mediante una solución de bajo costo y alto rendimiento. Desde el punto de vista metrológico, la implementación de los algoritmos especificados en los Anexos B y D de la norma IEC 60060-1 \cite{iec60060_1} asegura resultados determinísticos y libres del error operativo humano, garantizando que la evaluación de los parámetros del impulso analizado cumpla rigurosamente con los límites normativos.
 
 Desde una perspectiva operacional, el sistema desarrollado busca reducir el tiempo de cómputo de los parámetros de cada impulso, eliminando la necesidad de software de terceros, permitiendo la visualización de múltiples ondas registradas en tiempo real. Asimismo, la integración de una base de datos con respaldos redundantes garantiza la preservación e integridad de la información técnica frente a eventuales fallos de alimentación o del sistema operativo.
 
 \section{Motivación para la elección del tema}
 \label{sec:motivacion}
 
-La elección de este tema responde al desafío de integrar el procesamiento digital de señales (DSP), la arquitectura de \emph{software} orientada a objetos, la comunicación de instrumentos de medición y la metrología. La oportunidad de aplicar patrones de diseño arquitectónicos modernos, tales como el patrón Modelo-Vista-Presentador (MVP), y desarrollar una capa de abstracción de \emph{hardware} (HAL) sobre la arquitectura VISA (PyVISA), representa una experiencia formativa de alto valor profesional en el área de la ingeniería electrónica.
+La elección de este tema responde a brindar al LAT una solución concreta a un problema real que tiene, mediante un sistema autónomo, escalable y mantenible en el tiempo, capaz de adaptarse a la actualización futura de osciloscopios de mayor resolución vertical (\qty{10}{bit}, \qty{12}{bit} o \qty{16}{bit}) sin requerir reestructuraciones drásticas en el código fuente de la aplicación.
 
-Asimismo, existe una motivación orientada a brindar al LAT un sistema autónomo, escalable y mantenible en el tiempo, capaz de adaptarse a la actualización futura de osciloscopios de mayor resolución vertical (\qty{10}{bit}, \qty{12}{bit} o \qty{16}{bit}) sin requerir reestructuraciones drásticas en el código fuente de la aplicación.
+Asimismo, existe una motivación orientada al desafío de integrar el procesamiento digital de señales (DSP), la arquitectura de \emph{software} orientada a objetos, la comunicación de instrumentos de medición y la metrología. La oportunidad de aplicar patrones de diseño arquitectónicos modernos, tales como el patrón Modelo-Vista-Presentador (MVP), y desarrollar una capa de abstracción de \emph{hardware} (HAL) sobre la arquitectura VISA \cite{rohde_schwarz_visa} (PyVISA), representa una experiencia formativa de alto valor profesional en el área de la ingeniería electrónica.
 
 \section{Formulación del problema}
 \label{sec:formulacion_problema}
 
-Actualmente el Laboratorio de Alta Tensión de la Facultad de Ciencias Exactas, Físicas y Naturales de la UNC, cuenta con la necesidad de un sistema automatizado, de adquisición, procesamiento, almacenamiento trazable y presentación gráfica, de datos correspondientes a ensayos de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1.2/50}{\micro\second}), en cumplimiento de las normas IEC 60060-1 y 61083-2, para reducir los tiempos operativos y mejorar la precisión numérica de los resultados.
+Actualmente el Laboratorio de Alta Tensión de la Facultad de Ciencias Exactas, Físicas y Naturales de la UNC, cuenta con la necesidad de un sistema automatizado, de adquisición, procesamiento, almacenamiento trazable y presentación gráfica, de datos correspondientes a ensayos de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1.2/50}{\micro\second}), en cumplimiento de las normas IEC 60060-1 y 61083-2. Esta necesidad surge debido a que el procedimiento actual presenta las siguientes limitaciones operativas:
 
-\section{Objetivo}
+\begin{itemize}
+    \item \textbf{Tiempos de procesamiento excesivos}: El análisis de una única onda requiere un tiempo cercano a \qty{3}{\minute}, lo que ralentiza la dinámica de ensayo cuando se aplican secuencias de múltiples impulsos consecutivos.
+    \item \textbf{Propensión a errores humanos}: La determinación visual de los parámetros característicos a partir de gráficos de puntos discretos aumenta el riesgo de discrepancias numéricas, especialmente ante la presencia de perturbaciones por interferencias electromagnéticas o características del elemento bajo ensayo, ya que queda sujeto a la interpretación del operario a cargo.
+    \item \textbf{Carencia de trazabilidad estructurada}: La información queda dispersa en archivos independientes, sin un registro centralizado que vincule los metadatos del ensayo, las condiciones ambientales del laboratorio y las curvas digitalizadas.
+\end{itemize}
+
+\section{Objetivos}
 \label{sec:objetivos}
-
-A continuación se formalizan los objetivos que guían el desarrollo del presente Proyecto Integrador.
 
 \subsection{Objetivo General}
 \label{subsec:objetivo_general}
@@ -83,10 +94,10 @@ Para dar cumplimiento a los objetivos propuestos, se adoptó un enfoque metodol�
     \item \textbf{Revisión normativa y formalización matemática}: Estudio de los procedimientos de cálculo de la norma IEC 60060-1 \cite{iec60060_1} para la reconstrucción de la curva de tensión de ensayo ($U_\text{t}(t)$), y de las exigencias de incertidumbre de la norma IEC 61083-2 \cite{iec61083_2}.
     \item \textbf{Diseño de la capa de abstracción de hardware (HAL)}: Implementación de la comunicación serie sobre PyVISA, empaquetando comandos SCPI.
     \item \textbf{Arquitectura de software e interfaz gráfica}: Modelado de la aplicación bajo el patrón MVP, separando la Vista pasiva, el Presentador coordinador y el Modelo funcional.
-    \item \textbf{Desarrollo del motor de cálculos DSP}: Programación de los algoritmos de acondicionamiento, ajuste, filtrado e interpolación de datos, para obtener lo parámetros del impulso.
-    \item \textbf{Gestión de persistencia de datos}: Estructuración de la base de datos, vinculando metradatos, condiciones ambientales y vectores de señal, e implementación del generador de respaldos y resultados.
+    \item \textbf{Desarrollo del motor de cálculos DSP}: Programación de los algoritmos de acondicionamiento, ajuste, filtrado e interpolación de datos, para obtener los parámetros del impulso.
+    \item \textbf{Gestión de persistencia de datos}: Estructuración de la base de datos, vinculando metadatos, condiciones ambientales y vectores de señal, e implementación del generador de respaldos y resultados.
     \item \textbf{Calibración de precisión}: Evaluación del algoritmo utilizando las formas de onda de impulso pleno (LI) e impulso cortado (LIC) del TDG, cuantificando la incertidumbre estándar del \emph{software}.
-    \item \textbf{Verificación del sistema}: Comprobación total del sistema en el LAT, capturando y procesando impulsos reales, para validar la integridad del \emph{software}, y comparar los tiempos operativos respecto con el método manual.
+    \item \textbf{Verificación del sistema}: Comprobación total del sistema en el LAT, capturando y procesando impulsos reales, para validar la integridad del \emph{software}, y comparar los tiempos operativos respecto al método manual.
 \end{enumerate}
 
 \section{Orientación al lector sobre el informe}

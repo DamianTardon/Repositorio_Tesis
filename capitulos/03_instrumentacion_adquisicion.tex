@@ -2,40 +2,40 @@
 \chapter{Instrumentación y adquisición de señales}
 \vspace{3\baselineskip}
 
-En este capítulo se abordan los principios de funcionamiento osciloscopio de almacenamiento digital para la digitalización de señales. Empezando con la caracterización funcional del osciloscopio, indicando sus parámetros críticos de desempeño que deben considerarse al momento de seleccionarlo. A continuación, se describen las interfaces de comunicación física estandarizadas empleadas para la comunicación con la computadora. Finalmente, se explica la arquitectura de software para instrumentos virtuales (VISA) y la sintaxis de comandos SCPI, destacando su rol como capa de abstracción para la automatización, configuración remota, y extracción digitalizada de formas de onda.
+En este capítulo se abordan los principios de funcionamiento del osciloscopio de almacenamiento digital para la digitalización de señales. Empezando con la caracterización funcional del osciloscopio, indicando sus parámetros críticos de desempeño que deben considerarse al momento de seleccionarlo. A continuación, se describen las interfaces de comunicación física estandarizadas empleadas para la comunicación con la computadora. Finalmente, se explica la arquitectura de software para instrumentos virtuales (VISA) y la sintaxis de comandos SCPI, destacando su rol como capa de abstracción para la automatización, configuración remota, y extracción digitalizada de formas de onda.
 
 \section{Osciloscopio de almacenamiento digital}
 
-El osciloscopio de almacenamiento digital, es un instrumento de medición electrónico, el cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y posterior análisis.
+El osciloscopio de almacenamiento digital es un instrumento de medición electrónico, el cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y posterior análisis.
 
-Su funcionamiento consiste en que la señal de interés ingresa por un circuito de entrada de acondicionamiento analógico, para dirigirse al convertidor analógico-digital (ADC, \emph{Analog-Digital Converter}) que muestrea y cuantiza la señal a una tasa definida por la base de tiempo configurada en ese momento. Luego, almacena la versión digitalizada en la memoria del osciloscopio, para finalmente presentarla en pantalla.
+Su funcionamiento consiste en que la señal de interés ingresa por un circuito de entrada de acondicionamiento analógico, para dirigirse al convertidor analógico-digital (ADC, \emph{Analog-Digital Converter}) que muestrea y cuantiza la señal a una tasa definida por la base de tiempo configurada en ese momento \cite{Floyd2006}. Luego, almacena la versión digitalizada en la memoria del osciloscopio, para finalmente presentarla en pantalla.
 
 A continuación, se describen sus parámetros más relevantes, que deben ser considerados al momento de seleccionar el osciloscopio para capturar una señal eléctrica.
 
-\textbf{Muestreo de señales:} Consiste en tomar valores de una señal analógica continua a intervalos regulares de tiempo para transformarla en una señal discreta de valores continuos (infinitos valores posibles). Para esto se aplica el teorema de muestreo (ecuacion \ref{eq:teorema_muestreo}), el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, ya que de lo contrario, aparece el fenómeno destructivo denominado \enquote{aliasing}, que muestra erróneamente componentes de frecuencias menores de lo que realmente son, llamadas “alias”. Matemáticamente, se define:
+\textbf{Muestreo de señales:} Consiste en tomar valores de una señal analógica continua a intervalos regulares de tiempo para transformarla en una señal discreta de valores continuos (infinitos valores posibles). Para esto se aplica el teorema de muestreo (ecuación \ref{eq:teorema_muestreo}), el cual establece que la frecuencia de muestreo $(f_s)$ debe ser mayor al doble de la componente de máxima frecuencia $(f_{max})$ presente en la señal, ya que de lo contrario, aparece el fenómeno destructivo denominado \enquote{aliasing}, que muestra erróneamente componentes de frecuencias menores de lo que realmente son, llamadas “alias”. Matemáticamente, se define:
 \begin{equation}
     f_s > 2 f_{max}
     \label{eq:teorema_muestreo}
 \end{equation}
 
-\textbf{Cuantización de señales:} Consiste de convertir el valor de amplitud real continuo muestreado al valor digital más cercano dentro de una escala predeterminada (resolución del ADC).
+\textbf{Cuantización de señales:} Consiste en convertir el valor de amplitud real continuo muestreado al valor digital más cercano dentro de una escala predeterminada (resolución del ADC).
 
 Este proceso de aproximación introduce un error numérico inherente denominado \textbf{error de cuantización}:
 \begin{equation}
     \varepsilon_q = \pm 0.5 \cdot q 
 \end{equation}
 
-Donde, el paso de cuantización ($q$), depende del rango dinámico de escala completa ($V_{FSR}$) (relación entre el valor máximo y el valor mínimo que puede capturar), y la resolución en bits ($N$) del convertidor:
+Donde el paso de cuantización ($q$) depende del rango dinámico de escala completa ($V_{FSR}$) (relación entre el valor máximo y el valor mínimo que puede capturar), y de la resolución en bits ($N$) del convertidor:
 \begin{equation}
     q = \dfrac{V_{FSR}}{2^N}
 \end{equation}
 
-\textbf{Resolución vertical:} La resolución del eje vertical ($V_{res}$) también está vinculada con la cantidad de bits ($N$) del ADC que tiene el instrumento. Consierando que la tensión de entrada varia entre cero y un valor máximo $(V_{max})$, resulta:
+\textbf{Resolución vertical:} La resolución del eje vertical ($V_{res}$) también está vinculada con la cantidad de bits ($N$) del ADC que tiene el instrumento. Considerando que la tensión de entrada varía entre cero y un valor máximo $(V_{max})$, resulta:
 \begin{equation}
     V_{res} = \dfrac{V_{max}}{2^N}
 \end{equation}
 
-\textbf{Longitud de memoria}: El osciloscopio posee una memoria finita ($N_{record}$) para almacenar datos, que junto con la frecuencia de muestreo ($f_s$), determina la ventana de tiempo ($T_{acq}$) que puede registrar datos.
+\textbf{Longitud de memoria}: El osciloscopio posee una memoria finita ($N_{record}$) para almacenar datos, que, junto con la frecuencia de muestreo ($f_s$), determina la ventana de tiempo ($T_{acq}$) que puede registrar datos.
 \begin{equation}
     T_{acq} = \dfrac{N_{record}}{f_s}
 \end{equation}
@@ -46,23 +46,23 @@ Donde, el paso de cuantización ($q$), depende del rango dinámico de escala com
 
 \section{Estándares de comunicación}
 
-En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos desde la memoria del osciloscopio hacia la computadora requiere de interfaces físicas estandarizadas, y protocolos lógicos de control.
+En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos, desde la memoria del osciloscopio hacia la computadora, requiere de interfaces estandarizadas y protocolos de control.
 
-Actualmente, la comunicación entre instrumentos de medida y sistemas de adquisición, se rige por los siguientes estándares físicos:
+Actualmente, la comunicación entre instrumentos de medida y sistemas de adquisición se rige por los siguientes estándares físicos:
 
 \begin{itemize}
     \item \textbf{GPIB (General Purpose Interface Bus / IEEE-488):} Es un estándar de bus de datos digital de corto rango, diseñado específicamente para interconectar y controlar dispositivos de prueba y medida, tales como osciloscopios, multímetros y generadores de señal, mediante un controlador central.
-    \item \textbf{Comunicaciones Serie (RS-232 y USB):} Los datos suelen transmitirse a la computadora empleando el puerto USB o el puerto Serie (utilizando el protocolo RS-232). Estas interfaces son de adopción masiva debido a la arquitectura abierta de las computadoras modernas.
+    \item \textbf{Comunicaciones Serie (RS-232 y USB):} Los datos suelen transmitirse a la computadora empleando el puerto USB o el puerto serie (utilizando el protocolo RS-232). Estas interfaces son de adopción masiva debido a la arquitectura abierta de las computadoras modernas.
     \item \textbf{LXI (LAN eXtensions for Instrumentation) / Ethernet:} Permite la integración del instrumento en redes de área local, facilitando tasas de transferencia de datos significativamente mayores y posibilitando el control y monitoreo remoto a largas distancias.
 \end{itemize}
 
 \subsection{Protocolo VISA}
 
-La diversidad de buses físicos (GPIB, RS-232, USB, Ethernet) presenta un desafío a nivel de desarrollo de software, ya que tradicionalmente cada puerto requería llamadas al sistema y controladores (\emph{drivers}) de bajo nivel completamente distintos. Para mitigar este problema, la industria adoptó la Arquitectura de Software para Instrumentos Virtuales (VISA, \emph{Virtual Instrument Software Architecture}), que funciona como una capa de abstracción de Entrada/Salida, cuyo objetivo es proporcionar una interfaz de software, que encapsula y oculta los detalles de implementación del hardware subyacente. Lo que brinda las siguientes ventajas en el desarrollo de este trabajo:
+La diversidad de buses físicos (GPIB, RS-232, USB, Ethernet) presenta un desafío a nivel de desarrollo de software, ya que tradicionalmente cada puerto requería llamadas al sistema y controladores (\emph{drivers}) de bajo nivel completamente distintos. Para mitigar este problema, la industria adoptó la Arquitectura de Software para Instrumentos Virtuales (VISA, \emph{Virtual Instrument Software Architecture}) \cite{rohde_schwarz_visa}, que funciona como una capa de abstracción de Entrada/Salida, cuyo objetivo es proporcionar una interfaz de software, que encapsula y oculta los detalles de implementación del hardware subyacente, lo que brinda las siguientes ventajas en el desarrollo de este trabajo:
 
 \begin{itemize}
     \item \textbf{Independencia del bus de hardware:} VISA permite que el software de control envíe comandos al osciloscopio sin necesidad de especificar cómo se gestionan eléctricamente los bits. Si el diseño del sistema migra de una conexión USB a una LAN, el código fuente de control de nivel superior no requiere modificaciones sustanciales.
-    \item \textbf{Integración con comandos SCPI:} VISA actúa como el canal de transporte para el protocolo de Comandos Estándar para Instrumentos Programables (SCPI, \emph{Standard Commands for Programmable Instruments}), que es un lenguaje basado en cadenas de texto ASCII estandarizadas (por ejemplo, \texttt{TIMebase:SCALe?}), que los instrumentos interpretan para ajustar sus parámetros como escala de tiempo, resolución vertical, o para entregar el contenido de su memoria hacia la computadora.
+    \item \textbf{Integración con comandos SCPI:} VISA actúa como el canal de transporte para el protocolo de Comandos Estándar para Instrumentos Programables (SCPI, \emph{Standard Commands for Programmable Instruments}) \cite{rohde_schwarz_scpi}, que es un lenguaje basado en cadenas de texto ASCII estandarizadas (por ejemplo, \texttt{TIMebase:SCALe?}), que los instrumentos interpretan para ajustar sus parámetros como escala de tiempo, resolución vertical, o para entregar el contenido de su memoria hacia la computadora.
     \item \textbf{Gestión de recursos:} La arquitectura asigna descriptores unificados a cada instrumento detectado, centralizando la inicialización, la lectura de las muestras adquiridas, la escritura de comandos de configuración, y el cierre de las sesiones de comunicación.
 \end{itemize}
 
@@ -73,16 +73,16 @@ Los descriptores de recursos VISA por lo general, tienen la siguiente gramática
 
 \begin{itemize}
     \item \textbf{Interfaz}: Indica el tipo de controlador del puerto.
-    \item \textbf{Índice}: Permite diferenciar numéricamente cuando existen múltiples tarjetas controladoras del mismo tipo  en la misma computadora (por ejemplo, UBS0 y UBS1). Si se omite, VISA asume el valor cero por defecto.
+    \item \textbf{Índice}: Permite diferenciar numéricamente cuando existen múltiples tarjetas controladoras del mismo tipo  en la misma computadora (por ejemplo, USB0 y USB1). Si se omite, VISA asume el valor cero por defecto.
     \item \textbf{Dirección del dispositivo}: Identificador o ruta simbólica asignada para ubicar de forma unívoca el dispositivo.
     \item \textbf{Recurso}:
     \begin{itemize}
-        \item \textbf{\texttt{INSTR}}: La sesión se gestiona utilizando los mecanismos de VISA completos, permitiendo por ejemplo, el uso de comandos de configuración y lectura de estado.
-        \item \textbf{\texttt{SOCKET}}: VISA actuará simplemente como un puente datos de bajo nivel, sin enviar comandos de control propios del protocolo de instrumentación.
+        \item \textbf{\texttt{INSTR}}: La sesión se gestiona utilizando los mecanismos de VISA completos, permitiendo, por ejemplo, el uso de comandos de configuración y lectura de estado.
+        \item \textbf{\texttt{SOCKET}}: VISA actuará simplemente como un puente de datos de bajo nivel, sin enviar comandos de control propios del protocolo de instrumentación.
     \end{itemize}
 \end{itemize}
 
-A continuación, se presentan un ejemplo de descriptor de recursos VISA para puerto serie:
+A continuación, se presenta un ejemplo de descriptor de recursos VISA para puerto serie:
 
 \begin{table}[H]
     \centering

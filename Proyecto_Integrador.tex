@@ -27,6 +27,8 @@
 \usepackage{amsmath, amssymb, mathtools}
 \usepackage{booktabs} % Formateo de tablas.
 \usepackage{tabularx}
+\usepackage{ragged2e}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X} % Definición de columna flexible con alineación desajustada a la derecha y cesión de fin de fila.
 %\usepackage{multirow, booktabs} % Para texto en varias filas, y Formateo de tablas.
 %\usepackage[table, xcdraw]{xcolor}
 \usepackage{siunitx}
@@ -43,7 +45,7 @@
 
 % --- BIBLIOGRAFÍA ---
 \usepackage{csquotes} % Formato de citas textuales.
-\usepackage[backend=biber, style=ieee]{biblatex} % Estilo IEEE.
+\usepackage[backend=biber, style=ieee, defernumbers=true]{biblatex} % Estilo IEEE.
 % IMPORTANTE: Cargar las referencias en .bib.
 \addbibresource{referencias.bib}
 
@@ -121,19 +123,22 @@
 
 % ===========================================================================================
 \part{MARCO METODOLÓGICO}
-\input{capitulos/06_descripcion_modelo.tex}
-\input{capitulos/07_calibracion.tex}
+\input{capitulos/06_seleccion_ecosistema.tex}
+\input{capitulos/07_descripcion_modelo.tex}
+\input{capitulos/08_calibracion.tex}
 
 
 % ====================================================================================
 \part{RESULTADOS Y CONCLUSIONES}
-\input{capitulos/08_resultados.tex}
-\input{capitulos/09_conclusiones.tex}
+\input{capitulos/09_resultados.tex}
+\input{capitulos/10_conclusiones.tex}
 
 % BIBLIOGRAFÍA =================================================================================================
 \cleardoublepage
 % La bibliografía solo aparecerá si hay citas en el texto y el archivo .bib existe.
-\printbibliography[heading=bibintoc, title={Bibliografía}]
+%\printbibliography[heading=bibintoc, title={Bibliografía}]
+\printbibliography[type=book, title={Bibliografía}]
+\printbibliography[nottype=book, title={Referencias}]
 
 % =======================================================================================================
 %\part*{ANEXOS}

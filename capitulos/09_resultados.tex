@@ -1,25 +1,28 @@
 \newpage
 \chapter*{Resultados}
 \label{ch:resultados}
+\addcontentsline{toc}{chapter}{Resultados}
 \vspace{3\baselineskip}
 
 En este apartado se exponen los resultados de las calibraciones realizadas al programa desarrollado, aplicando el procedimiento descripto en el capítulo \ref{ch:calibracion_software}.
 
-\section{Análisis de precisión}
-\label{sec:analisis_precision}
+\section*{Comparativa de precisión}
+\label{sec:comparativa_precision}
+\addcontentsline{toc}{section}{Comparativa de precisión}
 
-En esta sección se analiza la diferencia de precisión entre el método utilizado actualmente en el Laboratorio de Alta Tensión y el software desarrollado en el presente trabajo. Para ello, se compararon los resultados obtenidos al analizar el mismo conjunto de impulsos generados con el TDG \cite{iec61083_2}, en tres variantes:
+En esta sección se compara la diferencia de precisión entre el método utilizado actualmente en el Laboratorio de Alta Tensión y el software desarrollado en el este trabajo. Para ello, se presentan los resultados obtenidos al analizar el mismo conjunto de impulsos generados con el TDG \cite{iec61083_2}, en tres variantes:
 
 \begin{enumerate}
-    \item \textbf{Manual}: Se graficó cada impulso, y se lo analizó aplicando el método descripto en el Anexo C de la norma IEC 60060-1 \cite{iec60060_1}. Para este caso, se usó la versión de las ondas de 8 bit, ya que se corresponde con la resolución que se usa actualmente en el laboratorio.
+    \item \textbf{Manual}: Se graficó cada impulso y se lo analizó aplicando el método descripto en el Anexo C de la norma IEC 60060-1 \cite{iec60060_1}. Para este caso, se usó la versión de las ondas de 8 bit, ya que se corresponde con la resolución que se usa actualmente en el laboratorio.
     \item \textbf{8 bit}: Se generó con el TDG los impulsos de referencia con una resolución de \num{8} bit, acorde a la resolución del osciloscopio \cite{gds1000au_UserManual} empleado en este trabajo.
     \item \textbf{16 bit}: Se generaron con el TDG los impulsos de referencia con una resolución de \num{16} bit, la máxima disponible, para evaluar el comportamiento del software en caso de utilizar un osciloscopio con mayor resolución.
 \end{enumerate}
 
-El TDG tiene un total de \num{29} casos de impulsos plenos (LI), y \num{6} de impulsos cortados (LIC), de los cuales se seleccionaron \num{5} LI y \num{2} LIC, que son los más representativos de lo que se observa habitualmente en el laboratorio. Dado que, el algoritmo de análisis para impulsos cortados en la cola y en el frente, son distintos.
+El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de impulsos cortados (LIC), de los cuales se seleccionaron \num{5} LI y \num{2} LIC, que son los más representativos de lo que se observa habitualmente en el laboratorio, dado que el algoritmo de análisis para impulsos cortados en la cola y en el frente es distinto.
 
-\subsection{Ondas plenas}
+\subsection*{Ondas plenas}
 \label{subsec:precision_onda_plena}
+\addcontentsline{toc}{subsection}{Ondas plenas}
 
 \begin{table}[H]
     \centering
@@ -86,8 +89,9 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI), y \num{6} de im
 \end{table}
 
 
-\subsection{Ondas cortadas}
-\label{subsec:precision_onda_cortadas}
+\subsection*{Ondas cortadas}
+\label{subsec:precision_onda_cortada}
+\addcontentsline{toc}{subsection}{Ondas cortadas}
 
 \begin{table}[H]
     \centering
@@ -141,10 +145,11 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI), y \num{6} de im
     \label{tab:resultados_os_lic}
 \end{table}
 
-\section{Análisis de tiempo de demora}
-\label{sec:analisis_tiempo}
+\section*{Comparativa de tiempo de procesamiento}
+\label{sec:comparativa_tiempo}
+\addcontentsline{toc}{section}{Comparativa de tiempo de procesamiento}
 
-En esta sección se compara el tiempo de procesamiento requerido por el método utilizado actualmente en el Laboratorio de Alta Tensión frente al del software desarrollado en este trabajo. Para ello, se capturaron 5 impulsos plenos en el laboratorio, con cada método, y se cronometró el tiempo desde que se dispara el impulso hasta que se terminan de calcular todos los parámetros de la onda ($U_\text{t}$, $T_1$, $T_2$ y $OS\%$). A continuación, se presenta la tabla comparativa.
+En esta sección se compara el tiempo de procesamiento requerido por el método utilizado actualmente en el Laboratorio de Alta Tensión frente al del software desarrollado en este trabajo. Para ello, se capturaron \num{5} impulsos plenos en el laboratorio con cada método, y se cronometró el tiempo desde que se lo disparó hasta que se terminó de calcular todos sus parámetros ($U_\text{t}$, $T_1$, $T_2$ y $OS\%$). A continuación, se presenta la tabla comparativa.
 
 \begin{table}[H]
     \centering
@@ -157,16 +162,18 @@ En esta sección se compara el tiempo de procesamiento requerido por el método 
     \label{tab:tiempo_manual_software}
 \end{table}
 
-\section{Incertidumbre estándar del \emph{software}}
+\section*{Incertidumbre estándar del \emph{software}}
 \label{sec:incertidumbre_software}
+\addcontentsline{toc}{section}{Incertidumbre estándar del \emph{software}}
 
 Aplicando el procedimiento de la sección \ref{sec:procedimiento_calibracion}, se obtuvieron las siguientes incertidumbres para los grupos de impulsos analizados, tanto para ondas de \num{8} como de \num{16} bit.
 
-\subsection{Incertidumbre para LI}
+\subsection*{Incertidumbre para LI}
 \label{subsec:incertidumbre_software_li}
+\addcontentsline{toc}{subsection}{Incertidumbre para LI}
 
-En este caso, se analizó los \num{29} casos LI, tal como indica la norma IEC 61083-2 \cite{iec61083_2}.
-Donde
+En este caso, se analizaron los \num{29} casos LI, tal como indica la norma IEC 61083-2 \cite{iec61083_2}, donde:
+
 \begin{itemize}
     \item \textbf{$u_{B721}$}: Es la incertidumbre máxima del patrón \cite{iec61083_2} para el grupo de impulsos analizado (LI o LIC).
     \item \textbf{$u_{B71}$}: Es la componente de incertidumbre del algoritmo desarrollado.
@@ -188,8 +195,9 @@ Donde
     \label{tab:incertidumbre_software_li}
 \end{table}
 
-\subsection{Incertidumbre para LIC}
+\subsection*{Incertidumbre para LIC}
 \label{subsec:incertidumbre_software_lic}
+\addcontentsline{toc}{subsection}{Incertidumbre para LIC}
 
 En este caso, se analizaron solo \num{2} casos LIC, correspondientes a los impulsos cortados en la cola, ya que se priorizaron durante el desarrollo por ser los de mayor interés para el laboratorio.
 

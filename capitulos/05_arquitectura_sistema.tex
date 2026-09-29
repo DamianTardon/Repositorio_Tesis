@@ -1,15 +1,75 @@
 \newpage
 \chapter{Arquitectura del software}
+\label{ch:arquitectura_software}
 \vspace{3\baselineskip}
 
-En este capítulo se presentan los patrones de diseño de arquitectura de software considerados para estructurar el software de este trabajo. Teniendo como premisa el diseño modular orientado a garantizar la escalabilidad, mantenibilidad y el desacople estructural entre componentes del sistema. Para ello, se analizan las variantes Modelo-Vista-Controlador (MVC), Modelo-Vista-Presentador (MVP) y Modelo-Vista-VistaModelo (MVVM), analizando el modo en que cada uno gestiona la separación entre la lógica de presentación, la lógica de negocio y el manejo de datos. 
+En este capítulo se presentan los patrones de arquitectura considerados para estructurar el sistema propuesto, bajo la premisa de un diseño modular orientado a garantizar la escalabilidad, la mantenibilidad y el desacoplamiento estructural entre componentes.
 
 \section{Patrones de arquitectura del software}
 
-Actualmente, para el desarrollo de software en general, se existen diversos patrones de diseño que ayudan a organizar el código, mejorar la mantenibilidad y facilitar la escalabilidad. Algunos de esos patrones son:
+Un patrón de arquitectura \cite{fowler2019architecture} de \emph{software} es un esquema estructural que estandariza la organización de un sistema. Establece las decisiones de diseño fundamentales, la división en subsistemas o módulos, la asignación de responsabilidades y las reglas de interacción entre ellos, rigiéndose por el principio de separación de responsabilidades. Su propósito central es guiar la estructura del sistema para optimizar atributos de calidad como la mantenibilidad, la testabilidad, la escalabilidad y el bajo acoplamiento.
+
+Entre los diversos patrones arquitectónicos de interfaz de usuario aplicables, se analizaron los siguientes:
+
+\begin{enumerate}
+    \item Modelo-Vista-Controlador (MVC).
+    \item Modelo-Vista-Presentador (MVP).
+    \item Modelo-Vista-VistaModelo (MVVM).
+\end{enumerate}
+
+\subsection{Modelo-Vista-Controlador}
+
+El patrón Modelo-Vista-Controlador (MVC) \cite{fowler2006gui} aísla la lógica de negocio y el estado de la aplicación, tanto de la interfaz gráfica como de la gestión de eventos de entrada.
+
+El flujo opera de forma que el Controlador intercepta las acciones del usuario y actualiza el estado del Modelo. Ante este cambio, el Modelo notifica a la Vista, la cual consulta directamente al Modelo para refrescar la representación gráfica en pantalla.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/arquitectura_software/esquema_mvc.png}
+    \caption{Interacciones entre módulos del esquema MVC. Fuente: Propia.}
+    \label{fig:esquema_mvc}
+\end{figure}
 
 \begin{itemize}
-    \item \textbf{Modelo-Vista-Controlador (MVC)}: Es un patrón de diseño de software que se utiliza para separar la lógica de presentación, la lógica de negocio (procesar los datos, realizar cálculos y tomar decisiones), y la gestión de eventos en una aplicación. En este patrón, el \textbf{Modelo} representa los datos y la lógica de negocio, la \textbf{Vista} se encarga de la presentación visual y la interacción con el usuario, y el \textbf{Controlador} actúa como intermediario entre el Modelo y la Vista, gestionando las entradas del usuario y actualizando la Vista en consecuencia.
-    \item \textbf{Modelo-Vista-Presentador (MVP)}: Es similar al MVC, pero con una separación más clara entre la lógica de presentación y la lógica de negocio. En este patrón, el \textbf{Presentador} se encarga de manejar la lógica de presentación y la interacción con el usuario, mientras que el \textbf{Modelo} sigue representando los datos y la lógica de negocio. La \textbf{Vista} se limita a mostrar los datos proporcionados por el Presentador y a enviar las acciones del usuario al Presentador.
-    \item \textbf{Modelo-Vista-VistaModelo (MVVM)}: Es una evolución del MVP, el cual introduce el concepto de \textbf{VistaModelo}, que actúa como un enlace entre el Modelo y la Vista. En este patrón, la VistaModelo expone los datos y comandos que la Vista puede enlazar directamente, lo que facilita la separación de responsabilidades y mejora la testabilidad de la aplicación.
+    \item \textbf{Modelo:} Encapsula la lógica de cálculo y el almacenamiento de los datos. Notifica automáticamente sus cambios a la Vista para que esta actualice la pantalla.
+    \item \textbf{Vista:} Provee la representación visual de la interfaz de usuario. Observa activamente las modificaciones del Modelo y consulta su estado directamente para actualizar los elementos en pantalla.
+    \item \textbf{Controlador:} Intercepta las acciones del usuario, ejecuta la lógica de control correspondiente y actualiza el estado del Modelo.
+\end{itemize}
+
+\subsection{Modelo-Vista-Presentador}
+
+El patrón Modelo-Vista-Presentador (MVP) \cite{fowler2006gui} es una derivación de MVC orientada a suprimir el acoplamiento directo entre la Vista y el Modelo, promoviendo vistas pasivas y facilitando la realización de pruebas unitarias.
+
+En esta estructura, la Vista captura las interacciones del usuario y las delega al Presentador. Este último consulta y modifica el Modelo, procesa los datos obtenidos y actualiza la Vista.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/arquitectura_software/esquema_mvp.png}
+    \caption{Interacciones entre módulos del esquema MVP. Fuente: Propia.}
+    \label{fig:esquema_mvp}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Modelo:} Cumple la misma función de cálculo y almacenamiento que en el esquema MVC, pero no se comunica con la Vista, ya que interactúa exclusivamente con el Presentador a través de consultas y respuestas.
+    \item \textbf{Vista:} Actúa como una pantalla pasiva sin lógica interna ni referencias al Modelo. Se encarga de capturar los eventos de entrada del usuario, para delegarlos al Presentador y renderizar los datos que este le envía.
+    \item \textbf{Presentador:} Actúa como mediador bidireccional entre la Vista y el Modelo. Procesa los eventos delegados por la interfaz, ejecuta la lógica de presentación, modifica o consulta el Modelo y actualiza la Vista.
+\end{itemize}
+
+\subsection{Modelo-Vista-VistaModelo}
+
+El patrón Modelo-Vista-VistaModelo (MVVM) \cite{smith2009wpf}\cite{fowler2004presentation}\cite{fuksa2025mvvm} está diseñado para entornos con motores de enlaces de datos y definición declarativa de interfaces. Su objetivo es desacoplar completamente la lógica de presentación del código visual mediante sincronización reactiva.
+
+La comunicación está mediada por el motor de enlace de datos, donde las acciones del usuario en la Vista ejecutan comandos del VistaModelo, y cualquier alteración en el estado de este último emite notificaciones, actualizando automáticamente los elementos visuales enlazados sin requerir manipulación manual de la interfaz.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/arquitectura_software/esquema_mvvm.png}
+    \caption{Interacciones entre módulos del esquema MVVM. Fuente: Propia.}
+    \label{fig:esquema_mvvm}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Modelo:} Realiza los cálculos y administra los datos del sistema, de igual forma que en los esquemas anteriores. Permanece totalmente desacoplado de la representación gráfica e interactúa exclusivamente con el VistaModelo.
+    \item \textbf{Vista:} Define la estructura y el diseño visual de forma declarativa. Se sincroniza mediante enlaces de datos hacia el VistaModelo, y vincula las acciones del usuario a los comandos expuestos por este.
+    \item \textbf{VistaModelo:} Modela el estado y el comportamiento de la presentación de forma abstracta e independiente de la tecnología de renderizado. Expone propiedades observables y comandos ejecutables, prescindiendo de referencias directas a componentes visuales.
 \end{itemize}

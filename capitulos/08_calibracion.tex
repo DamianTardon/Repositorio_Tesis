@@ -13,8 +13,8 @@ Debido a que el algoritmo de cálculo forma parte integral del sistema digital d
 Además, establece dos evaluaciones complementarias:
 
 \begin{enumerate}
-    \item \textbf{Verificación de límites de aceptación}: Comprobación de que las desviaciones relativas entre los valores calculados por el \emph{software}, y los valores de referencia no superen las tolerancias estipuladas en el Anexo A de la norma \cite{iec61083_2}, que pueden observarse en la tabla \ref{tab:tolerancias_iec61083}.
-    \item \textbf{Cuantificación de la incertidumbre estándar del \emph{software}}: En el Anexo B de la norma \cite{iec61083_2} describe un procedimiento para determinar la incertidumbre combinada, para un conjunto de formas de onda selecciondas (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), con el algoritmo del \emph{software} que se va a evaluar .
+    \item \textbf{Verificación de límites de aceptación}: Comprobación de que las desviaciones relativas entre los valores calculados por el \emph{software} y los valores de referencia, no superen las tolerancias estipuladas en el Anexo A de la norma \cite{iec61083_2}, que pueden observarse en la tabla \ref{tab:tolerancias_iec61083}.
+    \item \textbf{Cuantificación de la incertidumbre estándar del \emph{software}}: En el Anexo B de la norma \cite{iec61083_2} se describe un procedimiento para determinar la incertidumbre combinada, para un conjunto de formas de onda seleccionadas (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), con el algoritmo del \emph{software} que se va a evaluar.
 \end{enumerate}
 
 \begin{table}[H]
@@ -43,15 +43,15 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
 \begin{enumerate}
     \item \textbf{Inyección de casos de prueba:}
     
-    Se inyecta iterativamente los \num{29} casos de prueba de la tabla A.1 de la norma \cite{iec61083_2} para impulsos plenos (LI), y los \num{6} casos de la tabla A.2 para impulsos cortados (LIC).
+    Se inyectan iterativamente los \num{29} casos de prueba de la tabla A.1 de la norma \cite{iec61083_2} para impulsos plenos (LI), y los \num{6} casos de la tabla A.2 para impulsos cortados (LIC).
 
     \item \textbf{Procesamiento de las ondas:}
 
-    Para cada caso de prueba, se carga el vector de tensión desde el archivo TDG correspondiente. A continuación, se ejecuta la rutina de análisis, obteniendo los parámetros característicos ($U_\text{t}$, $T_1$, $_2$, $OS\%$ y $T_\text{C}$).
+    Para cada caso de prueba, se carga el vector de tensión desde el archivo TDG correspondiente. A continuación, se ejecuta la rutina de análisis, obteniendo los parámetros característicos ($U_\text{t}$, $T_1$, $T_2$, $OS\%$ y $T_\text{C}$).
 
     \item \textbf{Evaluación de errores relativos y tolerancias:}
     
-    El sistema compara el valor calculado $x_{\text{calc}}$ con el valor patrón $x_{\text{REF}}$, determinando el error relativo percentual $\varepsilon_{r,i}\%$, dado por la ecuación:
+    El sistema compara el valor calculado $x_{\text{calc}}$ con el valor patrón $x_{\text{REF}}$, determinando el error relativo porcentual $\varepsilon_{r,i}\%$, dado por la ecuación:
 
     \begin{equation}
         \varepsilon_{r,i}\% = \left| \frac{x_{\text{calc,i}} - x_{\text{REF,i}}}{x_{\text{REF,i}}} \right| \cdot \qty{100}{\percent}
@@ -97,6 +97,13 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
             \label{eq:ub7}
         \end{equation}
     \item \textbf{Generación del certificado:}
-    
-    Una vez concluidos los cálculos de incertidumbre, genera un reporte en formato PDF con los resultados del análisis, para su trazabilidad metrológica conforme a la norma \cite{iec61083_2}. Donde indica, características del \emph{software} evaluado, los valores calculados y el desvío de cada parámetro, para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
+
+    Una vez concluidos los cálculos de incertidumbre, se genera un reporte en formato PDF con los resultados del análisis para su trazabilidad metrológica, conforme a la norma \cite{iec61083_2}, el cual indica las características del \emph{software} evaluado, los valores calculados y el desvío de cada parámetro para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
 \end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/calibracion/algoritmo_calibracion.png}
+    \caption{Diagrama de componentes del sistema de calibración. Fuente: Propia.}
+    \label{fig:algoritmo_calibracion}
+\end{figure}

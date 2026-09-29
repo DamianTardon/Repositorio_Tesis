@@ -7,7 +7,7 @@ En este capítulo se expone la implementación del software desarrollado para la
 \section{Arquitectura adoptada}
 \label{sec:arquitectura_adoptada}
 
-El sistema se diseñó con el patrón arquitectónico MVP, con el objetivo de separar las responsabilidades de la lógica de presentación, la lógica de negocio, y la gestión de eventos, lo que permite desarrollar y evaluar de forma independiente cada parte del sistema. Este desacoplamiento de componentes, facilita la escalabilidad del sistema ante la incorporación de otros modelos de osciloscopios, métodos adicionales de análisis, etc.
+El sistema se diseñó con el patrón arquitectónico MVP, con el objetivo de separar las responsabilidades de la lógica de presentación, la lógica de negocio, y la gestión de eventos, lo que permite desarrollar y evaluar de forma independiente cada parte del sistema. Este desacoplamiento de componentes facilita la escalabilidad del sistema ante la incorporación de otros modelos de osciloscopios, métodos adicionales de análisis, etc.
 
 \section{Capa de coordinación: Presentador}
 \label{sec:capa_presentador}
@@ -24,15 +24,29 @@ La interfaz de usuario se mantiene de forma estrictamente pasiva, limitándose a
     \item \textbf{Control de capas visuales}: El presentador responde dinámicamente a las casillas de verificación de la pantalla que habilitan o deshabilitan la visibilidad de trazas individuales, modificando la interfaz de forma instantánea.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/presentador/diagrama_coordinacion_gui.png}
+    \caption{Diagrama de coordinación de la gui. Fuente: Propia.}
+    \label{fig:diagrama_coordinacion_gui}
+\end{figure}
+
 \subsection{Coordinación de la capa de abstracción de \emph{hardware}}
 \label{subsec:coordinacion_hardware}
 
 La comunicación con el osciloscopio digital se realiza a través de un módulo especializado de abstracción de \emph{hardware}, coordinado por el presentador:
 \begin{itemize}
     \item \textbf{Configuración del instrumental}: El presentador indica a la capa de \emph{hardware} los parámetros que el operador estableció en la interfaz gráfica para configurar el instrumento, tales como, las escalas verticales y horizontal, el origen de los ejes verticales y horizontal, el disparo en modo único (\emph{single-shot}) del osciloscopio.
-    \item \textbf{Espera no bloqueante de señal}: Ante la orden de inicio de ensayo, debido a que la descarga de alta tensión ocurre de forma indeterminada, el presentador coordina una rutina en segundo plano que sondea continuamente el estado del instrumento, esperando el disparo. Esto evita que la interfaz gráfica se congele, y siga siendo manipulable.
+    \item \textbf{Espera no bloqueante de señal}: Ante la orden de inicio de ensayo, debido a que la descarga de alta tensión ocurre de forma indeterminada, el presentador coordina una rutina en segundo plano que sondea continuamente el estado del instrumento, esperando el disparo. Esto evita que la interfaz gráfica se congele y siga siendo manipulable.
     \item \textbf{Descarga y procesamiento de datos}: Al detectarse el disparo, el presentador detiene la espera activa y transfiere los datos desde la memoria del osciloscopio hacia el motor de cálculo, para luego, con los valores obtenidos actualizar la interfaz gráfica y renderizar las señales.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/presentador/diagrama_coordinacion_hal.png}
+    \caption{Diagrama de coordinación de la hal. Fuente: Propia.}
+    \label{fig:diagrama_coordinacion_hal}
+\end{figure}
 
 \subsection{Coordinación de la lógica matemática}
 \label{subsec:coordinacion_calculos}
@@ -41,26 +55,32 @@ Una vez obtenidos los vectores de tensión y corriente, el presentador los trans
 \begin{itemize}
     \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
     \item \textbf{Delegación del cálculo normativo}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
-    \item \textbf{Tranferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual OS\%) para cargarlos en la capa de visualización.
+    \item \textbf{Transferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual OS\%) para cargarlos en la capa de visualización.
 \end{itemize}
 
 \subsection{Coordinación del gestor de archivos}
 \label{subsec:coordinacion_archivos}
 
-El presentador se comunica con el módulo de gestión de archivos para almacenanar los resultados de los ensayos:
+El presentador se comunica con el módulo de gestión de archivos para almacenar los resultados de los ensayos:
 \begin{itemize}
         \item \textbf{Validación de datos de entrada:} Para evitar fallos de cálculo y errores operativos, el presentador restringe el ingreso de datos en la interfaz, mediante validadores numéricos que bloquean caracteres no válidos o valores fuera de rango, antes de interactuar con los módulos correspondientes, previniendo las siguientes fallas:
         \begin{itemize}
             \item \textbf{Ensayo nulo:} Si el operador acciona el botón de \enquote{Guardar} o \enquote{Exportar} sin haber creado previamente la carpeta del ensayo, se bloquea la operación, y se notifica la ausencia del directorio del ensayo.
             \item \textbf{Ausencia de condiciones ambientales:} Se restringe el ingreso de datos inválidos en estos campos, se impide el almacenamiento de la onda si no están cargados, y se notifica al operador que debe completarlos.
-            \item \textbf{Búfer de adquisición vacío:} Si el operador solicita guardar datos sin haber capturado una señal, se interrumpe la acción, y dispara una alerta de búfer vacío.
+            \item \textbf{Búfer de adquisición vacío:} Si el operador solicita guardar datos sin haber capturado una señal, se interrumpe la acción y dispara una alerta de búfer vacío.
         \end{itemize}
     \item \textbf{Verificación de sesión}: Antes de escribir en el disco, el presentador evalúa que haya una sesión de trabajo abierta, de lo contrario no tiene ninguna ruta donde almacenar la información.
-    \item \textbf{Guardado de información}: Una vez calculados los parámetros, empaqueta la información de las trazas de las señales, junto con los metadatos (cliente, condiciones ambientales, etc), para delegar al gestor de archivos el almacenamiento permanente en disco. Mientras que, se bloquea el guardado en caso de búferes vacíos o en ausencia de campos obligatorios, para evitar archivos corruptos en la base de datos.
+    \item \textbf{Guardado de información}: Una vez calculados los parámetros, empaqueta la información de las trazas de las señales, junto con los metadatos (cliente, condiciones ambientales, etc), para delegar al gestor de archivos el almacenamiento permanente en disco. Mientras que se bloquea el guardado en caso de búferes vacíos o en ausencia de campos obligatorios, para evitar archivos corruptos en la base de datos.
     \item \textbf{Carga de ensayos previos}: Cuando el operador carga un ensayo realizado anteriormente, el presentador solicita al gestor de archivos que recupere la información del mismo, para luego actualizar los gráficos e indicadores numéricos de la pantalla.
     \item \textbf{Exportación a planillas externas}: Cuando el operador solicita exportar los resultados, delega al gestor de archivos la conversión de datos a hojas de cálculo.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/presentador/diagrama_coordinacion_archivos.png}
+    \caption{Diagrama de coordinación del gestor de archivos. Fuente: Propia.}
+    \label{fig:diagrama_coordinacion_archivos}
+\end{figure}
 
 \section{Capa de lógica y datos: Modelo}
 \label{sec:capa_modelo}
@@ -77,7 +97,7 @@ Esta capa se subdivide en tres submódulos independientes especializados:
 \subsection{Controlador de \emph{hardware}}
 \label{subsec:controlador_osciloscopio}
 
-El módulo \textbf{Controlador de \emph{hardware}}, tiene como función abstraer las operaciones de bajo nivel, permitiendo desacoplar la comunicación con el dispositivo, del resto del sistema. Para ello, encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
+El módulo \textbf{Controlador de \emph{hardware}} tiene como función abstraer las operaciones de bajo nivel, permitiendo desacoplar la comunicación con el dispositivo, del resto del sistema. Para ello, encapsula todas las operaciones de control, configuración de canales y adquisición de datos de la memoria del osciloscopio, mediante comandos SCPI, usando el protocolo de comunicación PyVISA.
 
 \subsubsection{Interfaz de comunicación y capa de abstracción de \emph{hardware}}
 \label{subsubsec:interfaz_fisica_hal}
@@ -119,6 +139,13 @@ Por otro lado, a nivel físico, la conexión se realiza a través de un puerto U
     \texttt{COM1}
 \end{align*}
 Donde \texttt{COM1} identifica el número de puerto serie virtual asignado por el sistema operativo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/modelo/diagrama_controlador_hardware.png}
+    \caption{Diagrama de componentes de la hal. Fuente: Propia.}
+    \label{fig:impulso_tension_pleno}
+\end{figure}
 
 \subsubsection{Sistema de adquisición y acondicionamiento}
 \label{subsubsec:arquitectura_flujo}
@@ -162,6 +189,13 @@ Al detectar el impulso finaliza el bucle de \emph{polling} y emite una señal, q
 
 Como el instante de descarga es indeterminado, se implementa un hilo de ejecución secundario asíncrono, dedicado a consultar el estado de disparo, ya que si se ejecutara en el hilo principal, sería una operación bloqueante, que congele la aplicación e inhabilite la GUI. Por lo que, así se mantiene siempre reactivo el hilo principal de eventos gráficos, permitiendo al usuario manipular oscilogramas previos, cargar campos o cualquier otra acción, mientras el sistema espera la captura del impulso.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/persistencia/diagrama_secuencia_captura.png}
+    \caption{Diagrama de coordinación del gestor de archivos. Fuente: Propia.}
+    \label{fig:diagrama_secuencia_captura}
+\end{figure}
+
 \subsubsection{Digitalización}
 
 Las señales eléctricas que ingresan a los bornes analógicos del osciloscopio, se muestrean a una tasa que depende de la base de tiempo utilizada. Después, el convertidor analógico-digital (ADC) realiza la cuantización en amplitud, dividiendo el rango dinámico vertical en $2^8 = 256$ niveles de tensión discretos (\num{8} bits). A continuación, se graban en la memoria del instrumento.
@@ -175,7 +209,7 @@ Luego de que el osciloscopio digitalice la señal, el presentador ordena la desc
     \text{\texttt{\# A B C D E}}
 \end{equation*}
 \begin{enumerate}
-    \item[\texttt{\#:}] [\num{1} byte] Caracter ASCII que indica el inicio de la cabecera.
+    \item[\texttt{\#:}] [\num{1} byte] Carácter ASCII que indica el inicio de la cabecera.
     \item[\texttt{A:}] [\num{1} byte] Dígito ASCII que especifica la cantidad de caracteres que componen el campo \texttt{B}. Para adquisiciones estándar toma el valor ASCII \texttt{'4'}, mientras que para adquisiciones de memoria extendida toma el valor \texttt{'7'}.
     \item[\texttt{B:}] [\num{4} o \num{7} bytes] Cadena de caracteres ASCII que representa el tamaño total en bytes del bloque de datos que le sigue (\texttt{C}+\texttt{D}+\texttt{E}).
     Para adquisiciones estándar toma el valor ASCII \texttt{'8008'}, mientras que para adquisiciones de memoria extendida puede tomar los valores \texttt{'2000008'} o \texttt{'4000008'}.
@@ -213,6 +247,13 @@ Este componente constituye el núcleo matemático del \emph{software}, y es resp
 \label{subsubsec:flujo_algoritmico}
 
 Este proceso se divide en tres fases operativas: preprocesamiento común, clasificación dinámica y reconstrucción de la señal.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/modelo/diagrama_flujo_calculo.png}
+    \caption{Diagrama de flujo de motor de cálculo. Fuente: Propia.}
+    \label{fig:diagrama_flujo_calculo}
+\end{figure}
 
 \subsubsection{Fase I: acondicionamiento inicial}
 
@@ -256,7 +297,7 @@ Se asume que la onda es plena y se procede al ajuste paramétrico.
 \begin{enumerate}[resume]
     \item \textbf{Segmentación de datos}: Se selecciona una ventana de datos en el intervalo comprendido entre el \qty{20}{\percent} en el flanco de subida y el \qty{40}{\percent} en la cola de descarga del impulso.
     \item \textbf{Ajuste de curva base}: Se realiza un ajuste paramétrico no lineal sobre las muestras tomadas, utilizando el algoritmo de \textbf{Levenberg-Marquardt}, teniendo como modelo de estimación la función de doble exponencial, de la ecuación \ref{eq:doble_exponencial}.
-    Para garantizar la convergencia, el vector de parámetros iniciales se estima apartir de:
+    Para garantizar la convergencia, el vector de parámetros iniciales se estima a partir de:
     \begin{itemize}
         \item $U$: Se asigna igual al valor pico de la onda analizada.
         \item $t_d$: Se toma el primer punto del arreglo segmentado para el ajuste.
@@ -337,7 +378,7 @@ Si la desviación supera el umbral, la onda se clasifica como \textbf{impulso co
 
 Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obteniendo una curva registrada y una curva base (ajustada numéricamente o escalada analíticamente), para avanzar a la secuencia final:
 \begin{enumerate}[resume]
-    \item \textbf{Cálculo de curva residual}: Se obtiene como la diferencia algebraica entre la curva corregida ($U_{\text{corregida}}[n]$) y la curva base ($U_\text{b}[n]$) construída con los parámetros obtenidos del ajuste:
+    \item \textbf{Cálculo de curva residual}: Se obtiene como la diferencia algebraica entre la curva corregida ($U_{\text{corregida}}[n]$) y la curva base ($U_\text{b}[n]$) construida con los parámetros obtenidos del ajuste:
     \begin{equation}
         R[n] = U_{\text{corregida}}[n] - U_\text{b}[n]
         \label{eq:curva_residual}
@@ -351,7 +392,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
     \end{equation}
     \item \textbf{Cálculo de parámetros característicos}: A partir de la curva de tensión de ensayo $U_\text{t}[n]$, se calculan los parámetros normativos. Dado que la señal procesada es de tiempo discreto, hay valores analíticos que pueden no corresponder con las muestras obtenidas, por lo que para encontrarlos se realiza una interpolación lineal.
     \begin{itemize}
-        \item \textbf{Valor de la tensión de ensayo} ($U_\text{t}$): Como se normalizó la polaridad para que en el análsis sean todas positivas las ondas, con buscar el máximo es suficiente.
+        \item \textbf{Valor de la tensión de ensayo} ($U_\text{t}$): Como se normalizó la polaridad para que en el análisis sean todas positivas las ondas, con buscar el máximo es suficiente.
         \begin{equation}
             U_\text{t} = \text{max}(U_\text{t}[n])
             \label{eq:valor_cresta}
@@ -392,7 +433,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
 \subsection{Gestión de la base de datos}
 \label{subsec:gestion_base_datos}
 
-El módulo de \textbf{Persistencia de la información}, tiene como función principal administrar de forma centralizada la bases de datos en disco, utilizando el formato HDF5. Así como también, gestionar la exportación de resultados a hojas de cálculo tipo CSV o XLSX. Además, también debe proteger la integridad de las formas de onda originales, y los resultados analíticos calculados, como también, evitar pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
+El módulo de \textbf{Persistencia de la información}, tiene como función principal administrar de forma centralizada las bases de datos en disco, utilizando el formato HDF5. Así como también, gestionar la exportación de resultados a hojas de cálculo tipo CSV o XLSX. Además, también debe proteger la integridad de las formas de onda originales, y los resultados analíticos calculados, como también, evitar pérdidas de información ante fallos, a la vez que optimiza el uso de espacio en disco y reduce los tiempos de lectura/escritura.
 
 \subsubsection{Flujo de almacenamiento}
 \label{subsubsec:flujo_almacenamiento}
@@ -411,9 +452,23 @@ Posteriormente, el módulo de almacenamiento, graba la información en disco, im
 \begin{enumerate}
     \item \textbf{Apertura segura}: El archivo HDF5 se manipula en \emph{modo adición} usando un manejador de contexto, que asegura la
     escritura segura frente a fallos y la correcta liberación del descriptor de archivo del sistema operativo ante cierres inesperados, evitando la corrupción de la base de datos.
-    \item \textbf{Organización jerárquica}: Se crea un subgrupo individual para cada registro (por ej. \texttt{/Onda\_01} o \texttt{/Referencia\_01}). Las condiciones ambientales, la fecha y los parámetros calculados, se inyectan como atributos de este grupo específico, garantizando que cada onda digitalizada esté inseparablemente asociada a sus parámetros de ensayo.
-    \item \textbf{Resguardo de seguridad redundante}: En paralelo a la base de datos, crea copias de seguridad independientes de cada onda, en formato de texto plano con valores separados por comas (\textbf{CSV}), que contienen el registro bruto escalado verticalmente a su magnitud real. Lo que brinda un sistema de respaldo redundante de los datos originales, desacoplado del formato principal.
+    \item \textbf{Organización jerárquica}: Se crea un subgrupo individual para cada registro (por ej. \texttt{/Onda\_01} o \texttt{/Referencia\_01}). Las condiciones ambientales, la fecha y los parámetros calculados se inyectan como atributos de este grupo específico, garantizando que cada onda digitalizada esté inseparablemente asociada a sus parámetros de ensayo.
+    \item \textbf{Resguardo de seguridad redundante}: En paralelo a la base de datos, crea copias de seguridad independientes de cada onda, en formato de texto plano con valores separados por comas (\textbf{CSV}), que contienen el registro bruto escalado verticalmente a su magnitud real, lo que brinda un sistema de respaldo redundante de los datos originales, desacoplado del formato principal.
 \end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/modelo/diagrama_gestion_base_datos.png}
+    \caption{Diagrama de componentes del gestor de la base de datos. Fuente: Propia.}
+    \label{fig:diagrama_gestion_base_datos}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/persistencia/diagrama_secuencia_guardado.png}
+    \caption{Diagrama de secuencia del guardado de información. Fuente: Propia.}
+    \label{fig:diagrama_secuencia_guardado}
+\end{figure}
 
 \subsubsection{Exportación de resultados}
 \label{subsubsec:exportar_resultados}
@@ -421,6 +476,13 @@ Posteriormente, el módulo de almacenamiento, graba la información en disco, im
 Para exportar los resultados a hojas de cálculo que faciliten su manipulación en programas comerciales para la elaboración de informes, el módulo permite la extracción del historial completo de los impulsos aplicados al elemento bajo ensayo, hacia hojas de cálculo utilizando los formatos de extensión \textbf{CSV} o \textbf{XLSX}.
 
 Aunque previamente convierte la escala física de los resultados: las bases de tiempo se convierten de segundos (\unit{\second}) a microsegundos (\unit{\micro\second}) y las tensiones de volts (\unit{\volt}) a kilovolts (\unit{\kilo\volt}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{img/puml/persistencia/diagrama_secuencia_exportacion.png}
+    \caption{Diagrama de secuencia de la captura de impulsos. Fuente: Propia.}
+    \label{fig:diagrama_secuencia_exportacion}
+\end{figure}
 
 \subsubsection{Sistema de ficheros en disco}
 \label{subsubsec:estructura_ficheros_disco}
@@ -450,12 +512,12 @@ Una vez que el operador haya seleccionado un directorio raíz para el proyecto, 
             ]
             [\textbf{03 Resultados}: \emph{Carpeta de resultados exportados (hoja de cálculo e imágenes)}
             [{\textbf{\texttt{item-cliente - Resultados.xlsx}}: \emph{Archivo de resultados del ensayo}}]
-            [{\textbf{\texttt{item-cliente - Resultados.cvs}}: \emph{Archivo de resultados del ensayo}}]
+            [{\textbf{\texttt{item-cliente - Resultados.csv}}: \emph{Archivo de resultados del ensayo}}]
             [{\textbf{\texttt{ondas.png}}: \emph{Imagen exportada manualmente desde el visualizador de ondas}}]
             ]
         ]
     \end{forest}
-    \caption{Esctructura de directorio de archivos.}
+    \caption{Estructura de directorio de archivos.}
     \label{fig:estructura_carpetas}
 \end{figure}
 Donde:
@@ -468,11 +530,11 @@ Donde:
 \subsubsection{Estructura de la base de datos}
 \label{subsubsec:estructura_base_datos}
 
-La información se almacena de manera estructurada y comprimida, en único archivo con formato \textbf{HDF5}, que actúa como una base datos independiente para cada elemento bajo ensayo.
+La información se almacena de manera estructurada y comprimida, en un único archivo con formato \textbf{HDF5}, que actúa como una base de datos independiente para cada elemento bajo ensayo.
 
 Este formato organiza internamente el archivo como un sistema de ficheros, distribuyendo los datos en grupos que actúan como carpetas, aplicando la estructura de la figura \ref{fig:estructura_base_datos}.
 
-Cabe aclarar, que el canal de corriente (CH2) no se somete a ningún procesamiento matemático por indicación de la norma \cite{iec60060_1}, limitándose el software a su acondicionamiento, escalamiento físico y representación gráfica. No obstante, dentro del grupo de CH2, el conjunto de datos ensayo contiene una copia del vector bruto escalado únicamente para mantener la simetría estructural con el canal de tensión (CH1) dentro del esquema de almacenamiento.
+Cabe aclarar que el canal de corriente (CH2) no se somete a ningún procesamiento matemático por indicación de la norma \cite{iec60060_1}, limitándose el software a su acondicionamiento, escalamiento físico y representación gráfica. No obstante, dentro del grupo de CH2, el conjunto de datos de ensayo contiene una copia del vector bruto escalado únicamente para mantener la simetría estructural con el canal de tensión (CH1) dentro del esquema de almacenamiento.
 
 \begin{figure}[H]
     \centering
@@ -506,7 +568,7 @@ Cabe aclarar, que el canal de corriente (CH2) no se somete a ningún procesamien
                 [{\textbf{\texttt{OS}}: \emph{Sobreimpulso porcentual}}]
             ]
             [{\textbf{Grupo de Tiempos} (\texttt{/Time}) [\unit{\second}]}
-                [{\textbf{\texttt{raw}}: \emph{Vector bruto a apartir de} $\Delta t$}]
+                [{\textbf{\texttt{raw}}: \emph{Vector bruto a partir de} $\Delta t$}]
                 [{\textbf{\texttt{alineado}}: \emph{Vector alineado con el frente del impulso de referencia}}]
             ]
             [{\textbf{Grupo de CH1} (\texttt{/CH1\_Voltage}) [\unit{\volt}]}
@@ -543,7 +605,7 @@ El diseño de la GUI se estructuró en retroalimentación directa con los técni
 
 \begin{itemize}
     \item Registrar datos del elemento bajo ensayo.
-    \item Registrar de condiciones ambientales (temperatura, humedad y presión).
+    \item Registrar condiciones ambientales (temperatura, humedad y presión).
     \item Control centralizado del osciloscopio digital (ajuste de escalas, bases de tiempo, posición del cursor y modos de disparo).
     \item Almacenar la información manualmente.
     \item Exportar resultados a hojas de cálculo.
@@ -553,14 +615,14 @@ En base a esos requisitos se desarrolló la interfaz, la cual puede observarse e
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{img/GUI_1366x768.png}
+    \includegraphics[width=1\textwidth]{img/gui/GUI_1366x768.png}
     \caption{GUI en tamaño 1366x768 px.}
     \label{fig:GUI_1366x768}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{img/GUI_1920x1080.png}
+    \includegraphics[width=1\textwidth]{img/gui/GUI_1920x1080.png}
     \caption{GUI en tamaño 1920x1080 px.}
     \label{fig:GUI_1920x1080}
 \end{figure}
@@ -571,7 +633,7 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{img/GUI_Bloques.png}
+    \includegraphics[width=1\textwidth]{img/gui/GUI_Bloques.png}
     \caption{Flujo de trabajo.}
     \label{fig:recorrido_gui}
 \end{figure}
@@ -580,49 +642,49 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
     \item \textbf{Datos del ensayo}: Sirve para cargar los datos relacionados a la trazabilidad del laboratorio sobre del elemento que se va a ensayar.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{img/GUI_1_datos_ensayo.png}
+        \includegraphics[width=0.8\textwidth]{img/gui/GUI_1_datos_ensayo.png}
         \caption{Bloque de Datos de ensayo.}
         \label{fig:GUI_1_Datos_ensayo}
     \end{figure}
     \item \textbf{Condiciones ambientales}: Donde el operador introduce parámetros termodinámicos de referencia como la temperatura, presión y humedad. Estos valores son esenciales para la posterior corrección atmosférica\footnote{En la versión actual del software, la corrección del valor de tensión de ensayo $U_t$ se realiza manualmente por el personal del laboratorio.} de la tensión de ensayo $U_t$ de acuerdo con la norma \textbf{IEC 60060-1} \cite{iec60060_1}.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{img/GUI_2_condiciones_ambientales.png}
+        \includegraphics[width=0.8\textwidth]{img/gui/GUI_2_condiciones_ambientales.png}
         \caption{Bloque de Condiciones ambientales.}
         \label{fig:GUI_2_condiciones_ambientales}
     \end{figure}
     \item \textbf{Atenuaciones del sistema}: Para ingresar los factores de atenuación de los divisores resistivos y atenuadores coaxiales, correspondientes al sistema de medición.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{img/GUI_3_atenuaciones.png}
+        \includegraphics[width=0.8\textwidth]{img/gui/GUI_3_atenuaciones.png}
         \caption{Bloque de Atenuaciones del sistema de medición.}
         \label{fig:GUI_3_atenuaciones}
     \end{figure}
-    \item \textbf{Configuraciones del osciloscopio}: Agrupa los comandos de control del instrumento
+    \item \textbf{Configuraciones del osciloscopio}: Agrupa los comandos de control del instrumento.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_4_control_osciloscopio.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_4_control_osciloscopio.png}
         \caption{Bloque de Control del instrumento.}
         \label{fig:GUI_4_control_osciloscopio}
     \end{figure}
     \item \textbf{Ensayo}: Permite al usuario ejecutar la adquisición de señal, guardar los registros en la base de datos y realizar la exportación en formatos planos como Excel o CSV.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{img/GUI_5_opciones_ensayo.png}
+        \includegraphics[width=0.8\textwidth]{img/gui/GUI_5_opciones_ensayo.png}
         \caption{Bloque de Opciones de ensayo.}
         \label{fig:GUI_5_opciones_ensayo}
     \end{figure}
     \item \textbf{Resultados del ensayo}: Este panel renderiza dinámicamente en una tabla los parámetros de la onda calculados tras la adquisición ($U_t$, $T_1$, $T_2$ o $T_c$ y $OS\%$).
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\textwidth]{img/GUI_6_resultados_ensayo.png}
+        \includegraphics[width=0.8\textwidth]{img/gui/GUI_6_resultados_ensayo.png}
         \caption{Bloque de Resultados de ensayo.}
         \label{fig:GUI_6_resultados_ensayo}
     \end{figure}
     \item \textbf{Gráfico de ondas}: El área de mayor tamaño de la pantalla se reservó para el renderizado de las curvas de tensión y corriente.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_7_grafico.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_7_grafico.png}
         \caption{Bloque de Gráfico.}
         \label{fig:GUI_7_grafico}
     \end{figure}
@@ -635,7 +697,7 @@ A modo de ejemplo se presenta a continuación, una guía paso a paso del flujo d
 \begin{enumerate}
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_1_crear_sesion.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_1_crear_sesion.png}
         \caption{Creación de directorio del ensayo.}
         \label{fig:GUI_uso_1_crear_sesion}
     \end{figure}
@@ -645,14 +707,14 @@ A modo de ejemplo se presenta a continuación, una guía paso a paso del flujo d
     \item [\textbf{Paso 4:}] Crear la carpeta.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\textwidth]{img/GUI_uso_2_sesion_creada.png}
+        \includegraphics[width=0.5\textwidth]{img/gui/GUI_uso_2_sesion_creada.png}
         \caption{Notificación de creación de carpeta exitosa.}
         \label{fig:GUI_uso_2_sesion_creada}
     \end{figure}
     \item [\textbf{Paso 5:}] Confirmar que se creó correctamente la carpeta del ensayo.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\textwidth]{img/GUI_uso_3_cargar_condiciones.png}
+        \includegraphics[width=0.5\textwidth]{img/gui/GUI_uso_3_cargar_condiciones.png}
         \caption{Edición de campos a completar.}
         \label{fig:GUI_uso_3_cargar_condiciones}
     \end{figure}
@@ -661,14 +723,14 @@ A modo de ejemplo se presenta a continuación, una guía paso a paso del flujo d
     \item [\textbf{Paso 8:}] Completar los campos de las atenuaciones.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\textwidth]{img/GUI_uso_4_deshabilitar_atenuaciones.png}
+        \includegraphics[width=0.5\textwidth]{img/gui/GUI_uso_4_deshabilitar_atenuaciones.png}
         \caption{Deshabilitación de edición de campos de atenuaciones.}
         \label{fig:GUI_uso_4_deshabilitar_atenuaciones}
     \end{figure}
     \item [\textbf{Paso 9:}] Deshabilitar (destildar) la edición de los campos de las atenuaciones.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_5_configurar_instrumento.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_5_configurar_instrumento.png}
         \caption{Configuración del osciloscopio.}
         \label{fig:GUI_uso_5_configurar_instrumento}
     \end{figure}
@@ -676,38 +738,38 @@ A modo de ejemplo se presenta a continuación, una guía paso a paso del flujo d
     \emph{Nota: si conecta el instrumento antes de abrir el programa, se conectará automáticamente desde el inicio.}
     \item [\textbf{Paso 11:}] Habilitar/deshabilitar los canales del osciloscopio que se vayan a usar.
     \item [\textbf{Paso 12:}] Configurar los parámetros del osciloscopio.
-    \item [\textbf{Paso 13:}] Accionar el botón \enquote{Iniciar} para comenzar la captura del impuslo.
+    \item [\textbf{Paso 13:}] Accionar el botón \enquote{Iniciar} para comenzar la captura del impulso.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_6_guardar_onda.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_6_guardar_onda.png}
         \caption{Guardado de impulso.}
         \label{fig:GUI_uso_6_guardar_onda}
     \end{figure}
     \item [\textbf{Paso 14:}] Accionar el botón \enquote{Guardar}, para almacenar permanentemente la onda.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_7_onda_guardada.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_7_onda_guardada.png}
         \caption{Ejemplo de onda guardada.}
         \label{fig:GUI_uso_7_onda_guardada}
     \end{figure}
-    Luego de guardar la onda, se puede mover la leyenda para que no interfiera con el gráfico. Y también, se puede ampliar/alejar el gráfico con la rueda el \emph{mouse}.
+    Luego de guardar la onda, se puede mover la leyenda para que no interfiera con el gráfico. Y también, se puede ampliar/alejar el gráfico con la rueda del \emph{mouse}.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_8_historial.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_8_historial.png}
         \caption{Historial de impulsos guardados.}
         \label{fig:GUI_uso_8_historial}
     \end{figure}
     \item [\textbf{Paso 15:}] \textbf{(Opcional)} Accionar el botón \enquote{Ver Ondas} para ver el historial de ondas almacenadas. Donde se encuentran las opciones de mostrar/ocultar todas las ondas en simultáneo, o también se puede mostrar/ocultar individualmente cada una, seleccionando en la lista desplegable.
         \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_9_normalizar_ondas.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_9_normalizar_ondas.png}
         \caption{Gráfico normalizado a valor unitario.}
         \label{fig:GUI_uso_9_normalizar_ondas}
     \end{figure}
     \item [\textbf{Paso 16:}] \textbf{(Opcional)} Accionar los botones de opciones \enquote{Real} o \enquote{Normalizado}, para ver las ondas en su magnitud real o escalada a valor unitario respectivamente.
         \begin{figure}[H]
         \centering
-        \includegraphics[width=1\textwidth]{img/GUI_uso_10_exportar.png}
+        \includegraphics[width=1\textwidth]{img/gui/GUI_uso_10_exportar.png}
         \caption{Ejemplo de exportación de resultados.}
         \label{fig:GUI_uso_10_exportar}
     \end{figure}
