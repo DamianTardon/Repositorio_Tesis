@@ -1,7 +1,180 @@
 \newpage
 \chapter*{Lista de Símbolos y Convenciones}
+\addcontentsline{toc}{chapter}{Lista de Símbolos y Convenciones}
 \vspace{3\baselineskip}
 
-Este párrafo comienza después de los tres espacios reglamentarios.
-
 \section*{Lista de símbolos}
+
+\begin{xltabular}{\linewidth}{llX}
+    \toprule
+    \textbf{Símbolo} & \textbf{Unidad} & \textbf{Descripción} \\
+    \midrule
+    \endfirsthead
+
+    \toprule
+    \textbf{Símbolo} & \textbf{Unidad} & \textbf{Descripción} \\
+    \midrule
+    \endhead
+
+    \midrule
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    $A_{\text{CH1}}$ & veces & Factor de atenuación de tensión\\
+    $A_{\text{CH2}}$ & veces & Factor de atenuación de corriente\\
+    $E$ & - & Factor de escala de amplitud\\
+    $f$ & \unit{\hertz} & Frecuencia de la señal\\
+    $f_s$ & \unit{Sa/s} & Frecuencia de muestreo\\
+    $f_{\max}$ & \unit{\hertz} & Componente de máxima frecuencia\\
+    $k$ & - & Factor de cobertura (intervalo de confianza)\\
+    $k(f)$ & - & Respuesta en frecuencia de la tensión de ensayo\\
+    $N$ & bit & Resolución del convertidor analógico-digital\\
+    $N_{\text{pretrigger}}$ & muestras & Cantidad de muestras previas al disparo\\
+    $N_{\text{record}}$ & puntos & Longitud de memoria de registro\\
+    $O_1$ & \unit{\second} & Origen virtual del impulso\\
+    $OS\%$ & \unit{\percent} & Magnitud relativa de la sobreelevación\\
+    $R(t)$ & \unit{\volt} & Curva residual\\
+    $R_f(t)$ & \unit{\volt} & Curva residual filtrada\\
+    $T_1$ & \unit{\second} & Tiempo de frente del impulso\\
+    $T_2$ & \unit{\second} & Tiempo hasta el semivalor del impulso\\
+    $T_c$ & \unit{\second} & Tiempo de corte del impulso\\
+    $T_{\text{AB}}$ & \unit{\second} & Intervalo entre el $30\%$ y $90\%$ del valor de cresta\\
+    $T_{\text{acq}}$ & \unit{\second} & Ventana de tiempo de adquisición\\
+    $t_d$ & \unit{\second} & Retardo temporal del origen virtual\\
+    $t_L$ & \unit{\second} & Desfasaje temporal entre impulsos\\
+    $U$ & \unit{\volt} & Amplitud de la función de doble exponencial\\
+    $U_m(t)$ & \unit{\volt} & Curva base\\
+    $U_b$ & \unit{\volt} & Máximo de la curva base\\
+    $U_e$ & \unit{\volt} & Curva registrada\\
+    $U_e(t)$ & \unit{\volt} & Máximo de la curva registrada\\
+    $U_0(t)$ & \unit{\volt} & Curva registrada compensada en offset\\
+    $U_t$ & \unit{\volt} & Máximo de la curva tensión de ensayo\\
+    $U_t(t)$ & \unit{\volt} & Curva tensión de ensayo\\
+    $u_{\text{B}71}$ & \% & Incertidumbre estándar tipo A del algoritmo\\
+    $u_{\text{B}72}$ & \% & Incertidumbre estándar tipo B del patrón\\
+    $u_{\text{B}7}$ & \% & Incertidumbre estándar combinada del \textit{software}\\
+    $u_d(t)$ & \unit{\volt} & Función de doble exponencial\\
+    $U_x$ & - & Incertidumbre expandida de referencia\\
+    $V_{\text{offset}}$ & \unit{\volt} & Tensión continua de desplazamiento previa al disparo\\
+    $V_{\text{res}}$ & \unit{\volt}/div & Resolución del eje vertical\\
+    $\Delta t$ & \unit{\second} & Intervalo de tiempo entre muestras\\
+    $\varepsilon_{r,i\%}$ & \unit{\percent} & Error relativo porcentual\\
+    $\tau_1$ & \unit{\micro\second} & Constante de tiempo de descarga\\
+    $\tau_2$ & \unit{\micro\second} & Constante de tiempo de carga\\
+\end{xltabular}
+
+\section*{Lista de acrónimos}
+
+\begin{xltabular}{\linewidth}{lXX}
+    \toprule
+    \textbf{Acrónimo} & \textbf{Descripción} & \textbf{Traducción} \\
+    \midrule
+    \endfirsthead
+
+    \toprule
+    \textbf{Acrónimo} & \textbf{Descripción} & \textbf{Traducción} \\
+    \midrule
+    \endhead
+
+    \midrule
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    ADC & Analog-Digital Converter & Convertidor Analógico-Digital \\
+    CDC-ACM & Communication Device Class - Abstract Control Model & Clase de Dispositivo de Comunicación con Modelo de Control Abstracto \\
+    CH1 / CH2 & Channel 1 / Channel 2 & Canal 1 / Canal 2 \\
+    CSV & Comma-Separated Values & Valores Separados por Comas \\
+    DSP & Digital Signal Processing & Procesamiento Digital de Señales \\
+    FCEFYN & Facultad de Ciencias Exactas, Físicas y Naturales & \\
+    FIR & Finite Impulse Response & Filtro de Respuesta Impulsional Finita \\
+    GPIB & General Purpose Interface Bus & Bus de Interfaz de Propósito General \\
+    GUI & Graphical User Interface & Interfaz Gráfica de Usuario \\
+    HAL & Hardware Abstraction Layer & Capa de Abstracción de Hardware \\
+    HDF5 & Hierarchical Data Format 5 & Formato de Datos Jerárquico versión 5 \\
+    IEC & International Electrotechnical Commission & Comisión Electrotécnica Internacional \\
+    IIR & Infinite Impulse Response & Filtro de Respuesta Impulsional Infinita \\
+    LabVIEW & Laboratory Virtual Instrument Engineering Workbench & Entorno de Trabajo de Ingeniería de Instrumentos Virtuales \\
+    LAT & Laboratorio de Alta Tensión & \\
+    LI & Lightning Impulse & Impulso de Tensión Tipo Rayo Pleno \\
+    LIC & Lightning Impulse Chopped & Impulso de Tensión Tipo Rayo Cortado \\
+    LM & Levenberg-Marquardt & \\
+    LXI & LAN eXtensions for Instrumentation & Extensiones LAN para Instrumentación \\
+    MVC & Model-View-Controller & Modelo-Vista-Controlador \\
+    MVP & Model-View-Presenter & Modelo-Vista-Presentador \\
+    MVVM & Model-View-ViewModel & Modelo-Vista-VistaModelo \\
+    NI & National Instruments & \\
+    PyVISA & Python Virtual Instrument Software Architecture & Biblioteca de Python para el protocolo VISA \\
+    SCPI & Standard Commands for Programmable Instruments & Comandos Estándar para Instrumentos Programables \\
+    TDG & Test Data Generator & Generador de Datos de Prueba \\
+    UNC & Universidad Nacional de Córdoba & \\
+    USB & Universal Serial Bus & Bus Serie Universal \\
+    VISA & Virtual Instrument Software Architecture & Arquitectura de Software para Instrumentos Virtuales \\
+    XLSX & Excel Spreadsheet XML & Formato de hojas de cálculo de Microsoft Excel \\
+\end{xltabular}
+
+\section*{Lista de unidades de medida}
+
+\begin{xltabular}{\linewidth}{llX}
+    \toprule
+    \textbf{Símbolo} & \textbf{Unidad} & \textbf{Magnitud} \\
+    \midrule
+    \endfirsthead
+
+    \toprule
+    \textbf{Símbolo} & \textbf{Unidad} & \textbf{Magnitud} \\
+    \midrule
+    \endhead
+
+    \midrule
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    \unit{\ampere} & Amper & Corriente eléctrica\\
+    bit & Bit & Unidad mínima de información digital\\
+    byte & Byte & Cantidad de información digital\\
+    \unit{\degreeCelsius} & Grado Celsius & Temperatura\\
+    \unit{\gram\per\cubic\meter} & Gramo por metro cúbico & Humedad absoluta\\
+    \unit{\hertz} & Hertz & Frecuencia\\
+    \unit{\minute} & Minuto & Tiempo\\
+    \unit{\ohm} & Ohm & Resistencia eléctrica\\
+    \unit{\pascal} & Pascal & Presión atmosférica\\
+    pts / Sa & Puntos / Muestras & Longitud de memoria de captura\\
+    px & Píxel & Resolución gráfica\\
+    \unit{\second} & Segundo & Tiempo\\
+    \unit{\volt} & Volt & Tensión eléctrica\\
+    \unit{\percent} & Porcentaje & Proporción relativa\\
+\end{xltabular}
+
+\section*{Lista de múltiplos y submúltiplos}
+
+\begin{xltabular}{\linewidth}{llX}
+    \toprule
+    \textbf{Símbolo} & \textbf{Prefijo} & \textbf{Equivalencia} \\
+    \midrule
+    \endfirsthead
+
+    \toprule
+    \textbf{Símbolo} & \textbf{Prefijo} & \textbf{Equivalencia} \\
+    \midrule
+    \endhead
+
+    \midrule
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    G & Giga& $10^9$\\
+    M & Mega& $10^6$\\
+    k & Kilo& $10^3$\\
+    h & Hecto& $10^2$\\
+    m & Mili& $10^{-3}$\\
+    $\mu$ & Micro& $10^{-6}$\\
+    n & Nano& $10^{-9}$\\
+\end{xltabular}

@@ -6,6 +6,7 @@
 En este capítulo se presentan los patrones de arquitectura considerados para estructurar el sistema propuesto, bajo la premisa de un diseño modular orientado a garantizar la escalabilidad, la mantenibilidad y el desacoplamiento estructural entre componentes.
 
 \section{Patrones de arquitectura del software}
+\vspace{3\baselineskip}
 
 Un patrón de arquitectura \cite{fowler2019architecture} de \emph{software} es un esquema estructural que estandariza la organización de un sistema. Establece las decisiones de diseño fundamentales, la división en subsistemas o módulos, la asignación de responsabilidades y las reglas de interacción entre ellos, rigiéndose por el principio de separación de responsabilidades. Su propósito central es guiar la estructura del sistema para optimizar atributos de calidad como la mantenibilidad, la testabilidad, la escalabilidad y el bajo acoplamiento.
 
@@ -23,12 +24,15 @@ El patrón Modelo-Vista-Controlador (MVC) \cite{fowler2006gui} aísla la lógica
 
 El flujo opera de forma que el Controlador intercepta las acciones del usuario y actualiza el estado del Modelo. Ante este cambio, el Modelo notifica a la Vista, la cual consulta directamente al Modelo para refrescar la representación gráfica en pantalla.
 
+\vspace{3\baselineskip}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{img/arquitectura_software/esquema_mvc.png}
     \caption{Interacciones entre módulos del esquema MVC. Fuente: Propia.}
     \label{fig:esquema_mvc}
 \end{figure}
+\vspace{3\baselineskip}
+
 
 \begin{itemize}
     \item \textbf{Modelo:} Encapsula la lógica de cálculo y el almacenamiento de los datos. Notifica automáticamente sus cambios a la Vista para que esta actualice la pantalla.
@@ -42,12 +46,15 @@ El patrón Modelo-Vista-Presentador (MVP) \cite{fowler2006gui} es una derivació
 
 En esta estructura, la Vista captura las interacciones del usuario y las delega al Presentador. Este último consulta y modifica el Modelo, procesa los datos obtenidos y actualiza la Vista.
 
+\vspace{3\baselineskip}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{img/arquitectura_software/esquema_mvp.png}
     \caption{Interacciones entre módulos del esquema MVP. Fuente: Propia.}
     \label{fig:esquema_mvp}
 \end{figure}
+\vspace{3\baselineskip}
+
 
 \begin{itemize}
     \item \textbf{Modelo:} Cumple la misma función de cálculo y almacenamiento que en el esquema MVC, pero no se comunica con la Vista, ya que interactúa exclusivamente con el Presentador a través de consultas y respuestas.
@@ -61,12 +68,15 @@ El patrón Modelo-Vista-VistaModelo (MVVM) \cite{smith2009wpf}\cite{fowler2004pr
 
 La comunicación está mediada por el motor de enlace de datos, donde las acciones del usuario en la Vista ejecutan comandos del VistaModelo, y cualquier alteración en el estado de este último emite notificaciones, actualizando automáticamente los elementos visuales enlazados sin requerir manipulación manual de la interfaz.
 
+\vspace{3\baselineskip}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{img/arquitectura_software/esquema_mvvm.png}
     \caption{Interacciones entre módulos del esquema MVVM. Fuente: Propia.}
     \label{fig:esquema_mvvm}
 \end{figure}
+\vspace{3\baselineskip}
+
 
 \begin{itemize}
     \item \textbf{Modelo:} Realiza los cálculos y administra los datos del sistema, de igual forma que en los esquemas anteriores. Permanece totalmente desacoplado de la representación gráfica e interactúa exclusivamente con el VistaModelo.

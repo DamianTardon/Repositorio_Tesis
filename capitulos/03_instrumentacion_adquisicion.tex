@@ -5,6 +5,7 @@
 En este capítulo se abordan los principios de funcionamiento del osciloscopio de almacenamiento digital para la digitalización de señales. Empezando con la caracterización funcional del osciloscopio, indicando sus parámetros críticos de desempeño que deben considerarse al momento de seleccionarlo. A continuación, se describen las interfaces de comunicación física estandarizadas empleadas para la comunicación con la computadora. Finalmente, se explica la arquitectura de software para instrumentos virtuales (VISA) y la sintaxis de comandos SCPI, destacando su rol como capa de abstracción para la automatización, configuración remota, y extracción digitalizada de formas de onda.
 
 \section{Osciloscopio de almacenamiento digital}
+\vspace{3\baselineskip}
 
 El osciloscopio de almacenamiento digital es un instrumento de medición electrónico, el cual se encarga de convertir la señal analógica a un formato digital, permitiendo su almacenamiento, visualización y posterior análisis.
 
@@ -45,6 +46,7 @@ Donde el paso de cuantización ($q$) depende del rango dinámico de escala compl
 \textbf{Velocidad de muestreo:} Es una medida de la resolución en el tiempo, ya que indica la cantidad de muestras por unidad de tiempo (normalmente en segundos) que captura el instrumento, por lo tanto, define implícitamente la separación horizontal entre dos muestras consecutivas. Se mide en \unit{MSa/s} o \unit{GSa/s}.
 
 \section{Estándares de comunicación}
+\vspace{3\baselineskip}
 
 En el diseño e implementación de sistemas de instrumentación virtual, la transferencia de los datos, desde la memoria del osciloscopio hacia la computadora, requiere de interfaces estandarizadas y protocolos de control.
 
@@ -84,6 +86,7 @@ Los descriptores de recursos VISA por lo general, tienen la siguiente gramática
 
 A continuación, se presenta un ejemplo de descriptor de recursos VISA para puerto serie:
 
+\vspace{3\baselineskip}
 \begin{table}[H]
     \centering
     \caption{Ejemplo de descriptor para ASRL (Asynchronous Serial Line)}
@@ -95,3 +98,4 @@ A continuación, se presenta un ejemplo de descriptor de recursos VISA para puer
     \end{tabular}
     \label{tab:descriptor_asrl}
 \end{table}
+\vspace{3\baselineskip}

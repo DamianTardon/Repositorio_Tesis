@@ -5,6 +5,7 @@
 En este capítulo se abordan las metodologías de procesamiento digital de señales aplicables a la caracterización de ondas de impulso, en conformidad con las normas IEC 61083-2 \cite{iec61083_2} e IEC 60060-1 \cite{iec60060_1}. Comienza con el análisis de las técnicas de filtrado digital IIR y FIR, e introduciendo la técnica de filtrado de fase cero para mitigar la distorsión de la morfología del impulso. A continuación, se exponen las técnicas de regresión para el ajuste de curvas, enfocándose en la modelación no lineal del algoritmo de Levenberg-Marquardt \cite{Chapra2015}. Finalmente, se examinan los algoritmos de interpolación \cite{Chapra2015}, orientados a la determinación precisa de valores continuos a partir de los datos discretos registrados.
 
 \section{Filtros digitales}
+\vspace{3\baselineskip}
 
 Los filtros digitales \cite{asn_iir_fir_2020} son algoritmos matemáticos diseñados para modificar selectivamente las componentes en frecuencia de una señal, permitiendo el paso de ciertas frecuencias y atenuando otras, tal como ocurre con los filtros analógicos constituidos por componentes electrónicos (resistencias, capacitores e inductores), ya que buscan simular su comportamiento. Estos se clasifican principalmente en dos grandes familias, FIR o IIR, según la duración de su respuesta al impulso.
 
@@ -36,6 +37,7 @@ El filtrado de fase cero \cite{Lyons2004} o bidireccional es una técnica que el
 Por lo tanto, debe considerarse que al pasar dos veces la información por el algoritmo del filtrado, se duplica la atenuación de las frecuencias filtradas, y se duplica el tiempo de cálculo en comparación con un filtrado unidireccional.
 
 \section{Ajuste de curvas e interpolación}
+\vspace{3\baselineskip}
 
 Dado que los datos adquiridos por el osciloscopio son puntos discretos que representan una señal continua, que posee ruido electromagnético y errores de cuantización. Si bien todos estos fenómenos se pueden atenuar, no se pueden eliminar por completo, por lo tanto, es necesario aplicar técnicas de ajuste de curvas (regresión) para obtener la función que mejor modele el comportamiento de los datos. Mientras que, para obtener los valores ubicados entre dos muestras de la señal discreta, se debe recurrir a la interpolación.
 

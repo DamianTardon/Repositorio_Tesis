@@ -7,6 +7,7 @@ En este capítulo se expone el procedimiento de calibración metrológica y vali
 
 \section{Análisis de incertidumbre según IEC 61083-2}
 \label{subsec:analisis_incertidumbre_iec61083_2}
+\vspace{3\baselineskip}
 
 Debido a que el algoritmo de cálculo forma parte integral del sistema digital de medición, debe cuantificarse su contribución a la incertidumbre global. Para ello, la norma IEC 61083-2 \cite{iec61083_2} indica que la evaluación del \emph{software} debe realizarse mediante la inyección de registros digitales de ondas patrón provistos por el generador de datos de prueba (\emph{Test Data Generator}, TDG) suministrado por la misma, para compararlos con sus valores de referencia ($x_{\text{REF}}$) y sus respectivas incertidumbres expandidas ($U_x$).
 
@@ -17,6 +18,7 @@ Además, establece dos evaluaciones complementarias:
     \item \textbf{Cuantificación de la incertidumbre estándar del \emph{software}}: En el Anexo B de la norma \cite{iec61083_2} se describe un procedimiento para determinar la incertidumbre combinada, para un conjunto de formas de onda seleccionadas (por ejemplo, impulsos plenos, impulsos cortados, impulsos de corriente, etc), con el algoritmo del \emph{software} que se va a evaluar.
 \end{enumerate}
 
+\vspace{3\baselineskip}
 \begin{table}[H]
     \centering
     \caption{Tolerancias de aceptación paramétricas según la norma IEC 61083-2.}
@@ -34,9 +36,11 @@ Además, establece dos evaluaciones complementarias:
                                  & Sobrepasamiento (OS)           & $\pm\SI{1,0}{}$ (Absoluto) \\ \bottomrule
     \end{tabular}
 \end{table}
+\vspace{3\baselineskip}
 
 \section{Procedimiento de calibración}
 \label{sec:procedimiento_calibracion}
+\vspace{3\baselineskip}
 
 La calibración automática se ejecuta aplicando la siguiente secuencia de trabajo:
 
@@ -101,9 +105,11 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
     Una vez concluidos los cálculos de incertidumbre, se genera un reporte en formato PDF con los resultados del análisis para su trazabilidad metrológica, conforme a la norma \cite{iec61083_2}, el cual indica las características del \emph{software} evaluado, los valores calculados y el desvío de cada parámetro para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
 \end{enumerate}
 
+\vspace{3\baselineskip}
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{img/puml/calibracion/algoritmo_calibracion.png}
     \caption{Diagrama de componentes del sistema de calibración. Fuente: Propia.}
     \label{fig:algoritmo_calibracion}
 \end{figure}
+\vspace{3\baselineskip}
