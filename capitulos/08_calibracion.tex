@@ -26,14 +26,14 @@ Además, establece dos evaluaciones complementarias:
     \begin{tabular}{@{}lll@{}}
         \toprule
         \textbf{Tipo de Impulso} & \textbf{Parámetro Físico}      & \textbf{Tolerancia Máxima} \\ \midrule
-        Completo (LI)            & Valor Pico ($U_\text{t}$)      & $\pm\SI{0,10}{\percent}$   \\ \cmidrule(l){2-3}
-                                 & Tiempo de Frente ($T_1$)       & $\pm\SI{2}{\percent}$      \\ \cmidrule(l){2-3}
-                                 & Tiempo de Cola ($T_2$)         & $\pm\SI{1,0}{\percent}$    \\ \cmidrule(l){2-3}
-                                 & Sobrepasamiento (OS)           & $\pm\SI{1,0}{}$ (Absoluto) \\ \midrule
-        Cortado (LIC)            & Valor Pico ($U_\text{t}$)      & $\pm\SI{1,0}{\percent}$    \\ \cmidrule(l){2-3}
-                                 & Tiempo de Frente ($T_1$)       & $\pm\SI{2}{\percent}$      \\ \cmidrule(l){2-3}
-                                 & Tiempo de Corte ($T_\text{C}$) & $\pm\SI{2,0}{\percent}$    \\ \cmidrule(l){2-3}
-                                 & Sobrepasamiento (OS)           & $\pm\SI{1,0}{}$ (Absoluto) \\ \bottomrule
+        Completo (LI)            & Valor Pico ($U_\text{t}$)      & $\pm\qty{0,10}{\percent}$   \\ \cmidrule(l){2-3}
+                                 & Tiempo de Frente ($T_1$)       & $\pm\qty{2}{\percent}$      \\ \cmidrule(l){2-3}
+                                 & Tiempo de Cola ($T_2$)         & $\pm\qty{1,0}{\percent}$    \\ \cmidrule(l){2-3}
+                                 & Sobrepasamiento ($\beta'$)           & $\pm\qty{1,0}{\percent}$ (Absoluto) \\ \midrule
+        Cortado (LIC)            & Valor Pico ($U_\text{t}$)      & $\pm\qty{1,0}{\percent}$    \\ \cmidrule(l){2-3}
+                                 & Tiempo de Frente ($T_1$)       & $\pm\qty{2}{\percent}$      \\ \cmidrule(l){2-3}
+                                 & Tiempo de Corte ($T_\text{C}$) & $\pm\qty{2,0}{\percent}$    \\ \cmidrule(l){2-3}
+                                 & Sobrepasamiento ($\beta'$)           & $\pm\qty{1,0}{\percent}$ (Absoluto) \\ \bottomrule
     \end{tabular}
 \end{table}
 \vspace{3\baselineskip}
@@ -51,7 +51,7 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
 
     \item \textbf{Procesamiento de las ondas:}
 
-    Para cada caso de prueba, se carga el vector de tensión desde el archivo TDG correspondiente. A continuación, se ejecuta la rutina de análisis, obteniendo los parámetros característicos ($U_\text{t}$, $T_1$, $T_2$, $OS\%$ y $T_\text{C}$).
+    Para cada caso de prueba, se carga el vector de tensión desde el archivo TDG correspondiente. A continuación, se ejecuta la rutina de análisis, obteniendo los parámetros característicos ($U_\text{t}$, $T_1$, $T_2$, $\beta'$ y $T_\text{C}$).
 
     \item \textbf{Evaluación de errores relativos y tolerancias:}
     
@@ -78,10 +78,10 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
             \label{eq:ub71}
         \end{equation}
 
-        Para parámetros expresados en términos absolutos o porcentuales directos, tales como la magnitud relativa de la sobreelevación (OS), la ecuación resulta:
+        Para parámetros expresados en términos absolutos o porcentuales directos, tales como la magnitud relativa de la sobreelevación ($\beta'$), la ecuación resulta:
 
         \begin{equation}
-            u_\text{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i=1}^{n} \left| \text{OS}_i - \text{OS}_{\text{REF},i} \right|
+            u_\text{B71} = \frac{1}{\sqrt{3}} \cdot \max_{i=1}^{n} \left| \beta'_i - \beta'_{\text{REF},i} \right|
             \label{eq:ub71_os}
         \end{equation}
 
@@ -102,7 +102,7 @@ La calibración automática se ejecuta aplicando la siguiente secuencia de traba
         \end{equation}
     \item \textbf{Generación del certificado:}
 
-    Una vez concluidos los cálculos de incertidumbre, se genera un reporte en formato PDF con los resultados del análisis para su trazabilidad metrológica, conforme a la norma \cite{iec61083_2}, el cual indica las características del \emph{software} evaluado, los valores calculados y el desvío de cada parámetro para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
+    Una vez concluidos los cálculos de incertidumbre, se genera un reporte en formato PDF con los resultados del análisis para su trazabilidad metrológica, basado en los lineamientos de la norma IEC 61083~\cite{iec61083_2}, el cual indica las características del \emph{software} evaluado, los valores calculados y el desvío de cada parámetro para cada caso de prueba, y al final expone las incertidumbres obtenidas para cada parámetro de cada grupo de formas de ondas (LI y LIC).
 \end{enumerate}
 
 \vspace{3\baselineskip}

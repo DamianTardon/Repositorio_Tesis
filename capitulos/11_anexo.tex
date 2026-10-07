@@ -46,7 +46,7 @@ En la figura \ref{fig:curva_positiva} se observa la curva con su polaridad norma
 \end{figure}
 \vspace{3\baselineskip}
 
-La figura \ref{fig:curva_recortada} resalta en color rojo la ventana de datos útil (comprendida entre el \qty{20}{\percent} del frente y el \qty{40}{\percent} de la cola). Esta porción es la que se somete al proceso de regresión no lineal mediante el algoritmo de Levenberg-Marquardt~\cite{subsub:tipos_regresion}.
+La figura \ref{fig:curva_recortada} resalta en color rojo la ventana de datos útil (comprendida entre el \qty{20}{\percent} del frente y el \qty{40}{\percent} de la cola). Esta porción es la que se somete al proceso de regresión no lineal mediante el algoritmo de Levenberg-Marquardt~\cite{Chapra2015}.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -101,7 +101,7 @@ La figura \ref{fig:curva_ensayo} muestra la curva de tensión de ensayo $U_\text
 \end{figure}
 \vspace{3\baselineskip}
 
-Finalmente, en la figura \ref{fig:curva_final} se superpone la curva de tensión de ensayo procesada sobre la señal original bruta. Esta comparativa evidencia la efectiva supresión del ruido de alta frecuencia y del nivel de continua, dando como resultado una forma de onda apta para la determinación precisa de sus parámetros característicos ($U_\text{t}$, $T_{1}$, $T_{2}$ y OS\%).
+Finalmente, en la figura \ref{fig:curva_final} se superpone la curva de tensión de ensayo procesada sobre la señal original bruta. Esta comparativa evidencia la efectiva supresión del ruido de alta frecuencia y del nivel de continua, dando como resultado una forma de onda apta para la determinación precisa de sus parámetros característicos ($U_\text{t}$, $T_{1}$, $T_{2}$ y $\beta'$).
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -152,7 +152,7 @@ En la figura \ref{fig:curva_positiva_lic} se observa la curva cortada con su amp
 \end{figure}
 \vspace{3\baselineskip}
 
-La figura \ref{fig:curva_recortada_lic} resalta en color rojo la ventana de datos útil del frente de la onda. A diferencia del caso pleno, el algoritmo detecta la discrepancia morfológica en la cola (debida al colapso de tensión) y clasifica el impulso como LIC, por lo que utiliza este segmento resaltado únicamente para determinar el factor de escala $E$ (ecuación \ref{eq:factor_escala}), sin realizar un nuevo ajuste por mínimos cuadrados.
+La figura \ref{fig:curva_recortada_lic} resalta en color rojo la ventana de datos útil del frente de la onda. A diferencia del caso pleno, el algoritmo detecta la discrepancia morfológica en la cola (debida al colapso de tensión) y clasifica el impulso como LIC, por lo que utiliza este segmento resaltado únicamente para determinar el factor de escala $E$ (ecuación \ref{eq:factor_escala_e}), sin realizar un nuevo ajuste por mínimos cuadrados.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -207,7 +207,7 @@ La figura \ref{fig:curva_ensayo_lic} muestra la curva de tensión de ensayo $U_\
 \end{figure}
 \vspace{3\baselineskip}
 
-Por último, en la figura \ref{fig:curva_final_lic} se superpone la curva de tensión de ensayo procesada sobre la señal original bruta del TDG. De esta curva definitiva el algoritmo extrae los parámetros normativos correspondientes al impulso cortado ($U_\text{t}$, $T_1$, $T_\text{C}$ y OS\%), validando la robustez del método matemático frente a colapsos abruptos.
+Por último, en la figura \ref{fig:curva_final_lic} se superpone la curva de tensión de ensayo procesada sobre la señal original bruta del TDG. De esta curva definitiva el algoritmo extrae los parámetros normativos correspondientes al impulso cortado ($U_\text{t}$, $T_1$, $T_\text{C}$ y $\beta'$), validando la robustez del método matemático frente a colapsos abruptos.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]

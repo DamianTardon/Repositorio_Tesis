@@ -20,7 +20,7 @@ Los siguientes términos son un extracto de la norma IEC 60060-1 \cite{iec60060_
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/iec_60060/iec_60060_1_impulso_tension_pleno.png}
-    \caption{Impulso de tensión tipo rayo pleno. Fuente: \cite{iec60060_1}. Traducción propia.}
+    \caption{Impulso de tensión tipo rayo pleno. Fuente: \cite{iec60060_1}.}
     \label{fig:impulso_tension_pleno}
 \end{figure}
 \vspace{3\baselineskip}
@@ -40,15 +40,15 @@ Los siguientes términos son un extracto de la norma IEC 60060-1 \cite{iec60060_
 
 \textbf{Nivel de base:} Es el nivel de un registro de un sistema de medición de impulsos cuando hay una entrada cero al instrumento de registro.
 
-\textbf{Curva base $U_\text{m}(t)$:} Es una estimación de una tensión de impulso tipo rayo completa sin una oscilación superpuesta.
+\textbf{Curva base} $(U_\text{m}(t))$: Es una estimación de una tensión de impulso tipo rayo completa sin una oscilación superpuesta.
 
-\textbf{Curva residual $R(t)$:} Es la diferencia entre la curva registrada y la curva base.
+\textbf{Curva residual} $(R(t))$: Es la diferencia entre la curva registrada y la curva base.
 
-\textbf{Valor extremo $U_\text{e}$:} Es el valor máximo de la curva registrada medido desde el nivel de base en el mismo sentido que el impulso aplicado.
+\textbf{Valor extremo} $(U_\text{e})$: Es el valor máximo de la curva registrada medido desde el nivel de base en el mismo sentido que el impulso aplicado.
 
-\textbf{Máximo de la curva base $U_\text{b}$:} Es el valor máximo de la curva base.
+\textbf{Máximo de la curva base} $(U_\text{b})$: Es el valor máximo de la curva base.
 
-\textbf{Función de tensión de ensayo:} Es una función de amplitud-frecuencia que se define para representar la respuesta del aislamiento a impulsos con sobreelevación (\emph{overshoot}), dada por la ecuación \ref{eq:func_tension_ensayo}, donde $f$ es la frecuencia en \unit{\mega\hertz}.
+\textbf{Función de tensión de ensayo} $(k(f))$: Es una función de amplitud-frecuencia que se define para representar la respuesta del aislamiento a impulsos con sobreelevación (\emph{overshoot}), dada por la ecuación \ref{eq:func_tension_ensayo}, donde $f$ es la frecuencia en \unit{\mega\hertz}.
 
 \begin{equation}
         k(f) = \frac{1}{1+2,2 \cdot f^2}
@@ -60,12 +60,12 @@ Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión resi
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/iec_60060/iec_60060_1_funcion_tension_ensayo.png}
-    \caption{Función tensión de ensayo. Fuente: \cite{iec60060_1}. Traducción propia.}
+    \caption{Función tensión de ensayo. Fuente: \cite{iec60060_1}.}
     \label{fig:funcion_tension_ensayo}
 \end{figure}
 \vspace{3\baselineskip}
 
-\textbf{Curva residual filtrada ($R_f(t)$):} Es la curva residual filtrada por la función de tensión de ensayo de la ecuación \ref{eq:func_tension_ensayo}.
+\textbf{Curva residual filtrada} $(R_\text{f}(t))$: Es la curva residual filtrada por la función de tensión de ensayo de la ecuación \ref{eq:func_tension_ensayo}.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -75,7 +75,7 @@ Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión resi
     \label{fig:curva_ensayo_base_filtrada}
 \end{figure}
 
-\textbf{Curva de tensión de ensayo:} Es la suma de la curva base con la curva residual filtrada. Es una representación matemática del proceso de filtrado y no es una entidad física o un impulso equivalente.
+\textbf{Curva de tensión de ensayo} $(U_\text{t}(t))$: Es la suma de la curva base con la curva residual filtrada. Es una representación matemática del proceso de filtrado y no es una entidad física o un impulso equivalente.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -86,13 +86,13 @@ Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión resi
 \end{figure}
 \vspace{3\baselineskip}
 
-\textbf{Valor de la tensión de ensayo $U_\text{t}$:} Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.
+\textbf{Valor de la tensión de ensayo} $(U_\text{t})$: Es el valor máximo de la curva de tensión de ensayo, medido desde el nivel de base en el mismo sentido que el impulso aplicado.
 
-\textbf{Magnitud de la sobreelevación $\beta$:} Es la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$) y el valor máximo de la curva base ($U_\text{b}$).
+\textbf{Magnitud de la sobreelevación} $(\beta)$: Es la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$) y el valor máximo de la curva base ($U_\text{b}$).
 
-\textbf{Magnitud relativa de la sobreelevación $\beta'$:} Es la relación porcentual entre la magnitud de la sobreelevación y el valor extremo.
+\textbf{Magnitud relativa de la sobreelevación} $(\beta')$: Es la relación porcentual entre la magnitud de la sobreelevación y el valor extremo.
 
-\textbf{Tiempo de frente $T_1$:} Es un parámetro virtual definido como $1/0,6$ veces el intervalo $T_{AB}$ entre los instantes en que el impulso es \qty{30}{\percent} y \qty{90}{\percent} del valor de cresta en la curva de tensión de ensayo.
+\textbf{Tiempo de frente} $(T_1)$: Es un parámetro virtual definido como $1/0,6$ veces el intervalo $T_{AB}$ entre los instantes en que el impulso es \qty{30}{\percent} y \qty{90}{\percent} del valor de cresta en la curva de tensión de ensayo.
 
 \begin{equation}
     T_1 = \frac{T_{AB}}{0,6} = \frac{t_{90} - t_{30}}{0,6}
@@ -108,7 +108,7 @@ Nota: Aplicar esta función como un filtro paso bajo a la curva de tensión resi
 \end{figure}
 \vspace{3\baselineskip}
 
-\textbf{Origen virtual $O_1$:} Es un instante que precede al punto A de la curva de tensión de ensayo en un tiempo $0,3 * T_1$.
+\textbf{Origen virtual} $(O_1)$: Es un instante que precede al punto A de la curva de tensión de ensayo en un tiempo $0,3 \cdot T_1$.
 \begin{align}
     T' &= 0.5 \cdot T_{AB} \\
     T' &= 0.5 \cdot 0.6 \cdot T_1 \\
@@ -121,7 +121,7 @@ Luego:
     \label{eq:origen_virtual}
 \end{equation}
 
-\textbf{Tiempo hasta el semivalor $T_2$:} Parámetro virtual definido como el intervalo de tiempo entre el origen virtual ($O_1$), y el instante en que la curva de tensión de ensayo decae hasta la mitad de su valor de cresta ($U_\text{t}$).
+\textbf{Tiempo hasta el semivalor} $(T_2)$: Parámetro virtual definido como el intervalo de tiempo entre el origen virtual ($O_1$), y el instante en que la curva de tensión de ensayo decae hasta la mitad de su valor de cresta ($U_\text{t}$).
 
 \textbf{Tensión de impulso tipo rayo cortada:} Es un impulso tipo rayo que es interrumpido en el frente, cresta o cola por una descarga disruptiva, causando una caída súbita de la tensión.
 
@@ -136,7 +136,7 @@ Luego:
 \end{figure}
 \vspace{3\baselineskip}
 
-\textbf{Tiempo de corte $T_\text{C}$:} Es el intervalo de tiempo entre el origen virtual ($O_1$) del impulso y el instante relevante.
+\textbf{Tiempo de corte} $(T_\text{C})$: Es el intervalo de tiempo entre el origen virtual ($O_1$) del impulso y el instante relevante.
 
 \subsection{Onda de impulso plena}
 
@@ -156,7 +156,7 @@ Además, la norma establece las tolerancias que acepta en los parámetros caract
         Tiempo de frente ($T_1$)           & $\pm \qty{30}{\percent}$                                                                                \\
                                            & y para equipos con $U_\text{m} > \qty{800}{\kilo\volt}$: $\qty{-30}{\percent}$ a $+\qty{100}{\percent}$ \\ \midrule
         Tiempo hasta el semivalor ($T_2$)  & $\pm \qty{20}{\percent}$                                                                                \\ \midrule
-        Sobreelevación (OS)                & $\le \qty{10}{\percent}$                                                                                \\ \bottomrule
+        Sobreelevación ($\beta'$)          & $\le \qty{10}{\percent}$                                                                                \\ \bottomrule
     \end{tabular}
 \end{table}
 \vspace{3\baselineskip}

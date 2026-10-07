@@ -2,13 +2,15 @@
 \section*{Resumen}
 \label{sec:resumen}
 \addcontentsline{toc}{chapter}{Resumen}
-El presente Trabajo Final aborda el diseño, la implementación y la validación metrológica de un sistema de software integral para la automatización de la captura y análisis de ensayos de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), conforme a las normas IEC 60060-1~\cite{iec60060_1} y 61083-2~\cite{iec61083_2}. El trabajo responde a la necesidad de optimizar los procedimientos manuales de medición en el Laboratorio de Alta Tensión (FCEFYN-UNC), reduciendo los tiempos operacionales y eliminando el error operacional humano.
+El presente Trabajo Final aborda el diseño, la implementación y la validación metrológica de un sistema integral de software para la automatización de la captura y el análisis de ensayos de impulso tipo rayo (\qty[parse-numbers=false]{1.2/50}{\micro\second}), basado en los lineamientos de las normas IEC 60060-1~\cite{iec60060_1} e IEC 61083-2~\cite{iec61083_2}. El desarrollo responde a la necesidad de optimizar los procedimientos manuales de medición en el Laboratorio de Alta Tensión (FCEFyN-UNC), reduciendo los tiempos de ejecución y eliminando el error operacional humano.
 
-El sistema integra una capa de abstracción de hardware basada en el protocolo VISA y comandos SCPI para controlar un osciloscopio digital GW Instek GDS-1102A-U \cite{gds1000au_ProgrammingManual}. Desarrollado en Python bajo el patrón arquitectónico MVP, garantiza el desacoplamiento entre la interfaz gráfica y la lógica funcional con sondeo asíncrono no bloqueante.
+El sistema integra una capa de abstracción de hardware basada en el protocolo VISA y comandos SCPI para controlar un osciloscopio digital GW Instek GDS-1102A-U~\cite{gds1000au_ProgrammingManual}. Desarrollado en Python bajo la arquitectura Modelo-Vista-Presentador (MVP), garantiza el desacoplamiento entre la interfaz gráfica y la lógica funcional con sondeo asíncrono no bloqueante.
 
-El motor de cálculo numérico ejecuta el algoritmo indicado en la IEC 60060-1. Aplicando regresión no lineal con el algoritmo de Levenberg-Marquardt con una función de doble exponencial, en conjunto con un filtro digital de fase cero para eliminar el ruido indeseado, logrando sintetizar la curva de tensión de ensayo~\cite{iec60060_1}. Por su parte, la información se administra jerárquicamente en formato HDF5, con respaldos en texto plano (CSV) y exportación a planillas de cálculo.
+El motor de cálculo numérico implementa el algoritmo establecido en la IEC 60060-1. Emplea regresión no lineal mediante el algoritmo de Levenberg-Marquardt sobre una función de doble exponencial, y aplica un filtro digital de fase cero para atenuar el ruido, lo que permite sintetizar la curva de tensión de ensayo~\cite{iec60060_1}. 
 
-La calibración del software se realizó inyectando los registros patrón del generador de datos de prueba de la 61083-2~\cite{iec61083_2}, verificando que los errores en el cálculo de los parámetros característicos ($U_t$, $T_1$, $T_2$, $T_c$ y $OS\%$) cumplan las tolerancias admisibles.
+La gestión de la información se administra jerárquicamente en formato HDF5, integrando respaldos en texto plano (CSV) y exportación a planillas de cálculo.
+
+La calibración del software se realizó procesando los registros patrón del generador de datos de prueba (TDG) de la norma IEC 61083-2~\cite{iec61083_2}, para verificar si los errores en el cálculo de los parámetros característicos ($U_t$, $T_1$, $T_2$, $T_c$ y $\beta'$) cumplen las tolerancias admisibles.
 
 \section*{Área Temática}
 Computación e Informática, Digitales.
@@ -21,15 +23,15 @@ Ensayo de impulso atmosférico, alta tensión, procesamiento digital de señales
 
 \newpage
 \section*{Abstract}
+This Final Project addresses the design, implementation, and metrological validation of a comprehensive software system for the automation of the acquisition and analysis of lightning impulse tests (\qty[parse-numbers=false]{1.2/50}{\micro\second}), based on the guidelines of the IEC 60060-1~\cite{iec60060_1} and IEC 61083-2~\cite{iec61083_2} standards. The development responds to the need to optimize manual measurement procedures at the High Voltage Laboratory (FCEFyN-UNC), reducing execution times and eliminating human operational error.
 
-This Final Project addresses the design, implementation, and metrological validation of a comprehensive software system for the automation of the acquisition and analysis of lightning impulse tests (\qty[parse-numbers=false]{1.2/50}{\micro\second}), in accordance with IEC 60060-1~\cite{iec60060_1} and IEC 61083-2~\cite{iec61083_2} standards. The work responds to the need to optimize manual measurement procedures at the High Voltage Laboratory (FCEFyN-UNC), reducing operational times and eliminating human operational error.
+The system integrates a hardware abstraction layer based on the VISA protocol and SCPI commands to control a GW Instek GDS-1102A-U digital oscilloscope~\cite{gds1000au_ProgrammingManual}. Developed in Python under the Model-View-Presenter (MVP) architecture, it ensures the decoupling between the graphical user interface and the functional logic with non-blocking asynchronous polling.
 
-The system integrates a hardware abstraction layer based on the VISA protocol and SCPI commands to control a GW Instek GDS-1102A-U digital oscilloscope \cite{gds1000au_ProgrammingManual}. Developed in Python under the MVP architectural pattern, it guarantees decoupling between the graphical user interface and the functional logic through non-blocking asynchronous polling.
+The numerical calculation engine implements the algorithm established in IEC 60060-1. It employs non-linear regression via the Levenberg-Marquardt algorithm on a double exponential function, and applies a zero-phase digital filter to attenuate noise, enabling the synthesis of the test voltage curve~\cite{iec60060_1}.
 
-The numerical calculation engine executes the algorithm specified in IEC 60060-1. By applying nonlinear regression using the Levenberg-Marquardt algorithm with a double exponential function, together with a zero-phase digital filter to eliminate unwanted noise, it successfully synthesizes the test voltage curve~\cite{iec60060_1}. Furthermore, information is managed hierarchically in HDF5 format, with plain text (CSV) backups and spreadsheet export capabilities.
+Information management is hierarchically administered in HDF5 format, integrating plain text backups (CSV) and spreadsheet exports.
 
-Software calibration was performed by injecting the reference records from the test data generator of IEC 61083-2~\cite{iec61083_2}, verifying that the calculation errors for the characteristic parameters ($U_t$, $T_1$, $T_2$, $T_c$, and $OS\%$) comply with the allowable tolerances.
-
+Software calibration was performed by processing the reference records from the Test Data Generator (TDG) of the IEC 61083-2 standard~\cite{iec61083_2}, to verify whether the errors in the calculation of the characteristic parameters ($U_t$, $T_1$, $T_2$, $T_c$, and $\beta'$) comply with the allowable tolerances.
 \section*{Thematic area}
 Computer Science and Informatics, Digital Systems.
 
@@ -41,13 +43,15 @@ Lightning impulse test, high voltage, digital signal processing, software calibr
 
 \newpage
 \section*{Resumo}
-Este Trabalho Final aborda o projeto, a implementação e a validação metrológica de um sistema de software integral para a automatização da captura e análise de ensaios de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), em conformidade com as normas IEC 60060-1~\cite{iec60060_1} e IEC 61083-2~\cite{iec61083_2}. O trabalho responde à necessidade de otimizar os procedimentos manuais de medição no Laboratório de Alta Tensão (FCEFyN-UNC), reduzindo os tempos operacionais e eliminando o erro operacional humano.
+Este Trabalho Final aborda o projeto, a implementação e a validação metrológica de um sistema integral de software para a automação da captura e análise de ensaios de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), baseado nas diretrizes das normas IEC 60060-1~\cite{iec60060_1} e IEC 61083-2~\cite{iec61083_2}. O desenvolvimento atende à necessidade de otimizar os procedimentos manuais de medição no Laboratório de Alta Tensão (FCEFyN-UNC), reduzindo os tempos de execução e eliminando o erro operacional humano.
 
-O sistema integra uma camada de abstração de hardware baseada no protocolo VISA e comandos SCPI para controlar um osciloscópio digital GW Instek GDS-1102A-U \cite{gds1000au_ProgrammingManual}. Desenvolvido em Python sob o padrão arquitetônico MVP, garante o desacoplamento entre a interface gráfica e a lógica funcional por meio de sondagem assíncrona não bloqueante.
+O sistema integra uma camada de abstração de hardware baseada no protocolo VISA e comandos SCPI para controlar um osciloscópio digital GW Instek GDS-1102A-U~\cite{gds1000au_ProgrammingManual}. Desenvolvido em Python sob a arquitetura Modelo-Visão-Apresentador (MVP), garante o desacoplamento entre a interface gráfica e a lógica funcional com sondagem assíncrona não bloqueante.
 
-O motor de cálculo numérico executa o algoritmo especificado na norma IEC 60060-1. Aplicando regressão não linear com o algoritmo de Levenberg-Marquardt com uma função exponencial dupla, em conjunto com um filtro digital de fase zero para eliminar o ruído indesejado, consegue-se sintetizar a curva de tensão de ensaio~\cite{iec60060_1}. Além disso, a informação é gerida hierarquicamente em formato HDF5, com backups em texto simples (CSV) e exportação para planilhas de cálculo.
+O motor de cálculo numérico implementa o algoritmo estabelecido na IEC 60060-1. Emprega regressão não linear por meio do algoritmo de Levenberg-Marquardt sobre uma função dupla exponencial e aplica um filtro digital de fase zero para atenuar o ruído, o que permite sintetizar a curva de tensão de ensaio~\cite{iec60060_1}.
 
-A calibração do software foi realizada injetando os registros de referência do gerador de dados de teste da IEC 61083-2~\cite{iec61083_2}, verificando se os erros no cálculo dos parâmetros característicos ($U_t$, $T_1$, $T_2$, $T_c$ e $OS\%$) cumprem as tolerâncias admissíveis.
+O gerenciamento de dados é administrado hierarquicamente no formato HDF5, integrando backups em texto simples (CSV) e exportação para planilhas de cálculo.
+
+A calibração do software foi realizada processando os registros de referência do gerador de dados de teste (TDG) da norma IEC 61083-2~\cite{iec61083_2}, para verificar se os erros no cálculo dos parâmetros característicos ($U_t$, $T_1$, $T_2$, $T_c$ e $\beta'$) cumprem as tolerâncias admissíveis.
 
 \section*{Área Temática}
 Ciência da Computação e Informática, Sistemas Digitais.

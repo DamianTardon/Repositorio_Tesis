@@ -4,12 +4,12 @@
 \addcontentsline{toc}{chapter}{Conclusiones}
 \vspace{3\baselineskip}
 
-En el presente trabajo se desarrolló e implementó un sistema integral de software para la automatización, captura, procesamiento y evaluación metrológica de ensayos de tensión de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1,2/50}{\micro\second}) conforme a las exigencias de las normas \textbf{IEC 60060-1} e \textbf{IEC 61083-2}.
+En el presente trabajo se desarrolló e implementó un sistema integral de software para la automatización, captura, procesamiento y evaluación metrológica de ensayos de tensión de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1,2/50}{\micro\second}) basado en los lineamientos de las normas \textbf{IEC 60060-1} e \textbf{IEC 61083-2}.
 
 A partir del diseño, calibración y evaluación comparativa del sistema, se llegó a las siguientes conclusiones:
 
 \begin{itemize}
-    \item \textbf{Mejora sustancial en la eficiencia operativa:} El sistema desarrollado redujo el tiempo de cálculo de los parámetros normativos de una onda de impulso ($U_\text{t}$, $T_1$, $T_2$, $T_\text{C}$ y $\text{OS}\%$) de \textbf{150 segundos} (requeridos en la metodología de trazado manual actual) a solo \textbf{2 segundos} por impulso.
+    \item \textbf{Mejora sustancial en la eficiencia operativa:} El sistema desarrollado redujo el tiempo de cálculo de los parámetros normativos de una onda de impulso ($U_\text{t}$, $T_1$, $T_2$, $T_\text{C}$ y $\beta'$) de \textbf{150 segundos} (requeridos en la metodología de trazado manual actual) a solo \textbf{2 segundos} por impulso.
     Cabe destacar que dicha estimación manual no contempla el tiempo adicional requerido en la consolidación gráfica posterior, la cual implica exportar los datos brutos a un software externo (como Microsoft Excel) para superponer e integrar múltiples impulsos en un mismo gráfico. Por su parte, el software desarrollado elimina la dependencia de herramientas de terceros al ofrecer la selección, superposición y visualización directa de las ondas ensayadas listas para su exportación, optimizando significativamente la dinámica global de trabajo en el Laboratorio de Alta Tensión.
 
     \item \textbf{Precisión y cumplimiento normativo:} La evaluación, mediante las ondas patrón del TDG, demostró que el software cumple con los límites de aceptación paramétricos estipulados en la norma \textbf{IEC 61083-2}. A diferencia del método manual, que presentó errores desproporcionados en ondas con alta frecuencia superpuesta o cortes abruptos (superando el \num{20}\% de error en ciertos parámetros), el motor numérico desarrollado mantuvo los errores relativos de cálculo por debajo de los umbrales normativos en todas las pruebas.

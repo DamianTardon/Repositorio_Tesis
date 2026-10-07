@@ -61,7 +61,7 @@ Una vez obtenidos los vectores de tensión y corriente, el presentador los trans
 \begin{itemize}
     \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
     \item \textbf{Delegación del cálculo normativo}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
-    \item \textbf{Transferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual OS\%) para cargarlos en la capa de visualización.
+    \item \textbf{Transferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual $\beta'$) para cargarlos en la capa de visualización.
 \end{itemize}
 
 \subsection{Coordinación del gestor de archivos}
@@ -76,7 +76,7 @@ El presentador se comunica con el módulo de gestión de archivos para almacenar
             \item \textbf{Búfer de adquisición vacío:} Si el operador solicita guardar datos sin haber capturado una señal, se interrumpe la acción y dispara una alerta de búfer vacío.
         \end{itemize}
     \item \textbf{Verificación de sesión}: Antes de escribir en el disco, el presentador evalúa que haya una sesión de trabajo abierta, de lo contrario no tiene ninguna ruta donde almacenar la información.
-    \item \textbf{Guardado de información}: Una vez calculados los parámetros, empaqueta la información de las trazas de las señales, junto con los metadatos (cliente, condiciones ambientales, etc), para delegar al gestor de archivos el almacenamiento permanente en disco. Mientras que se bloquea el guardado en caso de búferes vacíos o en ausencia de campos obligatorios, para evitar archivos corruptos en la base de datos.
+    \item \textbf{Guardado de información}: Tras el cálculo de los parámetros, el sistema empaqueta la información de las trazas de las señales junto con sus metadatos asociados (cliente, condiciones ambientales, entre otros), para delegar el almacenamiento permanente en disco al gestor de archivos. La operación se bloquea ante búferes vacíos o la omisión de campos obligatorios, garantizando así la integridad de los datos almacenados.
     \item \textbf{Carga de ensayos previos}: Cuando el operador carga un ensayo realizado anteriormente, el presentador solicita al gestor de archivos que recupere la información del mismo, para luego actualizar los gráficos e indicadores numéricos de la pantalla.
     \item \textbf{Exportación a planillas externas}: Cuando el operador solicita exportar los resultados, delega al gestor de archivos la conversión de datos a hojas de cálculo.
 \end{itemize}
@@ -117,7 +117,7 @@ El controlador inicializa el administrador de recursos, y ejecuta un escaneo aut
 
 Si encuentra al menos un dispositivo direccionable, se conecta al mismo. La comunicación inicia instanciando el administrador de recursos VISA de Python (PyVISA), acompañado de la biblioteca \texttt{pyvisa-py} para asegurar un entorno multiplataforma sin depender de bibliotecas nativas propietarias.
 
-Sobre el canal de transporte establecido con VISA, el \emph{software} envía comandos SCPI, que debe cumplir con el siguiente formato indicado en el manual del fabricante \cite{gds1000au_ProgrammingManual}:
+Sobre el canal de transporte establecido con VISA, el \emph{software} envía comandos SCPI, que deben cumplir con el siguiente formato indicado en el manual del fabricante \cite{gds1000au_ProgrammingManual}:
 \begin{itemize}
     \item \textbf{No sensibilidad a mayúsculas:} Puede usarse mayúsculas y minúsculas.
     \item \textbf{Separación de parámetros:} Al configurar parámetros, debe separarse el comando y su argumento numérico, mediante un carácter de espacio en blanco simple.
@@ -154,7 +154,7 @@ Donde \texttt{COM1} identifica el número de puerto serie virtual asignado por e
     \centering
     \includegraphics[width=1\textwidth]{img/puml/modelo/diagrama_controlador_hardware.png}
     \caption{Diagrama de componentes de la HAL. Fuente: Propia.}
-    \label{fig:impulso_tension_pleno}
+    \label{fig:diagrama_controlador_hardware}
 \end{figure}
 \vspace{3\baselineskip}
 
@@ -204,7 +204,7 @@ Como el instante de descarga es indeterminado, se implementa un hilo de ejecuci�
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{img/puml/persistencia/diagrama_secuencia_captura.png}
-    \caption{Diagrama de coordinación del gestor de archivos. Fuente: Propia.}
+    \caption{Diagrama de secuencia de la captura de impulsos. Fuente: Propia.}
     \label{fig:diagrama_secuencia_captura}
 \end{figure}
 \vspace{3\baselineskip}
@@ -249,7 +249,7 @@ A continuación, para obtener las magnitudes reales aplicadas al objeto bajo ens
     {\text{Onda escalada}}[n] = \text{Onda sin escalar}[n] \times A_{\text{CH<X>}}
     \label{eq:reconstruccion_tension_total}
 \end{equation}
-Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en amperes, \unit{\ampere}), se transfieren al módulo de procesamiento matemático para determinar sus parámetros normativos: tiempo de frente $T_1$, tiempo de cola $T_2$, valor de cresta $U_{\text{t}}$ y sobreimpulso OS, conforme a los requerimientos de la norma \cite{iec60060_1}.
+Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en amperes, \unit{\ampere}), se transfieren al módulo de procesamiento matemático para determinar sus parámetros normativos: tiempo de frente $T_1$, tiempo de cola $T_2$, valor de cresta $U_{\text{t}}$ y sobreimpulso $\beta'$, conforme a los requerimientos de la norma IEC 60060-1~\cite{iec60060_1}.
 
 \subsection{Motor de cálculo}
 \label{subsec:motor_calculo}
@@ -260,7 +260,7 @@ Este componente constituye el núcleo matemático del \emph{software}, y es resp
 \label{subsubsec:flujo_algoritmico}
 
 Este proceso se divide en tres fases operativas: preprocesamiento común, clasificación dinámica y reconstrucción de la señal.
-Para facilitar la comprensión del procesamiento de las señales, en el \label{ch:anexo_i} se expone de manera gráfica y secuencial la evolución de un impulso pleno (LI) y un impulso cortado (LIC), a medida que atraviesan las etapas descriptas en esta sección.
+Para facilitar la comprensión del procesamiento de las señales, en el \ref{ch:anexo_i} se expone de manera gráfica y secuencial la evolución de un impulso pleno (LI) y un impulso cortado (LIC), a medida que atraviesan las etapas descriptas en esta sección.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -428,7 +428,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
             T_2 = t_{50} - O_1
             \label{eq:tiempo_cola}
         \end{equation}
-        \item \textbf{Sobreimpulso relativo} ($\text{OS}\%$): Se calcula como la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$):
+        \item \textbf{Sobreimpulso relativo} ($\beta'$): Se calcula como la diferencia entre el valor extremo de la curva registrada ($U_\text{e}$):
         \begin{equation}
             U_\text{e} = \max(U_\text{e}[n])
             \label{eq:max_curva_registrada}
@@ -440,7 +440,7 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
         \end{equation}
         expresado en porcentaje:
         \begin{equation}
-            \text{OS}\% = \frac{U_\text{e} - U_\text{b}}{U_\text{e}} \cdot \num{100}
+            \beta' = \frac{U_\text{e} - U_\text{b}}{U_\text{e}} \cdot \num{100}
             \label{eq:sobreimpulso_relativo}
         \end{equation}
     \end{itemize}
@@ -481,6 +481,11 @@ Posteriormente, el módulo de almacenamiento, graba la información en disco, im
     \item \textbf{Resguardo de seguridad redundante}: En paralelo a la base de datos, crea copias de seguridad independientes de cada onda, en formato de texto plano con valores separados por comas (\textbf{CSV}), que contienen el registro bruto escalado verticalmente a su magnitud real, lo que brinda un sistema de respaldo redundante de los datos originales, desacoplado del formato principal.
 \end{enumerate}
 
+\subsubsection{Exportación de resultados}
+\label{subsubsec:exportar_resultados}
+
+Para exportar los resultados a hojas de cálculo que faciliten su manipulación en programas comerciales para la elaboración de informes, el módulo permite la extracción del historial completo de los impulsos aplicados al elemento bajo ensayo, hacia hojas de cálculo utilizando los formatos de extensión \textbf{CSV} o \textbf{XLSX}. Aunque previamente convierte la escala física de los resultados: las bases de tiempo se convierten de segundos (\unit{\second}) a microsegundos (\unit{\micro\second}) y las tensiones de volts (\unit{\volt}) a kilovolts (\unit{\kilo\volt}). En la figura \ref{fig:diagrama_secuencia_exportacion}, puede verse el diagrama se secuencia del proceso de exportación de resultados.
+
 \vspace{3\baselineskip}
 \begin{figure}[H]
     \centering
@@ -490,16 +495,11 @@ Posteriormente, el módulo de almacenamiento, graba la información en disco, im
 \end{figure}
 \vspace{3\baselineskip}
 
-\subsubsection{Exportación de resultados}
-\label{subsubsec:exportar_resultados}
-
-Para exportar los resultados a hojas de cálculo que faciliten su manipulación en programas comerciales para la elaboración de informes, el módulo permite la extracción del historial completo de los impulsos aplicados al elemento bajo ensayo, hacia hojas de cálculo utilizando los formatos de extensión \textbf{CSV} o \textbf{XLSX}. Aunque previamente convierte la escala física de los resultados: las bases de tiempo se convierten de segundos (\unit{\second}) a microsegundos (\unit{\micro\second}) y las tensiones de volts (\unit{\volt}) a kilovolts (\unit{\kilo\volt}). En la figura \ref{fig:diagrama_secuencia_exportacion}, puede verse el diagrama se secuencia del proceso de exportación de resultados.
-
 \vspace{3\baselineskip}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{img/puml/persistencia/diagrama_secuencia_exportacion.png}
-    \caption{Diagrama de secuencia de la captura de impulsos. Fuente: Propia.}
+    \includegraphics[width=1\textwidth]{img/puml/persistencia/diagrama_secuencia_exportacion.png}
+    \caption{Diagrama de secuencia de la exportación de impulsos. Fuente: Propia.}
     \label{fig:diagrama_secuencia_exportacion}
 \end{figure}
 \vspace{3\baselineskip}
@@ -589,7 +589,7 @@ Cabe aclarar que el canal de corriente (CH2) no se somete a ningún procesamient
                 [{\textbf{\texttt{Valor\_pico}}: \emph{Tensión de cresta}}]
                 [{\textbf{\texttt{T1}}: \emph{Tiempo de frente}}]
                 [{\textbf{\texttt{T2}}: \emph{Tiempo de cola}}]
-                [{\textbf{\texttt{OS}}: \emph{Sobreimpulso porcentual}}]
+                [{\textbf{\texttt{β}}: \emph{Sobreimpulso porcentual}}]
             ]
             [{\textbf{Grupo de Tiempos} (\texttt{/Time}) [\unit{\second}]}
                 [{\textbf{\texttt{raw}}: \emph{Vector bruto a partir de} $\Delta t$}]
@@ -701,8 +701,8 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.8\textwidth]{img/gui/GUI_3_atenuaciones.png}
-        \caption{Bloque de Atenuaciones del sistema de medición.}
-        \label{fig:GUI_3_atenuaciones Fuente: Propia.}
+        \caption{Bloque de Atenuaciones del sistema de medición. Fuente: Propia.}
+        \label{fig:GUI_3_atenuaciones}
     \end{figure}
     \vspace{3\baselineskip}
 
@@ -728,7 +728,7 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
     \end{figure}
     \vspace{3\baselineskip}
 
-    \item \textbf{Resultados del ensayo}: Este panel renderiza dinámicamente en una tabla los parámetros de la onda calculados tras la adquisición ($U_t$, $T_1$, $T_2$ o $T_c$ y $OS\%$).
+    \item \textbf{Resultados del ensayo}: Este panel renderiza dinámicamente en una tabla los parámetros de la onda calculados tras la adquisición ($U_t$, $T_1$, $T_2$ o $T_c$ y $\beta'$).
     
     \vspace{3\baselineskip}
     \begin{figure}[H]
