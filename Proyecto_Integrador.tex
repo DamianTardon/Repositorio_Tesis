@@ -74,6 +74,10 @@
     \fancyfoot[C]{\thepage}
 }
 
+\addto\captionsspanish{
+    \renewcommand{\appendixname}{Anexo}
+}
+
 \begin{document}
 \pagestyle{fancy}
 
@@ -136,6 +140,8 @@
 \printbibliography[nottype=book, title={Referencias}]
 
 % =======================================================================================================
+\appendix
+\renewcommand{\thechapter}{\Roman{chapter}}
 \part*{ANEXOS}
 \addcontentsline{toc}{part}{ANEXOS}
 \input{capitulos/11_anexo.tex}
