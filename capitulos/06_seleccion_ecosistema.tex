@@ -1,7 +1,7 @@
 \chapter{Análisis y selección de \emph{hardware} y \emph{software}}
 \label{ch:seleccion_hardware_software}
 
-En este capítulo se expone el análisis técnico, normativo y económico para la definición de la plataforma de adquisición de datos y el entorno de software aplicados a la modernización del sistema de medición del ensayo de impulso del Laboratorio de Alta Tensión. Se analiza el estado actual del equipamiento del laboratorio, se evalúa el sistema comercial de referencia internacional, se comparan los instrumentos disponibles, y se fundamenta la selección final del hardware de medición y de la arquitectura de software desarrollada.
+En este capítulo se expone el análisis técnico, normativo y económico para la definición de la plataforma de adquisición de datos y el entorno de \emph{software} aplicados a la modernización del sistema de medición del ensayo de impulso del Laboratorio de Alta Tensión. Se analiza el estado actual del equipamiento del laboratorio, se evalúa el sistema comercial de referencia internacional, se comparan los instrumentos disponibles, y se fundamenta la selección final del \emph{hardware} de medición y de la arquitectura de \emph{software} desarrollada.
 
 \section{Análisis del equipamiento de referencia}
 \label{sec:estado_actual_owon}
@@ -35,7 +35,7 @@ Como se mencionó antes, el LAT contaba con el osciloscopio \emph{Nicolet PowerP
 \end{table}
 \vspace{3\baselineskip}
 
-A raíz de la salida de servicio del equipo, el laboratorio adoptó el uso del osciloscopio de uso general \emph{Owon PDS7102T} que puede verse en la figura \ref{fig:owon_pds7102t}. Bajo esta modalidad, la adquisición se realiza capturando la señal con el instrumento para efectuar posteriormente un trazado y análisis visual de los parámetros de impulso con el software propietario del equipo.
+A raíz de la salida de servicio del equipo, el laboratorio adoptó el uso del osciloscopio de uso general \emph{Owon PDS7102T} que puede verse en la figura \ref{fig:owon_pds7102t}. Bajo esta modalidad, la adquisición se realiza capturando la señal con el instrumento para efectuar posteriormente un trazado y análisis visual de los parámetros de impulso con el \emph{software} propietario del equipo.
 
 \subsection{Alternativas comerciales de referencia}
 \label{subsec:alternativas_comerciales}
@@ -53,7 +53,7 @@ Para establecer la cota superior del estado del arte en la instrumentación de i
 
 El sistema incorpora desacoplamiento óptico mediante enlaces de fibra óptica hacia la estación de control, logrando un aislamiento galvánico total que elimina bucles de tierra y protege al operador frente a descargas destructivas.
 
-El producto se comercializa en tres variantes cuyas especificaciones técnicas \cite{haefely_datasheet} se resumen en la tabla \ref{tab:haefely_hias744_comparativa}, con sus costos aproximados en septiembre de 2026\footnote{El precio fue consultado al fabricante.}.
+El producto se comercializa en tres variantes cuyas especificaciones técnicas \cite{haefely_datasheet} se resumen en la tabla \ref{tab:haefely_hias744_comparativa}, con sus costos aproximados\footnote{El precio fue indicado por el fabricante el 7 de mayo de 2026.}.
 
 \vspace{3\baselineskip}
 \begin{table}[H]
@@ -69,7 +69,7 @@ El producto se comercializa en tres variantes cuyas especificaciones técnicas \
             Profundidad de memoria & \num{2} Mpts & \num{2} Mpts & \num{2} Mpts \\ \midrule
             Aislamiento e interfaz de datos & Fibra óptica & Fibra óptica & Fibra óptica \\ \midrule
             Calibración metrológica & De fábrica & De fábrica & ISO/IEC 17025 \\ \midrule
-            Costo & \qty{59000}{USD} & \qty{75000}{USD} & No especificado \\ \bottomrule
+            Costo & \qty{65000}{USD} & \qty{79000}{USD} & No especificado \\ \bottomrule
         \end{tabular}
 \end{table}
 \vspace{3\baselineskip}
@@ -130,7 +130,7 @@ La selección definitiva del instrumento se realizó con base en cuatro criterio
 \end{table}
 \vspace{3\baselineskip}
 
-Del análisis realizado se determina que las alternativas Keysight DSO1052B y Owon PDS7102T debieron ser descartadas, debido a la ausencia de manuales de programación de comandos SCPI e incompatibilidad con la arquitectura VISA, lo que impide su integración automatizada con un entorno de software externo.
+Del análisis realizado se determina que las alternativas Keysight DSO1052B y Owon PDS7102T debieron ser descartadas, debido a la ausencia de manuales de programación de comandos SCPI e incompatibilidad con la arquitectura VISA, lo que impide su integración automatizada con un entorno de \emph{software} externo.
 
 Entre los osciloscopios del fabricante GW Instek, el modelo GDS-1102A-U fue seleccionado frente al modelo GDS-1022, debido a su mayor ancho de banda y su superior frecuencia de muestreo máxima, permitiendo un registro adecuado de impulsos de interés. La tabla \ref{tab:gwinstek_especificaciones} sintetiza las características del modelo seleccionado.
 
@@ -155,11 +155,11 @@ Entre los osciloscopios del fabricante GW Instek, el modelo GDS-1102A-U fue sele
 \label{sec:comparativa_software}
 \vspace{3\baselineskip}
 
-Una vez definido el hardware de adquisición, se evaluaron las alternativas para el desarrollo del entorno de automatización, procesamiento digital de señales y generación de reportes. Se contrapuso el uso del software comercial \emph{National Instruments LabVIEW} frente al ecosistema del lenguaje de programación \emph{Python}~\cite{python}.
+Una vez definido el \emph{hardware} de adquisición, se evaluaron las alternativas para el desarrollo del entorno de automatización, procesamiento digital de señales y generación de reportes. Se contrastó el uso del \emph{software} comercial \emph{National Instruments LabVIEW} frente al ecosistema del lenguaje de programación \emph{Python}~\cite{python}.
 
-Ambas plataformas cuentan con capacidad técnica para lograr la adquisición remota de datos vía protocolos VISA/SCPI, y procesar las ondas registradas. No obstante, una licencia comercial perpetua de desarrollo de \emph{LabVIEW} implica un costo de aproximadamente \qty{1100}{USD}\footnote{El precio fue consultado al fabricante.}. Asimismo, \emph{LabVIEW} opera como un entorno cerrado ("caja negra"), dificultando la auditoría interna de sus algoritmos matemáticos.
+Ambas plataformas cuentan con capacidad técnica para lograr la adquisición remota de datos vía protocolos VISA/SCPI y procesar las formas de onda registradas. No obstante, una licencia comercial perpetua de desarrollo de \emph{LabVIEW} implica un costo de aproximadamente \qty{1100}{USD}\footnote{El precio fue indicado por el fabricante el 6 de mayo de 2026.}. Asimismo, \emph{LabVIEW} opera como un entorno cerrado ("caja negra"), dificultando la auditoría interna de sus algoritmos matemáticos.
 
-Por el contrario, la solución basada en \emph{Python} emplea bibliotecas de código abierto (\emph{open source}) bajo licencias permisivas (BSD, MIT y LGPL) como PyVISA~\cite{pyvisa}, NumPy~\cite{numpy}, SciPy~\cite{scipy}, PySide6~\cite{pyside6} y h5py~\cite{h5py}. Este enfoque representa un costo económico nulo, brindando transparencia absoluta al desarrollador para auditar, verificar y adaptar los algoritmos exigidos por la norma IEC 61083-2 \cite{iec61083_2}. La tabla \ref{tab:comparativa_software_costos} expone la comparativa técnica y económica entre ambas soluciones.
+Por el contrario, la solución basada en \emph{Python} emplea bibliotecas de código abierto (\emph{open source}) bajo licencias permisivas (BSD, MIT y LGPL) como PyVISA~\cite{pyvisa}, NumPy~\cite{numpy}, SciPy~\cite{scipy}, PySide6~\cite{pyside6} y h5py~\cite{h5py}. Este enfoque representa un costo económico nulo, brindando transparencia absoluta al desarrollador para auditar, verificar y adaptar los algoritmos de acuerdo con los lineamientos de la norma IEC 61083-2 \cite{iec61083_2}. La tabla \ref{tab:comparativa_software_costos} expone la comparativa técnica y económica entre ambas soluciones.
 
 \vspace{3\baselineskip}
 \begin{table}[H]

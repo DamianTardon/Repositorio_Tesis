@@ -85,13 +85,16 @@
 \input{capitulos/00a_portada.tex}
 \input{capitulos/00b_acta_tribunal.tex}
 \input{capitulos/00c_acta_director.tex}
+\phantomsection
+\addcontentsline{toc}{chapter}{Dedicatoria}
 \input{capitulos/00d_dedicatoria.tex}
 \input{capitulos/00e_agradecimientos.tex}
+\addcontentsline{toc}{chapter}{Agradecimientos}
 \input{capitulos/00f_resumen.tex}
 
 \pagestyle{normal}
 \tableofcontents
-
+\addcontentsline{toc}{chapter}{\contentsname}
 \cleardoublepage
 
 \listoftables
@@ -103,7 +106,6 @@
 
 \cleardoublepage
 \input{capitulos/00g_simbolos_convenciones.tex}
-%\addcontentsline{toc}{chapter}{Lista de Símbolos}
 
 \newpage
 \pagenumbering{arabic} % A partir de aquí cambia el estilo de numeración.
@@ -130,7 +132,9 @@
 % ====================================================================================
 \part{RESULTADOS Y CONCLUSIONES}
 \input{capitulos/09_resultados.tex}
+\addcontentsline{toc}{chapter}{Resultados}
 \input{capitulos/10_conclusiones.tex}
+\addcontentsline{toc}{chapter}{Conclusiones}
 
 % BIBLIOGRAFÍA =================================================================================================
 \cleardoublepage
@@ -146,5 +150,6 @@
 \addcontentsline{toc}{part}{ANEXOS}
 \input{capitulos/11_anexo.tex}
 \input{capitulos/12_anexo_sat.tex}
+\addcontentsline{toc}{chapter}{Anexo del Proyecto Integrador}
 
 \end{document}

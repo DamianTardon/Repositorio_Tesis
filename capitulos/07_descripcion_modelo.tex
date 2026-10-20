@@ -2,7 +2,7 @@
 \chapter{Implementación del \emph{software}}
 \vspace{3\baselineskip}
 
-En este capítulo se expone la implementación del software desarrollado para la automatización, procesamiento digital y gestión de ensayos de impulso de alta tensión, según las directivas de las normas IEC 60060-1 e IEC 61083-2. Inicialmente se encuentra la descripción del patrón arquitectónico elegido (MVP). Seguidamente se explica cómo el presentador coordina la interfaz gráfica, el control del instrumental y la persistencia de datos. A continuación, se aborda la capa del modelo, analizando el controlador de hardware que actúa de capa de abstracción de hardware (HAL) del osciloscopio. Asimismo, se explica el algoritmo del motor de cálculo matemático, para la determinación de los parámetros normativos del impulso. Luego, se describe el esquema de persistencia jerárquica de la información. Finalmente, se detalla el diseño y flujo funcional de la interfaz gráfica de usuario.
+En este capítulo se expone la implementación del \emph{software} desarrollado para la automatización, procesamiento digital y gestión de ensayos de impulso de alta tensión, tomando como referencia los procedimientos de las normas IEC 60060-1 e IEC 61083-2. Inicialmente, se describe el patrón arquitectónico elegido (MVP). Seguidamente, se explica cómo el presentador coordina la interfaz gráfica, el control del instrumental y la persistencia de datos. A continuación, se aborda la capa del modelo, analizando el controlador de \emph{hardware} que actúa como capa de abstracción de hardware (HAL) del osciloscopio. Asimismo, se detalla el algoritmo del motor de cálculo matemático para la determinación de los parámetros normalizados del impulso. Luego, se expone el esquema de persistencia jerárquica de la información. Finalmente, se detalla el diseño y el flujo funcional de la interfaz gráfica de usuario.
 
 \section{Arquitectura adoptada}
 \label{sec:arquitectura_adoptada}
@@ -60,8 +60,8 @@ La comunicación con el osciloscopio digital se realiza a través de un módulo 
 Una vez obtenidos los vectores de tensión y corriente, el presentador los transfiere al motor de cálculo:
 \begin{itemize}
     \item \textbf{Escalamiento físico de ondas}: El presentador utiliza los coeficientes de los divisores resistivos y atenuadores externos, cargados en la interfaz visual, convirtiendo las lecturas del instrumento a sus valores físicos reales.
-    \item \textbf{Delegación del cálculo normativo}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
-    \item \textbf{Transferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_t$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual $\beta'$) para cargarlos en la capa de visualización.
+    \item \textbf{Delegación del cálculo de parámetros}: Transfiere los vectores de datos al motor matemático para su procesamiento analítico.
+    \item \textbf{Transferencia de resultados}: Recupera los resultados obtenidos en el motor de cálculo (la tensión de ensayo $U_\text{t}$, el tiempo de frente $T_1$, el tiempo de cola $T_2$ y el sobreimpulso porcentual $\beta'$) para cargarlos en la capa de visualización.
 \end{itemize}
 
 \subsection{Coordinación del gestor de archivos}
@@ -254,7 +254,7 @@ Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en
 \subsection{Motor de cálculo}
 \label{subsec:motor_calculo}
 
-Este componente constituye el núcleo matemático del \emph{software}, y es responsable de realizar el procesamiento digital de señales para obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}. Ha sido diseñado exclusivamente para cumplir con las normas IEC 60060-1 \cite{iec60060_1} y 61083-2 \cite{iec61083_2}.
+Este componente constituye el núcleo matemático del \emph{software}, y es responsable de realizar el procesamiento digital de señales para obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}. Su implementación se ha guiado por las directrices estipuladas en las normas IEC 60060-1 \cite{iec60060_1} y 61083-2 \cite{iec61083_2}.
 
 \subsubsection{Flujo algorítmico de cálculo}
 \label{subsubsec:flujo_algoritmico}
@@ -557,7 +557,7 @@ La información se almacena de manera estructurada y comprimida, en un único ar
 
 Este formato organiza internamente el archivo como un sistema de ficheros, distribuyendo los datos en grupos que actúan como carpetas, aplicando la estructura de la figura \ref{fig:estructura_base_datos}.
 
-Cabe aclarar que el canal de corriente (CH2) no se somete a ningún procesamiento matemático por indicación de la norma \cite{iec60060_1}, limitándose el software a su acondicionamiento, escalamiento físico y representación gráfica. No obstante, dentro del grupo de CH2, el conjunto de datos de ensayo contiene una copia del vector bruto escalado únicamente para mantener la simetría estructural con el canal de tensión (CH1) dentro del esquema de almacenamiento.
+Cabe aclarar que el canal de corriente (CH2) no se somete a ningún procesamiento matemático por indicación de la norma \cite{iec60060_1}, limitándose el \emph{software} a su acondicionamiento, escalamiento físico y representación gráfica. No obstante, dentro del grupo de CH2, el conjunto de datos de ensayo contiene una copia del vector bruto escalado únicamente para mantener la simetría estructural con el canal de tensión (CH1) dentro del esquema de almacenamiento.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -671,7 +671,6 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
 \end{figure}
 \vspace{3\baselineskip}
 
-
 \begin{enumerate}
     \item \textbf{Datos del ensayo}: Sirve para cargar los datos relacionados a la trazabilidad del laboratorio sobre del elemento que se va a ensayar.
 
@@ -684,7 +683,7 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
     \end{figure}
     \vspace{3\baselineskip}
 
-    \item \textbf{Condiciones ambientales}: Donde el operador introduce parámetros termodinámicos de referencia como la temperatura, presión y humedad. Estos valores son esenciales para la posterior corrección atmosférica\footnote{En la versión actual del software, la corrección del valor de tensión de ensayo $U_t$ se realiza manualmente por el personal del laboratorio.} de la tensión de ensayo $U_t$ de acuerdo con la norma IEC 60060-1~\cite{iec60060_1}.
+    \item \textbf{Condiciones ambientales}: Donde el operador introduce parámetros termodinámicos de referencia como la temperatura, presión y humedad. Estos valores son esenciales para la posterior corrección atmosférica\footnote{En la versión actual del software, la corrección del valor de tensión de ensayo $U_\text{t}$ se realiza manualmente por el personal del laboratorio.} de la tensión de ensayo $U_\text{t}$ de acuerdo con la norma IEC 60060-1~\cite{iec60060_1}.
 
     \vspace{3\baselineskip}
     \begin{figure}[H]
@@ -728,7 +727,7 @@ Con el fin de que sea intuitivo para los operadores, se diseñó aplicando un re
     \end{figure}
     \vspace{3\baselineskip}
 
-    \item \textbf{Resultados del ensayo}: Este panel renderiza dinámicamente en una tabla los parámetros de la onda calculados tras la adquisición ($U_t$, $T_1$, $T_2$ o $T_c$ y $\beta'$).
+    \item \textbf{Resultados del ensayo}: Este panel renderiza dinámicamente en una tabla los parámetros de la onda calculados tras la adquisición ($U_\text{t}$, $T_1$, $T_2$ o $T_\text{C}$ y $\beta'$).
     
     \vspace{3\baselineskip}
     \begin{figure}[H]
