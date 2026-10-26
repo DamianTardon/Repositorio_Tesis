@@ -1,23 +1,26 @@
 \newpage
 \chapter*{Conclusiones}
 \label{ch:conclusiones}
+\addcontentsline{toc}{chapter}{Conclusiones}
 \vspace{3\baselineskip}
 
-En el presente trabajo se desarrolló e implementó un sistema integral de \emph{software} para la automatización, captura, procesamiento y evaluación metrológica de ensayos de tensión de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1,2/50}{\micro\second}) basado en los lineamientos de las normas \textbf{IEC 60060-1} e \textbf{IEC 61083-2}.
+En el presente trabajo se desarrolló e implementó un sistema integral de \emph{software} para la automatización, captura, procesamiento y evaluación de ensayos de tensión de impulso atmosférico tipo rayo (\qty[parse-numbers=false]{1,2/50}{\micro\second}) basado en los lineamientos de las normas \textbf{IEC 60060-1} e \textbf{IEC 61083-2}.
 
 A partir del diseño, calibración y evaluación comparativa del sistema, se llegó a las siguientes conclusiones:
 
 \begin{itemize}
-    \item \textbf{Mejora sustancial en la eficiencia operativa:} El sistema desarrollado redujo el tiempo de cálculo de los parámetros normativos de una onda de impulso ($U_\text{t}$, $T_1$, $T_2$, $T_\text{C}$ y $\beta'$) de \textbf{150 segundos} (requeridos en la metodología de trazado manual actual) a solo \textbf{2 segundos} por impulso.
-    Cabe destacar que dicha estimación manual no contempla el tiempo adicional requerido en la consolidación gráfica posterior, la cual implica exportar los datos brutos a un \emph{software} externo (como Microsoft Excel) para superponer e integrar múltiples impulsos en un mismo gráfico. Por su parte, el \emph{software} desarrollado elimina la dependencia de herramientas de terceros al ofrecer la selección, superposición y visualización directa de las ondas ensayadas listas para su exportación, optimizando significativamente la dinámica global de trabajo en el Laboratorio de Alta Tensión.
+    \item \textbf{Optimización de tiempo:} El sistema desarrollado redujo el tiempo de cálculo de los parámetros del impulso de \textbf{150 segundos} (trazado manual actual) a solo \textbf{2 segundos}.
+    Cabe destacar que dicha estimación manual no contempla el tiempo adicional requerido en la consolidación gráfica posterior, la cual implica exportar los datos brutos a un \emph{software} externo (como Microsoft Excel) para superponer e integrar múltiples impulsos en un mismo gráfico. Por su parte, el \emph{software} desarrollado elimina la dependencia de herramientas de terceros al ofrecer la selección, superposición y visualización directa de las ondas ensayadas listas para su exportación, optimizando significativamente la dinámica global de trabajo en el LAT.
 
-    \item \textbf{Aumento de precisión:} La evaluación, mediante las ondas patrón del TDG (IEC 61083-2), demostró que el \emph{software} mejora significativamente la precisión de los resultados obtenidos respecto del método manual, el cual presentó errores elevados en ondas con oscilaciones de alta frecuencia superpuestas o cortes abruptos (superando el \num{20}\% de error en ciertos parámetros). Por lo tanto, el motor de cálculo desarrollado redujo los errores relativos en las pruebas realizadas.
+    \item \textbf{Aumento de exactitud:} La evaluación mediante las ondas patrón del TDG (IEC 61083-2) mostró una reducción de los errores respecto al método manual. En impulsos plenos (LI), el análisis manual (sobre 5 casos) registró errores máximos de hasta \qty{23,48}{\percent} en $U_\text{t}$, \qty{27,17}{\percent} en $T_1$, \qty{-46,31}{\percent} en $T_2$ y \qty{-6,70}{\percent} en $\beta'$, mientras que el \emph{software} (sobre 29 casos de \qty{8}{bits}) los redujo a \qty{0,175}{\percent}, \qty{1,563}{\percent}, \qty{-0,277}{\percent} y \qty{-0,182}{\percent}, respectivamente. Asimismo, en impulsos cortados (LIC), los errores máximos manuales de hasta \qty{5,73}{\percent} en $U_\text{t}$, \qty{10,54}{\percent} en $T_1$, \qty{6,80}{\percent} en $T_\text{C}$ y \qty{-1,44}{\percent} en $\beta'$ disminuyeron a \qty{-0,092}{\percent}, \qty{1,499}{\percent}, \qty{0,305}{\percent} y \qty{0,890}{\percent}, respectivamente.
+    
+    Aunque, cabe precisar que a \qty{8}{bits} de resolución, hay 4 casos LI que exceden la tolerancia de $\pm$ \qty{0,10}{\percent}, situación que se resuelve por completo al utilizar resoluciones de \qty{16}{bits}.
 
-    \item \textbf{Cuantificación de la incertidumbre del software:} El análisis de calibración normativo permitió cuantificar la incertidumbre estándar del \emph{software} para resoluciones verticales de \qty{8}{bits} (correspondiente al osciloscopio utilizado en el desarrollo y en el laboratorio) y de \qty{16}{bits} (máxima resolución disponible en el TDG). Se constató que el incremento en la resolución de cuantización reduce la componente de incertidumbre del algoritmo, ratificando la solidez matemática del motor numérico independientemente del instrumental utilizado.
+    \item \textbf{Cuantificación de la incertidumbre del software:} La calibración basada en la norma IEC 61083-2 permitió estimar la incertidumbre estándar del \emph{software} para resoluciones verticales de \qty{8}{bits} (correspondiente al osciloscopio utilizado en el desarrollo y en el laboratorio) y de \qty{16}{bits} (máxima resolución disponible en el TDG). Se constató que el incremento en la resolución reduce la componente de incertidumbre del algoritmo, mostrando que el motor de cálculo numérico mejora sus resultados cuanto mayor sea la resolución vertical del osciloscopio.
 
     \item \textbf{Robustez del procesamiento digital de señales:} La combinación de métodos de regresión no lineal mediante el algoritmo de Levenberg-Marquardt (con estimación automática de semillas según el Anexo D de la IEC 60060-1), y el filtrado bidireccional IIR de fase cero (diseñado para compensar la doble atenuación), permitió una adecuada reconstrucción de la curva de tensión de ensayo, minimizando la distorsión de fase y los desplazamientos temporales.
 
-    \item \textbf{Arquitectura desacoplada y disponibilidad operacional:} La adopción del patrón arquitectónico \textbf{Model-View-Presenter (MVP)}, combinada con una capa de abstracción de \emph{hardware} bajo el estándar \textbf{VISA/PyVISA}, mediante comunicación serie virtual CDC-ACM y un esquema de sondeo asíncrono no bloqueante, aseguró la reactividad permanente de la interfaz gráfica en todo momento. Asimismo, la estructura de almacenamiento jerárquico en formato \textbf{HDF5}, con respaldos redundantes en texto plano (\textbf{CSV}), garantizan la trazabilidad de los registros de ensayo y preservan su integridad.
+    \item \textbf{Arquitectura desacoplada y disponibilidad operacional:} La adopción del patrón arquitectónico \textbf{Model-View-Presenter (MVP)}, combinada con una capa de abstracción de \emph{hardware} bajo el estándar \textbf{VISA/PyVISA}, mediante comunicación serie virtual CDC-ACM y un esquema de sondeo asíncrono no bloqueante, aseguró la reactividad permanente de la interfaz gráfica en todo momento. Asimismo, la estructura de almacenamiento jerárquico en formato \textbf{HDF5}, con respaldos redundantes en texto plano (\textbf{CSV}), permiten tener trazabilidad de los registros de ensayo y preservan su integridad.
 \end{itemize}
 
 \section*{Trabajos futuros}
@@ -25,7 +28,7 @@ A partir del diseño, calibración y evaluación comparativa del sistema, se lle
 \addcontentsline{toc}{section}{Trabajos futuros}
 \vspace{3\baselineskip}
 
-Sobre la base de este desarrollo, y con el propósito de expandir las capacidades operativas y metrológicas del Laboratorio de Alta Tensión, se proponen las siguientes líneas de desarrollo futuro:
+Sobre la base de este desarrollo, y con el propósito de expandir las capacidades de medición y operativas del Laboratorio de Alta Tensión, se proponen las siguientes líneas de desarrollo futuro:
 
 \begin{enumerate}
     \item \textbf{Incorporación del módulo de corrección atmosférica de $U_\text{t}$:}
@@ -35,5 +38,5 @@ Sobre la base de este desarrollo, y con el propósito de expandir las capacidade
     Desarrollar e incorporar, en la Fase II del motor de cálculo, un algoritmo de análisis para ondas interrumpidas en el frente, completando la cobertura total de los casos de prueba de impulsos cortados contemplados en la norma IEC 61083-2.
 
     \item \textbf{Integración de \emph{hardware} de mayor resolución vertical:}
-    Aprovechar la modularidad de la capa de abstracción de \emph{hardware} (HAL/VISA), para integrar osciloscopios de mayor resolución vertical (\num{10}, \num{12} o \qty{16}{bits}), y minimizar el error de cuantización en la etapa de digitalización.
+    Aprovechar la modularidad de la capa de abstracción de \emph{hardware} (HAL/VISA), para integrar osciloscopios de mayor resolución vertical (\num{10}, \num{12} o \qty{16}{bits}), y minimizar el error de cuantización en la etapa de digitalización, para lo cual se recomienda tener en cuenta la norma IEC 61083-1:2021 \enquote{Instrumentos y software utilizados para mediciones en ensayos de alta tensión y alta corriente - Parte 1: Requisitos para instrumentos para ensayos de impulso}.
 \end{enumerate}

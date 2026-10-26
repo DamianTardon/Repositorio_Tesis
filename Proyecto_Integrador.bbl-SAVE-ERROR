@@ -1,0 +1,751 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{iec60060_1}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=d55358df1178e4a980b231e2de96521d}{%
+           family={{IEC 60060-1:2025}},
+           familyi={I\bibinitperiod}}}%
+      }
+      \strng{namehash}{d55358df1178e4a980b231e2de96521d}
+      \strng{fullhash}{d55358df1178e4a980b231e2de96521d}
+      \strng{bibnamehash}{d55358df1178e4a980b231e2de96521d}
+      \strng{authorbibnamehash}{d55358df1178e4a980b231e2de96521d}
+      \strng{authornamehash}{d55358df1178e4a980b231e2de96521d}
+      \strng{authorfullhash}{d55358df1178e4a980b231e2de96521d}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{High-voltage test techniques - Part 1: General definitions and test requirements}
+    \endentry
+    \entry{iec61083_2}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=88c6244f679739a12f0351983e393607}{%
+           family={{IEC 61083-2:2013}},
+           familyi={I\bibinitperiod}}}%
+      }
+      \strng{namehash}{88c6244f679739a12f0351983e393607}
+      \strng{fullhash}{88c6244f679739a12f0351983e393607}
+      \strng{bibnamehash}{88c6244f679739a12f0351983e393607}
+      \strng{authorbibnamehash}{88c6244f679739a12f0351983e393607}
+      \strng{authornamehash}{88c6244f679739a12f0351983e393607}
+      \strng{authorfullhash}{88c6244f679739a12f0351983e393607}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Instruments and software used for measurement in high-voltage impulse tests - Part 2: Requirements for software for tests with impulse voltages and currents}
+    \endentry
+    \entry{gds1000au_ProgrammingManual}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=d47b8f030086d3d862165794f9ebe745}{%
+           family={{GW Instek}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{fullhash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{bibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorbibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authornamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorfullhash}{d47b8f030086d3d862165794f9ebe745}
+      \field{extraname}{1}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{number}{Part No. 82DS-112AUI01}
+      \field{title}{Digital Storage Oscilloscope GDS-1000A-U Series Programming Manual}
+      \field{year}{2011}
+    \endentry
+    \entry{rohde_schwarz_visa}{online}{}
+      \name{author}{1}{}{%
+        {{hash=617503f92c81ed082c208b4583de2105}{%
+           family={{Rohde \& Schwarz}},
+           familyi={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{617503f92c81ed082c208b4583de2105}
+      \strng{fullhash}{617503f92c81ed082c208b4583de2105}
+      \strng{bibnamehash}{617503f92c81ed082c208b4583de2105}
+      \strng{authorbibnamehash}{617503f92c81ed082c208b4583de2105}
+      \strng{authornamehash}{617503f92c81ed082c208b4583de2105}
+      \strng{authorfullhash}{617503f92c81ed082c208b4583de2105}
+      \field{extraname}{1}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{3. {VISA} y herramientas del {VISA}}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.rohde-schwarz.com/lat/driver-pages/control-remoto/3-visa-and-tools_231388.html
+      \endverb
+      \verb{url}
+      \verb https://www.rohde-schwarz.com/lat/driver-pages/control-remoto/3-visa-and-tools_231388.html
+      \endverb
+    \endentry
+    \entry{Floyd2006}{book}{}
+      \name{author}{1}{}{%
+        {{hash=d707621bff00860337e7468e3c963e1e}{%
+           family={Floyd},
+           familyi={F\bibinitperiod},
+           given={Thomas\bibnamedelima L.},
+           giveni={T\bibinitperiod\bibinitdelim L\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Madrid}%
+      }
+      \list{publisher}{1}{%
+        {Pearson Educación}%
+      }
+      \strng{namehash}{d707621bff00860337e7468e3c963e1e}
+      \strng{fullhash}{d707621bff00860337e7468e3c963e1e}
+      \strng{bibnamehash}{d707621bff00860337e7468e3c963e1e}
+      \strng{authorbibnamehash}{d707621bff00860337e7468e3c963e1e}
+      \strng{authornamehash}{d707621bff00860337e7468e3c963e1e}
+      \strng{authorfullhash}{d707621bff00860337e7468e3c963e1e}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{9}
+      \field{isbn}{978-84-832-2720-6}
+      \field{title}{Fundamentos de sistemas digitales}
+      \field{year}{2006}
+    \endentry
+    \entry{rohde_schwarz_scpi}{online}{}
+      \name{author}{1}{}{%
+        {{hash=617503f92c81ed082c208b4583de2105}{%
+           family={{Rohde \& Schwarz}},
+           familyi={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{617503f92c81ed082c208b4583de2105}
+      \strng{fullhash}{617503f92c81ed082c208b4583de2105}
+      \strng{bibnamehash}{617503f92c81ed082c208b4583de2105}
+      \strng{authorbibnamehash}{617503f92c81ed082c208b4583de2105}
+      \strng{authornamehash}{617503f92c81ed082c208b4583de2105}
+      \strng{authorfullhash}{617503f92c81ed082c208b4583de2105}
+      \field{extraname}{2}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{2. Introducción a los comandos {SCPI}}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.rohde-schwarz.com/lat/driver-pages/control-remoto/entornos-de-programacion-remota_231250.html
+      \endverb
+      \verb{url}
+      \verb https://www.rohde-schwarz.com/lat/driver-pages/control-remoto/entornos-de-programacion-remota_231250.html
+      \endverb
+    \endentry
+    \entry{Chapra2015}{book}{}
+      \name{author}{2}{}{%
+        {{hash=7e3e8f9f0fe0cc26d7c4565cbbf9373a}{%
+           family={Chapra},
+           familyi={C\bibinitperiod},
+           given={Steven\bibnamedelima C.},
+           giveni={S\bibinitperiod\bibinitdelim C\bibinitperiod}}}%
+        {{hash=b9ce7e87a62b0781a9ca8b3cad8031c9}{%
+           family={Canale},
+           familyi={C\bibinitperiod},
+           given={Raymond\bibnamedelima P.},
+           giveni={R\bibinitperiod\bibinitdelim P\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {México, D. F.}%
+      }
+      \list{publisher}{1}{%
+        {McGraw-Hill Education}%
+      }
+      \strng{namehash}{28c90087a02461e7987d0cb248faad97}
+      \strng{fullhash}{28c90087a02461e7987d0cb248faad97}
+      \strng{bibnamehash}{28c90087a02461e7987d0cb248faad97}
+      \strng{authorbibnamehash}{28c90087a02461e7987d0cb248faad97}
+      \strng{authornamehash}{28c90087a02461e7987d0cb248faad97}
+      \strng{authorfullhash}{28c90087a02461e7987d0cb248faad97}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{7}
+      \field{isbn}{978-607-15-1294-9}
+      \field{title}{Métodos numéricos para ingenieros}
+      \field{year}{2015}
+    \endentry
+    \entry{asn_iir_fir_2020}{online}{}
+      \name{author}{1}{}{%
+        {{hash=d24c854db1e24f74497ec7c6818dc410}{%
+           family={{Advanced Solutions Nederland}},
+           familyi={A\bibinitperiod}}}%
+      }
+      \strng{namehash}{d24c854db1e24f74497ec7c6818dc410}
+      \strng{fullhash}{d24c854db1e24f74497ec7c6818dc410}
+      \strng{bibnamehash}{d24c854db1e24f74497ec7c6818dc410}
+      \strng{authorbibnamehash}{d24c854db1e24f74497ec7c6818dc410}
+      \strng{authornamehash}{d24c854db1e24f74497ec7c6818dc410}
+      \strng{authorfullhash}{d24c854db1e24f74497ec7c6818dc410}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Difference between {IIR} and {FIR} filters: a practical design guide}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.advsolned.com/difference-between-iir-and-fir-filters-a-practical-design-guide/
+      \endverb
+      \verb{url}
+      \verb https://www.advsolned.com/difference-between-iir-and-fir-filters-a-practical-design-guide/
+      \endverb
+    \endentry
+    \entry{siemens_fir_iir}{online}{}
+      \name{author}{1}{}{%
+        {{hash=74993f42c49b81f3a77103bcbb247c2b}{%
+           family={{Siemens}},
+           familyi={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{74993f42c49b81f3a77103bcbb247c2b}
+      \strng{fullhash}{74993f42c49b81f3a77103bcbb247c2b}
+      \strng{bibnamehash}{74993f42c49b81f3a77103bcbb247c2b}
+      \strng{authorbibnamehash}{74993f42c49b81f3a77103bcbb247c2b}
+      \strng{authornamehash}{74993f42c49b81f3a77103bcbb247c2b}
+      \strng{authorfullhash}{74993f42c49b81f3a77103bcbb247c2b}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Introduction to Filters: {FIR} versus {IIR}}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2020}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://community.sw.siemens.com/s/article/introduction-to-filters-fir-versus-iir
+      \endverb
+      \verb{url}
+      \verb https://community.sw.siemens.com/s/article/introduction-to-filters-fir-versus-iir
+      \endverb
+    \endentry
+    \entry{Lyons2004}{book}{}
+      \name{author}{1}{}{%
+        {{hash=30cfa3906c03117342e730ef1ed57349}{%
+           family={Lyons},
+           familyi={L\bibinitperiod},
+           given={Richard\bibnamedelima G.},
+           giveni={R\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {Upper Saddle River, New Jersey}%
+      }
+      \list{publisher}{1}{%
+        {Prentice Hall PTR}%
+      }
+      \strng{namehash}{30cfa3906c03117342e730ef1ed57349}
+      \strng{fullhash}{30cfa3906c03117342e730ef1ed57349}
+      \strng{bibnamehash}{30cfa3906c03117342e730ef1ed57349}
+      \strng{authorbibnamehash}{30cfa3906c03117342e730ef1ed57349}
+      \strng{authornamehash}{30cfa3906c03117342e730ef1ed57349}
+      \strng{authorfullhash}{30cfa3906c03117342e730ef1ed57349}
+      \field{sortinit}{5}
+      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{edition}{2}
+      \field{isbn}{0-13-108989-7}
+      \field{title}{Understanding Digital Signal Processing}
+      \field{year}{2004}
+    \endentry
+    \entry{fowler2019architecture}{online}{}
+      \name{author}{1}{}{%
+        {{hash=312ac886938a9b2be4f8eb607567fe4c}{%
+           family={Fowler},
+           familyi={F\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{fullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{bibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorbibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authornamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorfullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \field{extraname}{1}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{8}
+      \field{title}{Software Architecture Guide}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2019}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://martinfowler.com/architecture/
+      \endverb
+      \verb{url}
+      \verb https://martinfowler.com/architecture/
+      \endverb
+    \endentry
+    \entry{fowler2006gui}{online}{}
+      \name{author}{1}{}{%
+        {{hash=312ac886938a9b2be4f8eb607567fe4c}{%
+           family={Fowler},
+           familyi={F\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{fullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{bibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorbibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authornamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorfullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \field{extraname}{2}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{{GUI} Architectures}
+      \field{urlday}{29}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2006}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://martinfowler.com/eaaDev/uiArchs.html
+      \endverb
+      \verb{url}
+      \verb https://martinfowler.com/eaaDev/uiArchs.html
+      \endverb
+    \endentry
+    \entry{smith2009wpf}{article}{}
+      \name{author}{1}{}{%
+        {{hash=991eb1e033c962cafd66f30fa0593451}{%
+           family={Smith},
+           familyi={S\bibinitperiod},
+           given={Josh},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{991eb1e033c962cafd66f30fa0593451}
+      \strng{fullhash}{991eb1e033c962cafd66f30fa0593451}
+      \strng{bibnamehash}{991eb1e033c962cafd66f30fa0593451}
+      \strng{authorbibnamehash}{991eb1e033c962cafd66f30fa0593451}
+      \strng{authornamehash}{991eb1e033c962cafd66f30fa0593451}
+      \strng{authorfullhash}{991eb1e033c962cafd66f30fa0593451}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{{MSDN} Magazine}
+      \field{month}{2}
+      \field{title}{Patterns: {WPF} Apps With The {Model-View-ViewModel} Design Pattern}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2009}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://learn.microsoft.com/en-us/archive/msdn-magazine/2009/february/patterns-wpf-apps-with-the-model-view-viewmodel-design-pattern
+      \endverb
+      \verb{url}
+      \verb https://learn.microsoft.com/en-us/archive/msdn-magazine/2009/february/patterns-wpf-apps-with-the-model-view-viewmodel-design-pattern
+      \endverb
+    \endentry
+    \entry{fowler2004presentation}{online}{}
+      \name{author}{1}{}{%
+        {{hash=312ac886938a9b2be4f8eb607567fe4c}{%
+           family={Fowler},
+           familyi={F\bibinitperiod},
+           given={Martin},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{fullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{bibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorbibnamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authornamehash}{312ac886938a9b2be4f8eb607567fe4c}
+      \strng{authorfullhash}{312ac886938a9b2be4f8eb607567fe4c}
+      \field{extraname}{3}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Presentation Model}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2004}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://martinfowler.com/eaaDev/PresentationModel.html
+      \endverb
+      \verb{url}
+      \verb https://martinfowler.com/eaaDev/PresentationModel.html
+      \endverb
+    \endentry
+    \entry{fuksa2025mvvm}{article}{}
+      \name{author}{3}{}{%
+        {{hash=8caa03bda108d958f54e77258337be7c}{%
+           family={Fuksa},
+           familyi={F\bibinitperiod},
+           given={Mario},
+           giveni={M\bibinitperiod}}}%
+        {{hash=f13d376d84828a5641ecf5329ff26323}{%
+           family={Speth},
+           familyi={S\bibinitperiod},
+           given={Sandro},
+           giveni={S\bibinitperiod}}}%
+        {{hash=8deefb02d038861e0dd2e38fd1500e03}{%
+           family={Becker},
+           familyi={B\bibinitperiod},
+           given={Steffen},
+           giveni={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{c68b88bcda0569af81ebe00d377e675f}
+      \strng{fullhash}{c68b88bcda0569af81ebe00d377e675f}
+      \strng{bibnamehash}{c68b88bcda0569af81ebe00d377e675f}
+      \strng{authorbibnamehash}{c68b88bcda0569af81ebe00d377e675f}
+      \strng{authornamehash}{c68b88bcda0569af81ebe00d377e675f}
+      \strng{authorfullhash}{c68b88bcda0569af81ebe00d377e675f}
+      \field{sortinit}{6}
+      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{arXiv preprint arXiv:2504.18191}
+      \field{title}{{MVVM} Revisited: Exploring Design Variants of the {Model-View-ViewModel} Pattern}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2025}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://arxiv.org/pdf/2504.18191
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/pdf/2504.18191
+      \endverb
+    \endentry
+    \entry{haefely_datasheet}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=6d7dfdc45ea8cb6a568968944d20027b}{%
+           family={{Haefely AG}},
+           familyi={H\bibinitperiod}}}%
+      }
+      \list{organization}{1}{%
+        {Haefely AG}%
+      }
+      \strng{namehash}{6d7dfdc45ea8cb6a568968944d20027b}
+      \strng{fullhash}{6d7dfdc45ea8cb6a568968944d20027b}
+      \strng{bibnamehash}{6d7dfdc45ea8cb6a568968944d20027b}
+      \strng{authorbibnamehash}{6d7dfdc45ea8cb6a568968944d20027b}
+      \strng{authornamehash}{6d7dfdc45ea8cb6a568968944d20027b}
+      \strng{authorfullhash}{6d7dfdc45ea8cb6a568968944d20027b}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Haefely HiAS 744 Highest Resolution Impulse Analyzer Datasheet}
+      \field{year}{2020}
+    \endentry
+    \entry{python}{online}{}
+      \name{author}{1}{}{%
+        {{hash=c7b5508dc5e59a2846d22617276cc27c}{%
+           family={{Python Software Foundation}},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{fullhash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{bibnamehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authorbibnamehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authornamehash}{c7b5508dc5e59a2846d22617276cc27c}
+      \strng{authorfullhash}{c7b5508dc5e59a2846d22617276cc27c}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Python.org}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://www.python.org/
+      \endverb
+      \verb{url}
+      \verb https://www.python.org/
+      \endverb
+    \endentry
+    \entry{pyvisa}{online}{}
+      \name{author}{1}{}{%
+        {{hash=6dd3df96a0073cf6741ad3b9a328065b}{%
+           family={{PyVISA Authors}},
+           familyi={P\bibinitperiod}}}%
+      }
+      \strng{namehash}{6dd3df96a0073cf6741ad3b9a328065b}
+      \strng{fullhash}{6dd3df96a0073cf6741ad3b9a328065b}
+      \strng{bibnamehash}{6dd3df96a0073cf6741ad3b9a328065b}
+      \strng{authorbibnamehash}{6dd3df96a0073cf6741ad3b9a328065b}
+      \strng{authornamehash}{6dd3df96a0073cf6741ad3b9a328065b}
+      \strng{authorfullhash}{6dd3df96a0073cf6741ad3b9a328065b}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{PyVISA: Control your instruments with Python}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://pyvisa.readthedocs.io/
+      \endverb
+      \verb{url}
+      \verb https://pyvisa.readthedocs.io/
+      \endverb
+    \endentry
+    \entry{numpy}{online}{}
+      \name{author}{1}{}{%
+        {{hash=4cd095ab0bf9dceeb691e4f6237078f8}{%
+           family={{NumPy Community}},
+           familyi={N\bibinitperiod}}}%
+      }
+      \strng{namehash}{4cd095ab0bf9dceeb691e4f6237078f8}
+      \strng{fullhash}{4cd095ab0bf9dceeb691e4f6237078f8}
+      \strng{bibnamehash}{4cd095ab0bf9dceeb691e4f6237078f8}
+      \strng{authorbibnamehash}{4cd095ab0bf9dceeb691e4f6237078f8}
+      \strng{authornamehash}{4cd095ab0bf9dceeb691e4f6237078f8}
+      \strng{authorfullhash}{4cd095ab0bf9dceeb691e4f6237078f8}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{{NumPy} official website}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://numpy.org
+      \endverb
+      \verb{url}
+      \verb https://numpy.org
+      \endverb
+    \endentry
+    \entry{scipy}{online}{}
+      \name{author}{1}{}{%
+        {{hash=a6f29e65dba458548265e9c9727a5c84}{%
+           family={{SciPy Community}},
+           familyi={S\bibinitperiod}}}%
+      }
+      \strng{namehash}{a6f29e65dba458548265e9c9727a5c84}
+      \strng{fullhash}{a6f29e65dba458548265e9c9727a5c84}
+      \strng{bibnamehash}{a6f29e65dba458548265e9c9727a5c84}
+      \strng{authorbibnamehash}{a6f29e65dba458548265e9c9727a5c84}
+      \strng{authornamehash}{a6f29e65dba458548265e9c9727a5c84}
+      \strng{authorfullhash}{a6f29e65dba458548265e9c9727a5c84}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{{SciPy} official website}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://scipy.org
+      \endverb
+      \verb{url}
+      \verb https://scipy.org
+      \endverb
+    \endentry
+    \entry{pyside6}{online}{}
+      \name{author}{1}{}{%
+        {{hash=1a5b41da9b96e856c691f97524836bd7}{%
+           family={{Qt Project}},
+           familyi={Q\bibinitperiod}}}%
+      }
+      \strng{namehash}{1a5b41da9b96e856c691f97524836bd7}
+      \strng{fullhash}{1a5b41da9b96e856c691f97524836bd7}
+      \strng{bibnamehash}{1a5b41da9b96e856c691f97524836bd7}
+      \strng{authorbibnamehash}{1a5b41da9b96e856c691f97524836bd7}
+      \strng{authornamehash}{1a5b41da9b96e856c691f97524836bd7}
+      \strng{authorfullhash}{1a5b41da9b96e856c691f97524836bd7}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Python bindings for the Qt cross-platform application and UI framework}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://pypi.org/project/PySide6/
+      \endverb
+      \verb{url}
+      \verb https://pypi.org/project/PySide6/
+      \endverb
+    \endentry
+    \entry{h5py}{online}{}
+      \name{author}{1}{}{%
+        {{hash=8ec4f2446e611947edf6eeae3478351c}{%
+           family={{h5py Contributors}},
+           familyi={h\bibinitperiod}}}%
+      }
+      \strng{namehash}{8ec4f2446e611947edf6eeae3478351c}
+      \strng{fullhash}{8ec4f2446e611947edf6eeae3478351c}
+      \strng{bibnamehash}{8ec4f2446e611947edf6eeae3478351c}
+      \strng{authorbibnamehash}{8ec4f2446e611947edf6eeae3478351c}
+      \strng{authornamehash}{8ec4f2446e611947edf6eeae3478351c}
+      \strng{authorfullhash}{8ec4f2446e611947edf6eeae3478351c}
+      \field{sortinit}{7}
+      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{h5py: {HDF5} for {Python}}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://h5py.org
+      \endverb
+      \verb{url}
+      \verb https://h5py.org
+      \endverb
+    \endentry
+    \entry{gds1000au_driver}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=d47b8f030086d3d862165794f9ebe745}{%
+           family={{GW Instek}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{fullhash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{bibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorbibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authornamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorfullhash}{d47b8f030086d3d862165794f9ebe745}
+      \field{extraname}{2}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{Última consulta: 09-2026}
+      \field{title}{GDS-1000A-U USB Driver}
+      \verb{urlraw}
+      \verb https://www.gwinstek.com/en-global/products/downloadSeriesDownNew/121/142
+      \endverb
+      \verb{url}
+      \verb https://www.gwinstek.com/en-global/products/downloadSeriesDownNew/121/142
+      \endverb
+    \endentry
+    \entry{gds1000b_ProgrammingManual}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=d47b8f030086d3d862165794f9ebe745}{%
+           family={{GW Instek}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{fullhash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{bibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorbibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authornamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorfullhash}{d47b8f030086d3d862165794f9ebe745}
+      \field{extraname}{3}
+      \field{sortinit}{8}
+      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Digital Storage Oscilloscope GDS-1000B Series Programming Manual}
+      \field{year}{2020}
+    \endentry
+    \entry{qt_designer}{online}{}
+      \name{author}{1}{}{%
+        {{hash=8fdd00b7aac42271736575410d6a2219}{%
+           family={{The Qt Company}},
+           familyi={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{8fdd00b7aac42271736575410d6a2219}
+      \strng{fullhash}{8fdd00b7aac42271736575410d6a2219}
+      \strng{bibnamehash}{8fdd00b7aac42271736575410d6a2219}
+      \strng{authorbibnamehash}{8fdd00b7aac42271736575410d6a2219}
+      \strng{authornamehash}{8fdd00b7aac42271736575410d6a2219}
+      \strng{authorfullhash}{8fdd00b7aac42271736575410d6a2219}
+      \field{sortinit}{9}
+      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{{Qt for Python}}
+      \field{urlmonth}{9}
+      \field{urlyear}{2026}
+      \field{year}{2026}
+      \field{dateera}{ce}
+      \field{urldateera}{ce}
+      \verb{urlraw}
+      \verb https://doc.qt.io/qtforpython-6/index.html
+      \endverb
+      \verb{url}
+      \verb https://doc.qt.io/qtforpython-6/index.html
+      \endverb
+    \endentry
+    \entry{gds1000au_UserManual}{manual}{}
+      \name{author}{1}{}{%
+        {{hash=d47b8f030086d3d862165794f9ebe745}{%
+           family={{GW Instek}},
+           familyi={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{fullhash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{bibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorbibnamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authornamehash}{d47b8f030086d3d862165794f9ebe745}
+      \strng{authorfullhash}{d47b8f030086d3d862165794f9ebe745}
+      \field{extraname}{4}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Digital Storage Oscilloscope GDS-1000A-U Series User Manual}
+      \field{year}{2020}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

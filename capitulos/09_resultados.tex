@@ -1,24 +1,29 @@
 \newpage
 \chapter*{Resultados}
 \label{ch:resultados}
+\addcontentsline{toc}{chapter}{Resultados}
 \vspace{3\baselineskip}
+
+% Reinicia el contador de tablas y cambia el formato de numeración: 
+\setcounter{table}{0} \renewcommand{\thetable}{R.\arabic{table}} % Genera: Tabla R.1, Tabla R.2, ...
 
 En este apartado se exponen los resultados de las calibraciones realizadas al programa desarrollado, aplicando el procedimiento descripto en el capítulo \ref{ch:calibracion_software}.
 
-\section*{Comparativa de precisión}
-\label{sec:comparativa_precision}
-\addcontentsline{toc}{section}{Comparativa de precisión}
+\section*{Comparativa de exactitud}
+\label{sec:comparativa_exactitud}
+\addcontentsline{toc}{section}{Comparativa de exactitud}
 \vspace{3\baselineskip}
 
-En esta sección se compara la diferencia de precisión entre el método utilizado actualmente en el Laboratorio de Alta Tensión y el \emph{software} desarrollado en el este trabajo. Para ello, se presentan los resultados obtenidos al analizar el mismo conjunto de impulsos generados con el TDG \cite{iec61083_2}, en tres variantes:
+En esta sección se compara la diferencia de exactitud entre el método utilizado actualmente en el Laboratorio de Alta Tensión y el \emph{software} desarrollado en el este trabajo. Para ello, se presentan los resultados obtenidos al analizar el mismo conjunto de impulsos generados con el TDG \cite{iec61083_2}, en tres variantes:
 
 \begin{enumerate}
     \item \textbf{Manual}: Se graficó cada impulso y se lo analizó aplicando el método descripto en el Anexo C de la norma IEC 60060-1 \cite{iec60060_1}. Para este caso, se usó la versión de las ondas de 8 bit, ya que se corresponde con la resolución que se usa actualmente en el laboratorio.
-    \item \textbf{8 bit}: Se generó con el TDG los impulsos de referencia con una resolución de \num{8} bit, acorde a la resolución del osciloscopio \cite{gds1000au_UserManual} empleado en este trabajo.
-    \item \textbf{16 bit}: Se generaron con el TDG los impulsos de referencia con una resolución de \num{16} bit, la máxima disponible, para evaluar el comportamiento del \emph{software} en caso de utilizar un osciloscopio con mayor resolución.
+    \item \textbf{8 bit}: Se generó con el TDG los impulsos de referencia con una resolución de \qty{8}{bits}, acorde a la resolución del osciloscopio \cite{gds1000au_UserManual} empleado en este trabajo.
+    \item \textbf{16 bit}: Se generaron con el TDG los impulsos de referencia con una resolución de \qty{16}{bits}, la máxima disponible, para evaluar el comportamiento del \emph{software} en caso de utilizar un osciloscopio con mayor resolución.
 \end{enumerate}
 
-El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de impulsos cortados (LIC), de los cuales se seleccionaron \num{5} LI y \num{2} LIC, que son los más representativos de lo que se observa habitualmente en el laboratorio, dado que el algoritmo de análisis para impulsos cortados en la cola y en el frente es distinto.
+El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de impulsos cortados (LIC), de los cuales se seleccionaron \num{5} LI y \num{2} LIC, que son los más representativos de lo que se observa habitualmente en el laboratorio.
+Todas las ondas analizadas del TDG tenían un intervalo de muestreo de \qty{10}{\nano\second}.
 
 \subsection*{Ondas plenas}
 \label{subsec:precision_onda_plena}
@@ -31,11 +36,11 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Tensión pico, Ut}}                                                                                                                     \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LI-A1         & 1049.60       & 0.10             & 1051.96         & -0.22             & 1050.23        & 0.060             & 1049.59         & -0.001            \\ \midrule
-        LI-M5         & -55.003       & 0.10             & -42.086         & 23.48             & -54.979        & -0.043            & -54.987         & -0.029            \\ \midrule
-        LI-M6         & -166.87       & 0.10             & -160.59         & 3.76              & -166.88        & 0.007             & -166.87         & 0.000             \\ \midrule
-        LI-M8         & -99.732       & 0.10             & -99.900         & -0.17             & -99.811        & 0.080             & -99.733         & 0.001             \\ \midrule
-        LI-M12        & -4.3193       & 0.10             & -4.2986         & 0.48              & -4.3161        & -0.074            & -4.3190         & -0.007            \\ \bottomrule
+        LI-A1         & 1049,60       & 0,10             & 1051,96         & -0,22             & 1050,23        & 0,060             & 1049,59         & -0,001            \\ \midrule
+        LI-M5         & -55,003       & 0,10             & -42,086         & 23,48             & -54,979        & -0,043            & -54,987         & -0,029            \\ \midrule
+        LI-M6         & -166,87       & 0,10             & -160,59         & 3,76              & -166,88        & 0,007             & -166,87         & 0,000             \\ \midrule
+        LI-M8         & -99,732       & 0,10             & -99,900         & -0,17             & -99,811        & 0,080             & -99,733         & 0,001             \\ \midrule
+        LI-M12        & -4,3193       & 0,10             & -4,2986         & 0,48              & -4,3161        & -0,074            & -4,3190         & -0,007            \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $U_\text{t}$ para impulsos LI}
     \label{tab:resultados_ut_li}
@@ -49,11 +54,11 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Tiempo de frente, T1}}                                                                                                                 \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LI-A1         & 0.840         & 2.0              & 0.833           & 0.79              & 0.840          & -0.048            & 0.840           & -0.029            \\ \midrule
-        LI-M5         & 2.746         & 2.0              & 2.000           & 27.17             & 2.750          & 0.162             & 2.750           & 0.161             \\ \midrule
-        LI-M6         & 1.356         & 2.0              & 1.167           & 13.96             & 1.357          & 0.083             & 1.356           & -0.027            \\ \midrule
-        LI-M8         & 1.515         & 2.0              & 1.533           & -1.21             & 1.519          & 0.291             & 1.485           & 0.013             \\ \midrule
-        LI-M12        & 1.292         & 2.0              & 1.233           & 4.54              & 1.289          & -0.271            & 1.293           & 0.100             \\ \bottomrule
+        LI-A1         & 0,840         & 2,0              & 0,833           & 0,79              & 0,840          & -0,048            & 0,840           & -0,029            \\ \midrule
+        LI-M5         & 2,746         & 2,0              & 2,000           & 27,17             & 2,750          & 0,162             & 2,750           & 0,161             \\ \midrule
+        LI-M6         & 1,356         & 2,0              & 1,167           & 13,96             & 1,357          & 0,083             & 1,356           & -0,027            \\ \midrule
+        LI-M8         & 1,515         & 2,0              & 1,533           & -1,21             & 1,519          & 0,291             & 1,485           & 0,013             \\ \midrule
+        LI-M12        & 1,292         & 2,0              & 1,233           & 4,54              & 1,289          & -0,271            & 1,293           & 0,100             \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $T_1$ para impulsos LI}
     \label{tab:resultados_t1_li}
@@ -67,11 +72,11 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Tiempo de cola, T2}}                                                                                                                   \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LI-A1         & 60.16         & 1.0              & 60.05           & 0.18              & 60.22          & 0.097             & 60.15           & -0.009            \\ \midrule
-        LI-M5         & 42.11         & 1.0              & 61.61           & -46.31            & 42.10          & -0.016            & 42.11           & -0.002            \\ \midrule
-        LI-M6         & 54.74         & 1.0              & 50.49           & 7.76              & 54.73          & -0.013            & 54.74           & -0.002            \\ \midrule
-        LI-M8         & 49.36         & 1.0              & 49.55           & -0.38             & 49.27          & -0.178            & 49.36           & -0.001            \\ \midrule
-        LI-M12        & 52.27         & 1.0              & 52.93           & -1.26             & 52.39          & 0.233             & 52.27           & -0.008            \\ \bottomrule
+        LI-A1         & 60,16         & 1,0              & 60,05           & 0,18              & 60,22          & 0,097             & 60,15           & -0,009            \\ \midrule
+        LI-M5         & 42,11         & 1,0              & 61,61           & -46,31            & 42,10          & -0,016            & 42,11           & -0,002            \\ \midrule
+        LI-M6         & 54,74         & 1,0              & 50,49           & 7,76              & 54,73          & -0,013            & 54,74           & -0,002            \\ \midrule
+        LI-M8         & 49,36         & 1,0              & 49,55           & -0,38             & 49,27          & -0,178            & 49,36           & -0,001            \\ \midrule
+        LI-M12        & 52,27         & 1,0              & 52,93           & -1,26             & 52,39          & 0,233             & 52,27           & -0,008            \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $T_2$ para impulsos LI}
     \label{tab:resultados_t2_li}
@@ -85,20 +90,25 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Sobrepasamiento, $\beta'$}}                                                                                                                \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LI-A1         & 0.0           & 1.0              & 0.0             & 0.00              & 0.2            & 0.182             & -0.0            & -0.000            \\ \midrule
-        LI-M5         & 18.7          & 1.0              & 25.4            & -6.70             & 18.8           & 0.060             & 18.7            & -0.004            \\ \midrule
-        LI-M6         & 3.8           & 1.0              & 5.5             & -1.71             & 3.9            & 0.054             & 3.8             & 0.030             \\ \midrule
-        LI-M8         & -0.5          & 1.0              & 0.0             & -0.50             & -0.4           & 0.136             & -0.6            & -0.054            \\ \midrule
-        LI-M12        & -1.8          & 1.0              & 0.8             & -2.59             & -1.8           & -0.026            & -1.8            & 0.021             \\ \bottomrule
+        LI-A1         & 0,0           & 1,0              & 0,0             & 0,00              & 0,2            & 0,182             & -0,0            & -0,000            \\ \midrule
+        LI-M5         & 18,7          & 1,0              & 25,4            & -6,70             & 18,8           & 0,060             & 18,7            & -0,004            \\ \midrule
+        LI-M6         & 3,8           & 1,0              & 5,5             & -1,71             & 3,9            & 0,054             & 3,8             & 0,030             \\ \midrule
+        LI-M8         & -0,5          & 1,0              & 0,0             & -0,50             & -0,4           & 0,136             & -0,6            & -0,054            \\ \midrule
+        LI-M12        & -1,8          & 1,0              & 0,8             & -2,59             & -1,8           & -0,026            & -1,8            & 0,021             \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $\beta'$ para impulsos LI}
     \label{tab:resultados_os_li}
 \end{table}
 \vspace{3\baselineskip}
 
+De los resultados obtenidos, es importante declarar que para los casos a \qty{8}{bit}, los casos LI-A3, LI-M13, LI-M14, LI-M17 exceden el límite de $\pm$ \qty{0,10}{\percent} para la tensión pico, establecido en el Anexo A de la norma IEC 61083-2. Siendo LI-M13 el peor caso con un desvío del \qty{0,175}{\percent}.
+En contrapartida, la totalidad de los \num{29} casos LI con una resolución de \qty{16}{bit} pasaron satisfactoriamente la evaluación.
+
 \subsection*{Ondas cortadas}
 \label{subsec:precision_onda_cortada}
 \addcontentsline{toc}{subsection}{Ondas cortadas}
+
+Dado que el \emph{software} se focalizó en los requerimientos específicos del laboratorio, es importante especificar que el alcance de la evaluación para ondas cortadas se limitó estrictamente a los impulsos cortados en la cola (casos LIC-M4 y LIC-M5). Por lo tanto, se excluyeron los impulsos cortados en el frente (LIC-A1, LIC-M1 a LIC-M3), que requieren otro algoritmo de cálculo distinto al implementado.
 
 \vspace{3\baselineskip}
 \begin{table}[H]
@@ -107,8 +117,8 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Tensión pico, Ut}}                                                                                                                     \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LIC-M4        & 0.1478        & 1.0              & 0.1462          & 1.09              & 0.1479         & 0.080             & 0.1478          & -0.027            \\ \midrule
-        LIC-M5        & -389.9        & 1.0              & -367.5          & 5.73              & -389.5         & -0.092            & -389.8          & -0.013            \\ \bottomrule
+        LIC-M4        & 0,1478        & 1,0              & 0,1462          & 1,09              & 0,1479         & 0,080             & 0,1478          & -0,027            \\ \midrule
+        LIC-M5        & -389,9        & 1,0              & -367,5          & 5,73              & -389,5         & -0,092            & -389,8          & -0,013            \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $U_\text{t}$ para impulsos LIC}
     \label{tab:resultados_ut_lic}
@@ -122,8 +132,8 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Tiempo de frente, T1}}                                                                                                                 \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LIC-M4        & 1.305         & 2.0              & 1.283           & 1.66              & 1.310          & 0.358             & 1.305           & -0.001            \\ \midrule
-        LIC-M5        & 0.857         & 2.0              & 0.767           & 10.54             & 0.870          & 1.499             & 0.868           & 1.275             \\ \bottomrule
+        LIC-M4        & 1,305         & 2,0              & 1,283           & 1,66              & 1,310          & 0,358             & 1,305           & -0,001            \\ \midrule
+        LIC-M5        & 0,857         & 2,0              & 0,767           & 10,54             & 0,870          & 1,499             & 0,868           & 1,275             \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $T_1$ para impulsos LIC}
     \label{tab:resultados_t1_lic}
@@ -137,8 +147,8 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Tiempo de corte, Tc}}                                                                                                                  \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LIC-M4        & 6.00          & 2.0              & 5.76            & -0.20             & 6.01           & 0.134             & 6.01            & 0.122             \\ \midrule
-        LIC-M5        & 9.24          & 2.0              & 8.98            & 6.80              & 9.27           & 0.305             & 9.27            & 0.296             \\ \bottomrule
+        LIC-M4        & 6,00          & 2,0              & 5,76            & -0,20             & 6,01           & 0,134             & 6,01            & 0,122             \\ \midrule
+        LIC-M5        & 9,24          & 2,0              & 8,98            & 6,80              & 9,27           & 0,305             & 9,27            & 0,296             \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $T_\text{C}$ para impulsos LIC}
     \label{tab:resultados_tc_lic}
@@ -152,8 +162,8 @@ El TDG tiene un total de \num{29} casos de impulsos plenos (LI) y \num{6} de imp
         \toprule
         \multicolumn{9}{c}{\textbf{Sobrepasamiento, $\beta'$}}                                                                                                                \\ \midrule
         \textbf{Onda} & \textbf{Ref.} & \textbf{Tol. \%} & \textbf{Manual} & \textbf{Error \%} & \textbf{8 bit} & \textbf{Error \%} & \textbf{16 bit} & \textbf{Error \%} \\ \midrule
-        LIC-M4        & -0.2          & 1.0              & 1.2             & -1.44             & 0.7            & 0.890             & 0.6             & 0.797             \\ \midrule
-        LIC-M5        & 6.8           & 1.0              & 7.4             & -0.58             & 7.0            & 0.243             & 6.9             & 0.105             \\ \bottomrule
+        LIC-M4        & -0,2          & 1,0              & 1,2             & -1,44             & 0,7            & 0,890             & 0,6             & 0,797             \\ \midrule
+        LIC-M5        & 6,8           & 1,0              & 7,4             & -0,58             & 7,0            & 0,243             & 6,9             & 0,105             \\ \bottomrule
     \end{tabular}
     \caption{Resultados de $\beta'$ para impulsos LIC}
     \label{tab:resultados_os_lic}
@@ -206,12 +216,12 @@ En este caso, se analizaron los \num{29} casos LI, tal como indica la norma IEC 
     \centering
     \begin{tabular}{@{}cccccc@{}}
         \toprule
-                              & \textbf{Patrón}     & \multicolumn{2}{c}{\textbf{8 bit}}     & \multicolumn{2}{c}{\textbf{16 bit}}    \\ \midrule
+                              & \textbf{Patrón}    & \multicolumn{2}{c}{\textbf{8 bit}}     & \multicolumn{2}{c}{\textbf{16 bit}}    \\ \midrule
                               & \textbf{$u_{B72}$} & \textbf{$u_{B71}$} & \textbf{$u_{B7}$} & \textbf{$u_{B71}$} & \textbf{$u_{B7}$} \\ \midrule
-        \textbf{$U_\text{t}$} & 0.0150              & 0.1009             & 0.1020            & 0.0169             & 0.0226            \\ \midrule
-        \textbf{$T_1$}        & 0.2500              & 0.9024             & 0.9364            & 0.1404             & 0.2867            \\ \midrule
-        \textbf{$T_2$}        & 0.0300              & 0.1597             & 0.1625            & 0.0120             & 0.0323            \\ \midrule
-        \textbf{$\beta'$}       & 0.0400              & 0.1050             & 0.1123            & 0.0473             & 0.0619            \\ \bottomrule
+        \textbf{$U_\text{t}$} & 0,0150             & 0,1009             & 0,1020            & 0,0169             & 0,0226            \\ \midrule
+        \textbf{$T_1$}        & 0,2500             & 0,9024             & 0,9364            & 0,1404             & 0,2867            \\ \midrule
+        \textbf{$T_2$}        & 0,0300             & 0,1597             & 0,1625            & 0,0120             & 0,0323            \\ \midrule
+        \textbf{$\beta'$}     & 0,0400             & 0,1050             & 0,1123            & 0,0473             & 0,0619            \\ \bottomrule
         \end{tabular}
     \caption{Incertidumbre estándar del \emph{software} para 8 y 16 bit para LI.}
     \label{tab:incertidumbre_software_li}
@@ -229,12 +239,12 @@ En este caso, se analizaron solo \num{2} casos LIC, correspondientes a los impul
     \centering
     \begin{tabular}{@{}cccccc@{}}
         \toprule
-                              & \textbf{Patrón}     & \multicolumn{2}{c}{\textbf{8 bit}}     & \multicolumn{2}{c}{\textbf{16 bit}}    \\ \midrule
+                              & \textbf{Patrón}    & \multicolumn{2}{c}{\textbf{8 bit}}     & \multicolumn{2}{c}{\textbf{16 bit}}    \\ \midrule
                               & \textbf{$u_{B72}$} & \textbf{$u_{B71}$} & \textbf{$u_{B7}$} & \textbf{$u_{B71}$} & \textbf{$u_{B7}$} \\ \midrule
-        \textbf{$U_\text{t}$} & 0.0250              & 0.0531             & 0.0587            & 0.0158             & 0.0296            \\ \midrule
-        \textbf{$T_1$}        & 0.4500              & 0.8654             & 0.9754            & 0.7363             & 0.8629            \\ \midrule
-        \textbf{$T_\text{C}$} & 0.1500              & 0.1763             & 0.2315            & 0.1707             & 0.2272            \\ \midrule
-        \textbf{$\beta'$}       & 0.0250              & 0.5137             & 0.5144            & 0.4600             & 0.4607            \\ \bottomrule
+        \textbf{$U_\text{t}$} & 0,0250             & 0,0531             & 0,0587            & 0,0158             & 0,0296            \\ \midrule
+        \textbf{$T_1$}        & 0,4500             & 0,8654             & 0,9754            & 0,7363             & 0,8629            \\ \midrule
+        \textbf{$T_\text{C}$} & 0,1500             & 0,1763             & 0,2315            & 0,1707             & 0,2272            \\ \midrule
+        \textbf{$\beta'$}     & 0,0250             & 0,5137             & 0,5144            & 0,4600             & 0,4607            \\ \bottomrule
         \end{tabular}
     \caption{Incertidumbre estándar del \emph{software} para 8 y 16 bit para LIC.}
     \label{tab:incertidumbre_software_lic}

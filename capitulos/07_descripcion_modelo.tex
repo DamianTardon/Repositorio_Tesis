@@ -2,7 +2,7 @@
 \chapter{Implementación del \emph{software}}
 \vspace{3\baselineskip}
 
-En este capítulo se expone la implementación del \emph{software} desarrollado para la automatización, procesamiento digital y gestión de ensayos de impulso de alta tensión, tomando como referencia los procedimientos de las normas IEC 60060-1 e IEC 61083-2. Inicialmente, se describe el patrón arquitectónico elegido (MVP). Seguidamente, se explica cómo el presentador coordina la interfaz gráfica, el control del instrumental y la persistencia de datos. A continuación, se aborda la capa del modelo, analizando el controlador de \emph{hardware} que actúa como capa de abstracción de hardware (HAL) del osciloscopio. Asimismo, se detalla el algoritmo del motor de cálculo matemático para la determinación de los parámetros normalizados del impulso. Luego, se expone el esquema de persistencia jerárquica de la información. Finalmente, se detalla el diseño y el flujo funcional de la interfaz gráfica de usuario.
+En este capítulo se expone la implementación del \emph{software} desarrollado para la automatización, procesamiento digital y gestión de ensayos de impulso de alta tensión, tomando como referencia los procedimientos de las normas IEC 60060-1 e IEC 61083-2. Inicialmente, se describe el patrón arquitectónico elegido (MVP). Seguidamente, se explica cómo el presentador coordina la interfaz gráfica, el control del instrumental y la persistencia de datos. A continuación, se aborda la capa del modelo, analizando el controlador de \emph{hardware} que actúa como capa de abstracción de hardware (HAL) del osciloscopio. Asimismo, se detalla el algoritmo del motor de cálculo matemático para la determinación de los parámetros característicos del impulso. Luego, se expone el esquema de persistencia jerárquica de la información. Finalmente, se detalla el diseño y el flujo funcional de la interfaz gráfica de usuario.
 
 \section{Arquitectura adoptada}
 \label{sec:arquitectura_adoptada}
@@ -249,12 +249,12 @@ A continuación, para obtener las magnitudes reales aplicadas al objeto bajo ens
     {\text{Onda escalada}}[n] = \text{Onda sin escalar}[n] \times A_{\text{CH<X>}}
     \label{eq:reconstruccion_tension_total}
 \end{equation}
-Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en amperes, \unit{\ampere}), se transfieren al módulo de procesamiento matemático para determinar sus parámetros normativos: tiempo de frente $T_1$, tiempo de cola $T_2$, valor de cresta $U_{\text{t}}$ y sobreimpulso $\beta'$, conforme a los requerimientos de la norma IEC 60060-1~\cite{iec60060_1}.
+Los vectores resultantes de tensión (en volts, \unit{\volt}) y de corriente (en amperes, \unit{\ampere}), se transfieren al módulo de procesamiento matemático para determinar los parámetros del impulso evaluados según la norma IEC 60060-1~\cite{iec60060_1}: tiempo de frente $T_1$, tiempo de cola $T_2$, valor de cresta $U_{\text{t}}$ y sobreimpulso $\beta'$.
 
 \subsection{Motor de cálculo}
 \label{subsec:motor_calculo}
 
-Este componente constituye el núcleo matemático del \emph{software}, y es responsable de realizar el procesamiento digital de señales para obtener los parámetros normativos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}. Su implementación se ha guiado por las directrices estipuladas en las normas IEC 60060-1 \cite{iec60060_1} y 61083-2 \cite{iec61083_2}.
+Este componente constituye el núcleo matemático del \emph{software}, y es responsable de realizar el procesamiento digital de señales para obtener los parámetros característicos a partir de los arreglos temporales de tensiones discretas adquiridas por el \emph{hardware}. Su implementación se ha guiado por las directrices estipuladas en las normas IEC 60060-1 \cite{iec60060_1} y 61083-2 \cite{iec61083_2}.
 
 \subsubsection{Flujo algorítmico de cálculo}
 \label{subsubsec:flujo_algoritmico}
@@ -400,13 +400,13 @@ Independientemente de la ruta ejecutada en la Fase II, el algoritmo converge obt
         \label{eq:curva_residual}
     \end{equation}
     \item \textbf{Filtrado digital de fase cero}: 
-    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR a la curva residual ($R[n]$). Como este filtrado procesa la señal dos veces, la atenuación del filtro se diseña a la mitad en amplitud, de modo que al completar la secuencia bidireccional, la respuesta atenuada combinada coincida exactamente con la función de tensión de ensayo de la ecuación \ref{eq:func_tension_ensayo}.
+    Se obtiene la curva residual filtrada ($R_f[n]$), aplicando un filtro digital IIR a la curva residual ($R[n]$). Como este filtrado procesa la señal dos veces, la atenuación del filtro se diseña a la mitad en amplitud, de modo que al completar la secuencia bidireccional, la respuesta atenuada combinada aproxime la función de tensión de ensayo de la ecuación \ref{eq:func_tension_ensayo}.
     \item \textbf{Curva de tensión de ensayo}: Se sintetiza la curva de ensayo ($U_\text{t}[n]$) sumando algebraicamente la curva base analítica con la residual filtrada:
     \begin{equation}
         U_\text{t}[n] = U_\text{b}[n] + R_f[n]
         \label{eq:curva_ensayo}
     \end{equation}
-    \item \textbf{Cálculo de parámetros característicos}: A partir de la curva de tensión de ensayo $U_\text{t}[n]$, se calculan los parámetros normativos. Dado que la señal procesada es de tiempo discreto, hay valores analíticos que pueden no corresponder con las muestras obtenidas, por lo que para encontrarlos se realiza una interpolación lineal.
+    \item \textbf{Cálculo de parámetros característicos}: A partir de la curva de tensión de ensayo $U_\text{t}[n]$, se calculan los parámetros. Dado que la señal procesada es de tiempo discreto, hay valores analíticos que pueden no corresponder con las muestras obtenidas, por lo que para encontrarlos se realiza una interpolación lineal.
     \begin{itemize}
         \item \textbf{Valor de la tensión de ensayo} ($U_\text{t}$): Como se normalizó la polaridad para que en el análisis sean todas positivas las ondas, con buscar el máximo es suficiente.
         \begin{equation}

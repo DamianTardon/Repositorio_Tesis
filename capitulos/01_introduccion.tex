@@ -13,7 +13,9 @@ El desarrollo del presente Proyecto Integrador se enmarca en la necesidad de mod
 
 En el ámbito de la ingeniería eléctrica, la verificación de la rigidez dieléctrica del equipamiento resulta un requisito crítico para la seguridad operacional de las redes de transmisión y distribución.
 
-El ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), cuyo esquema de montaje puede apreciarse en la figura \ref{fig:diagrama_ensayo}, permite simular las sobretensiones transitorias de origen atmosférico, a las que se ven expuestos elementos como transformadores, seccionadores y celdas de media tensión, entre otros. La ejecución e interpretación de estos ensayos se encuentra regulada por la norma IEC 60060-1 \cite{iec60060_1}, la cual establece los conceptos teóricos, y los procedimientos de cálculo para determinar los parámetros característicos de la forma de onda, mientras que la norma IEC 61083-2 \cite{iec61083_2}, define las tolerancias metrológicas e incertidumbres admisibles, para los sistemas digitales de medición y el \emph{software} de procesamiento.
+El ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), cuyo esquema de montaje puede apreciarse en la figura \ref{fig:diagrama_ensayo}, permite simular las sobretensiones transitorias de origen atmosférico, a las que se ven expuestos elementos como transformadores, seccionadores y celdas de media tensión, entre otros. La ejecución e interpretación de estos ensayos se encuentra regulada por la norma IEC 60060-1 \cite{iec60060_1}, la cual establece los conceptos teóricos, y los procedimientos de cálculo para determinar los parámetros característicos de la forma de onda, mientras que la norma IEC 61083-2 \cite{iec61083_2}, define las tolerancias e incertidumbres admisibles para el \emph{software} de procesamiento.
+
+Es importante destacar que la evaluación realizada en este trabajo abarca de forma exclusiva al \emph{software} de procesamiento de datos de acuerdo a los lineamientos y registros patrón de la norma IEC 61083-2 \cite{iec61083_2}. No se evalúa el registrador digital (osciloscopio), regido por la norma IEC 61083-1, ni el sistema de medición completo del Laboratorio de Alta Tensión, bajo los requerimientos de la norma IEC 60060-2.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -24,7 +26,7 @@ El ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\seco
 \end{figure}
 \vspace{3\baselineskip}
 
-El presente informe aborda el diseño, la implementación y la validación metrológica de un \emph{software} integral (figura \ref{fig:esquema_solucion}), capaz de automatizar el control de un osciloscopio digital, la captura asíncrona de señales, el procesamiento digital del impulso registrado, mediante técnicas de regresión no lineal y filtrado digital de fase cero, y la gestión de la persistencia de datos.
+El presente informe aborda el diseño, la implementación y la evaluación de desempeño de un \emph{software} integral (figura \ref{fig:esquema_solucion}), capaz de automatizar el control de un osciloscopio digital, la captura asíncrona de señales, el procesamiento digital del impulso registrado, mediante técnicas de regresión no lineal y filtrado digital de fase cero, y la gestión de la persistencia de datos.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -47,7 +49,8 @@ Ante la imposibilidad económica de adquirir un sistema comercial dedicado de ad
 \label{sec:relevancia}
 \vspace{3\baselineskip}
 
-La relevancia de este Proyecto Integrador radica en mejorar la capacidad metrológica y reducir los tiempos de trabajo del Laboratorio de Alta Tensión, mediante una solución de bajo costo y alto rendimiento. Desde el punto de vista metrológico, la implementación de los algoritmos especificados en los Anexos B y D de la norma IEC 60060-1 \cite{iec60060_1} contribuye a la obtención de resultados determinísticos libres del error operativo humano. En consecuencia, tiende a minimizar la incertidumbre en la evaluación de los parámetros de los impulsos analizados.
+La relevancia de este Proyecto Integrador radica en mejorar la capacidad de medición y reducir los tiempos de trabajo del Laboratorio de Alta Tensión, mediante una solución de bajo costo y alto rendimiento. En materia de exactitud y repetibilidad, la implementación de los algoritmos especificados en los Anexos B y D de la norma IEC 60060-1 \cite{iec60060_1} contribuye a la obtención de resultados determinísticos libres del error operativo humano. En consecuencia, tiende a minimizar la incertidumbre en la evaluación de los parámetros de los impulsos analizados.
+
 
 Desde una perspectiva operacional, el desarrollo busca reducir el tiempo de cómputo de cada impulso y prescinde de \emph{software} de terceros. Asimismo, permite la visualización de múltiples ondas registradas en tiempo real e incorpora una base de datos con respaldos redundantes, orientada a preservar la integridad de la información técnica frente a eventuales fallos de alimentación o del sistema operativo.
 
@@ -78,7 +81,7 @@ Actualmente, el Laboratorio de Alta Tensión de la Facultad de Ciencias Exactas,
 \subsection{Objetivo General}
 \label{subsec:objetivo_general}
 
-Diseñar, desarrollar e implementar un \emph{software} que automatice la digitalización, el almacenamiento y el análisis de ondas de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), con base en los lineamientos de las normas IEC 60060-1 \cite{iec60060_1} e IEC 61083-2 \cite{iec61083_2}, con el propósito de optimizar el procedimiento manual existente, reduciendo los tiempos de análisis y aumentando la confiabilidad metrológica de los resultados.
+Diseñar, desarrollar e implementar un \emph{software} que automatice la digitalización, el almacenamiento y el análisis de ondas de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), con base en los lineamientos de las normas IEC 60060-1 \cite{iec60060_1} e IEC 61083-2 \cite{iec61083_2}, con el propósito de optimizar el procedimiento manual existente, reduciendo los tiempos de análisis y aumentando la confiabilidad de los resultados.
 
 \subsection{Objetivos Específicos}
 \label{subsec:objetivos_especificos}
@@ -92,7 +95,7 @@ Para alcanzar el objetivo general, se establecieron los siguientes objetivos esp
     \item Crear una interfaz gráfica de usuario (GUI) responsiva e intuitiva para la configuración del instrumento, la gestión de sesiones de trabajo y la captura de datos.
     \item Desarrollar el motor numérico de procesamiento digital de señales aplicando algoritmos de ajuste paramétrico y filtrado digital de fase cero.
     \item Implementar la persistencia de datos, con respaldos redundantes en texto plano (CSV) y exportación de resultados a planillas de cálculo (XLSX).
-    \item Validar metrológicamente el funcionamiento del \emph{software}, mediante la inyección de ondas patrón del generador de datos de prueba (TDG) estipulado en la norma IEC 61083-2 \cite{iec61083_2}, y la ejecución de ensayos reales en el laboratorio.
+    \item Evaluar el desempeño del \emph{software} mediante la inyección de ondas patrón del generador de datos de prueba (TDG) de la norma IEC 61083-2 \cite{iec61083_2}, y analizar el tiempo de procesamiento mediante la captura de impulsos reales en el laboratorio.
 \end{enumerate}
 
 \section{Metodología}
@@ -108,24 +111,26 @@ Para dar cumplimiento a los objetivos propuestos, se adoptó un enfoque metodol�
     \item \textbf{Desarrollo del motor de cálculos DSP}: Programación de los algoritmos de acondicionamiento, ajuste, filtrado e interpolación de datos, para obtener los parámetros del impulso.
     \item \textbf{Gestión de persistencia de datos}: Estructuración de la base de datos, vinculando metadatos, condiciones ambientales y vectores de señal, e implementación del generador de respaldos y resultados.
     \item \textbf{Calibración de precisión}: Evaluación del algoritmo utilizando las formas de onda de impulso pleno (LI) e impulso cortado (LIC) del TDG, cuantificando la incertidumbre estándar del \emph{software}.
-    \item \textbf{Verificación del sistema}: Comprobación total del sistema en el LAT, capturando y procesando impulsos reales, para validar la integridad del \emph{software}, y comparar los tiempos operativos respecto al método manual.
+    \item \textbf{Verificación del sistema}: Comprobación total del sistema en el LAT, capturando y procesando impulsos reales, para probar la integridad del \emph{software}, y comparar los tiempos operativos respecto al método manual.
 \end{enumerate}
 
 \section{Orientación al lector sobre el informe}
 \label{sec:orientacion_lector}
 \vspace{3\baselineskip}
 
-El informe se encuentra organizado en nueve partes, cuyo contenido se sintetiza a continuación:
+El informe se encuentra organizado de la siguiente forma:
 
 \begin{itemize}
     \item \textbf{Capítulo 1: Introducción}: Presenta la introducción general, los antecedentes del problema, la relevancia técnica, la motivación, los objetivos, la metodología y la estructura del trabajo.
-    \item \textbf{Capítulo 2: Fundamentos normativos de alta tensión}: Aborda los conceptos teóricos del ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}), las definiciones de la norma IEC 60060-1 \cite{iec60060_1} y el principio de funcionamiento del generador Marx.
+    \item \textbf{Capítulo 2: Ensayo de impulso (1,2/50 \textmu s)}: Aborda los conceptos teóricos del ensayo de impulso atmosférico (\qty[parse-numbers=false]{1.2/50}{\micro\second}) y las definiciones de la norma IEC 60060-1 \cite{iec60060_1}.
     \item \textbf{Capítulo 3: Instrumentación y adquisición de señales}: Describe el funcionamiento del osciloscopio digital, las interfaces de comunicación, el protocolo VISA y la sintaxis de comandos SCPI.
     \item \textbf{Capítulo 4: Procesamiento digital de señales}: Detalla las técnicas de filtrado digital, el método de ajuste por mínimos cuadrados no lineales mediante el algoritmo de Levenberg-Marquardt, y los esquemas de interpolación.
-    \item \textbf{Capítulo 5: Arquitectura del software}: Analiza los patrones de arquitectura de \emph{software} considerados para este trabajo, con el fin de establecer el desacoplamiento y la mantenibilidad del sistema.
-    \item \textbf{Capítulo 6: Descripción del modelo e implementación}: Expone la estructura detallada de los módulos del programa, el flujo asíncrono de adquisición, la organización de la base de datos, y el manual de uso de la interfaz gráfica.
-    \item \textbf{Capítulo 7: Calibración del software}: Describe el procedimiento de referencia de la IEC 61083-2 \cite{iec61083_2} para la calibración del motor de cálculo, mediante el generador de datos de prueba (TDG), y el análisis de incertidumbre.
-    \item \textbf{Capítulo 8: Resultados}: Presenta las tablas comparativas entre el método manual y el \emph{software} en cuanto a precisión y tiempo operativo de cómputo, y además, las componentes de incertidumbre obtenidas para el \emph{software}.
-    \item \textbf{Capítulo 9: Conclusiones y trabajos futuros}: Detalla las conclusiones generales del trabajo, el cumplimiento de los objetivos planteados, y las líneas de desarrollo propuestas para la expansión del sistema.
-    \item \textbf{Anexo I: Ejemplo de procesamiento de impulsos:} Ilustra gráficamente la evolución paso a paso de las señales digitalizadas (LI y LIC) a través del algoritmo del motor de cálculo implementado.
+    \item \textbf{Capítulo 5: Arquitectura del \emph{software}}: Analiza los patrones de arquitectura de \emph{software} considerados para este trabajo, con el fin de establecer el desacoplamiento y la mantenibilidad del sistema.
+    \item \textbf{Capítulo 6: Análisis y selección de \emph{hardware} y \emph{software}}: Expone el análisis técnico y económico para definir la plataforma de adquisición entre los osciloscopios disponibles, y fundamenta la adopción del ecosistema Python como entorno de desarrollo junto con del patrón arquitectónico elegido.
+    \item \textbf{Capítulo 7: Implementación del \emph{software}}: Expone la estructura detallada de los módulos del programa, el flujo asíncrono de adquisición, la organización de la base de datos, y el manual de uso de la interfaz gráfica.
+    \item \textbf{Capítulo 8: Calibración del \emph{software}}: Describe el procedimiento de referencia de la IEC 61083-2 \cite{iec61083_2} para la calibración del motor de cálculo, mediante el generador de datos de prueba (TDG), y el análisis de incertidumbre.
+    \item \textbf{Resultados}: Presenta las tablas comparativas entre el método manual y el \emph{software} en cuanto a precisión y tiempo operativo de cómputo, y además, las componentes de incertidumbre obtenidas para el \emph{software}.
+    \item \textbf{Conclusiones y trabajos futuros}: Detalla las conclusiones generales del trabajo, el cumplimiento de los objetivos planteados, y las líneas de desarrollo propuestas para la expansión del sistema.
+    \item \textbf{Anexo I: Ejemplo de procesamiento de impulsos}: Ilustra gráficamente la evolución paso a paso de las señales digitalizadas (LI y LIC) a través del algoritmo del motor de cálculo implementado.
+    \item \textbf{Anexo del Proyecto Integrador}: Incluye la Solicitud de Aprobación de Tema que dio inicio al presente trabajo.
 \end{itemize}

@@ -16,7 +16,7 @@
 \babelfont{tt}{Noto Sans Mono}
 
 % --- GEOMETRÍA Y DISEÑO ---
-\usepackage[a4paper, left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry} % Tamaño de la página.
+\usepackage[a4paper, left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm, headheight=14pt]{geometry} % Tamaño de la página.
 \usepackage{setspace} % Control de interlineado.
 \onehalfspacing % Interlineado de 1.5.
 \usepackage{indentfirst} % Fuerza la sangría en el primer párrafo tras una cabecera.
@@ -69,7 +69,7 @@
     \fancyhf{}
     \renewcommand{\headrulewidth}{1pt}
     \renewcommand{\footrulewidth}{1pt}
-    \fancyhead[L]{\nouppercase{\textit{\leftmark}}}
+    \fancyhead[L]{\small\nouppercase{\textit{\leftmark}}}
     \fancyfoot[R]{\textit{Tardón Damián David}} 
     \fancyfoot[C]{\thepage}
 }
@@ -121,20 +121,16 @@
 \input{capitulos/04_procesamiento_senales.tex}
 \input{capitulos/05_arquitectura_sistema.tex}
 
-
 % ===========================================================================================
 \part{MARCO METODOLÓGICO}
 \input{capitulos/06_seleccion_ecosistema.tex}
 \input{capitulos/07_descripcion_modelo.tex}
 \input{capitulos/08_calibracion.tex}
 
-
 % ====================================================================================
 \part{RESULTADOS Y CONCLUSIONES}
 \input{capitulos/09_resultados.tex}
-\addcontentsline{toc}{chapter}{Resultados}
 \input{capitulos/10_conclusiones.tex}
-\addcontentsline{toc}{chapter}{Conclusiones}
 
 % BIBLIOGRAFÍA =================================================================================================
 \cleardoublepage
@@ -150,6 +146,6 @@
 \addcontentsline{toc}{part}{ANEXOS}
 \input{capitulos/11_anexo.tex}
 \input{capitulos/12_anexo_sat.tex}
-\addcontentsline{toc}{chapter}{Anexo del Proyecto Integrador}
+
 
 \end{document}

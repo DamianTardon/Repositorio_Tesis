@@ -1,5 +1,7 @@
+\newpage
 \chapter{Análisis y selección de \emph{hardware} y \emph{software}}
 \label{ch:seleccion_hardware_software}
+\vspace{3\baselineskip}
 
 En este capítulo se expone el análisis técnico, normativo y económico para la definición de la plataforma de adquisición de datos y el entorno de \emph{software} aplicados a la modernización del sistema de medición del ensayo de impulso del Laboratorio de Alta Tensión. Se analiza el estado actual del equipamiento del laboratorio, se evalúa el sistema comercial de referencia internacional, se comparan los instrumentos disponibles, y se fundamenta la selección final del \emph{hardware} de medición y de la arquitectura de \emph{software} desarrollada.
 
@@ -40,7 +42,7 @@ A raíz de la salida de servicio del equipo, el laboratorio adoptó el uso del o
 \subsection{Alternativas comerciales de referencia}
 \label{subsec:alternativas_comerciales}
 
-Para establecer la cota superior del estado del arte en la instrumentación de impulsos de alta tensión, se examinó el sistema comercial dedicado HAEFELY HiAS 744 \cite{haefely_datasheet}, que puede apreciarse en la figura \ref{fig:Haefely_HiAS744}. Este equipo representa el máximo exponente tecnológico a nivel internacional para el análisis de impulso tipo rayo de \qty[parse-numbers=false]{1,2/50}{\micro\second}, cumpliendo de manera estricta los requerimientos de las normas IEC 60060-1, IEC 60060-2 e IEC 61083-2 \cite{iec61083_2}.
+Para establecer la cota superior del estado del arte en la instrumentación de impulsos de alta tensión, se examinó el sistema comercial dedicado HAEFELY HiAS 744 \cite{haefely_datasheet}, que puede apreciarse en la figura \ref{fig:Haefely_HiAS744}. Este equipo representa el máximo exponente tecnológico a nivel internacional para el análisis de impulso tipo rayo de \qty[parse-numbers=false]{1,2/50}{\micro\second}, que, según las especificaciones del fabricante, cumple los requerimientos de las normas IEC 60060-1, IEC 60060-2 e IEC 61083-2.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -62,14 +64,14 @@ El producto se comercializa en tres variantes cuyas especificaciones técnicas \
         \label{tab:haefely_hias744_comparativa}
         \begin{tabular}{lccc}
             \toprule
-            \textbf{Parámetro técnico} & \textbf{HiAS 744} & \textbf{HiAS 744-S} & \textbf{HiAS 744-REF} \\ \midrule
-            Resolución vertical & \qty{11}{bit} (\qty{0,05}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) \\ \midrule
-            Tasa de muestreo máxima & \qty{125}{\mega\sample/\second} & \qty{250}{\mega\sample/\second} & \qty{250}{\mega\sample/\second} \\ \midrule
-            Ancho de banda & $\ge \qty{50}{\mega\hertz}$ & $\ge \qty{100}{\mega\hertz}$ & $\ge \qty{100}{\mega\hertz}$ \\ \midrule
-            Profundidad de memoria & \num{2} Mpts & \num{2} Mpts & \num{2} Mpts \\ \midrule
-            Aislamiento e interfaz de datos & Fibra óptica & Fibra óptica & Fibra óptica \\ \midrule
-            Calibración metrológica & De fábrica & De fábrica & ISO/IEC 17025 \\ \midrule
-            Costo & \qty{65000}{USD} & \qty{79000}{USD} & No especificado \\ \bottomrule
+            \textbf{Parámetro técnico}      & \textbf{HiAS 744}                    & \textbf{HiAS 744-S}                    & \textbf{HiAS 744-REF}                  \\ \midrule
+            Resolución vertical             & \qty{11}{bit} (\qty{0,05}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) & \qty{16}{bit} (\qty{0,0015}{\percent}) \\ \midrule
+            Tasa de muestreo máxima         & \qty{125}{\mega\sample/\second}      & \qty{250}{\mega\sample/\second}        & \qty{250}{\mega\sample/\second}        \\ \midrule
+            Ancho de banda                  & $\ge \qty{50}{\mega\hertz}$          & $\ge \qty{100}{\mega\hertz}$           & $\ge \qty{100}{\mega\hertz}$           \\ \midrule
+            Profundidad de memoria          & \num{2} Mpts                         & \num{2} Mpts                           & \num{2} Mpts                           \\ \midrule
+            Aislamiento e interfaz de datos & Fibra óptica                         & Fibra óptica                           & Fibra óptica                           \\ \midrule
+            Calibración                     & De fábrica                           & De fábrica                             & ISO/IEC 17025                          \\ \midrule
+            Costo                           & \qty{65000}{USD}                     & \qty{79000}{USD}                       & No especificado                        \\ \bottomrule
         \end{tabular}
 \end{table}
 \vspace{3\baselineskip}
@@ -78,8 +80,6 @@ El producto se comercializa en tres variantes cuyas especificaciones técnicas \
 \label{subsec:comparativa_osciloscopios_laboratorio}
 
 Frente a la restricción presupuestaria que impide adquirir un analizador comercial dedicado como el HAEFELY HiAS 744, se procedió a evaluar los cuatro osciloscopios de propósito general disponibles en el laboratorio: Owon PDS7102T (figura \ref{fig:owon_pds7102t}), GW Instek GDS-1022 (figura \ref{fig:gwinstek_gds_1022}), GW Instek GDS-1102A-U (figura \ref{fig:gwinstek_gds1102au}) y Keysight DSO1052B (figura \ref{fig:keysight_dso1052b}).
-
-Para garantizar la captura adecuada de señales con tiempo de frente de impulso $T_1 = \qty{1,2}{\micro\second}$, la tasa de muestreo debe ser superior a \qty{2}{\mega\sample/\second}.
 
 \vspace{3\baselineskip}
 \begin{figure}[H]
@@ -109,8 +109,7 @@ Para garantizar la captura adecuada de señales con tiempo de frente de impulso 
 \end{figure}
 \vspace{3\baselineskip}
 
-
-La selección definitiva del instrumento se realizó con base en cuatro criterios fundamentales: ancho de banda y tasa de muestreo, longitud de memoria de registro, documentación disponible de comandos SCPI y compatibilidad con VISA, buscando que sean los más próximos al equipo de referencia de la tabla (\ref{tab:haefely_hias744_comparativa}). A continuación, la tabla \ref{tab:comparativa_osciloscopios} muestra la evaluación técnica comparativa entre las alternativas disponibles, donde debe considerarse que todas las opciones tienen resolución de \qty{8}{bit}.
+La selección definitiva del instrumento se realizó con base en cuatro criterios fundamentales: ancho de banda, tasa de muestreo, documentación disponible de comandos SCPI y compatibilidad con VISA, buscando que sean los más próximos al equipo de referencia de la tabla (\ref{tab:haefely_hias744_comparativa}). A continuación, la tabla \ref{tab:comparativa_osciloscopios} muestra la evaluación técnica comparativa entre las alternativas disponibles, donde debe considerarse que todas las opciones tienen resolución de \qty{8}{bits}.
 
 \vspace{3\baselineskip}
 \begin{table}[H]
@@ -120,11 +119,11 @@ La selección definitiva del instrumento se realizó con base en cuatro criterio
         \label{tab:comparativa_osciloscopios}
         \begin{tabular}{cccccc}
             \toprule
-            \textbf{Equipo} & \textbf{Ancho de banda} & \textbf{Tasa de muestreo} & \textbf{SCPI} & \textbf{VISA} \\ \midrule
-            Owon PDS7102T & \qty{100}{\mega\hertz} & \qty{500}{\mega\sample/\second} & No & No \\ \midrule
-            GW Instek GDS-1022 & \qty{25}{\mega\hertz} & \qty{250}{\mega\sample/\second} & Sí & Sí \\ \midrule
-            GW Instek GDS-1102A-U & \qty{100}{\mega\hertz} & \qty{1}{\giga\sample/\second} & Sí & Sí \\ \midrule
-            Keysight DSO1052B & \qty{100}{\mega\hertz} & \qty{1}{\giga\sample/\second} & No & No \\ \bottomrule
+            \textbf{Equipo}       & \textbf{Ancho de banda} & \textbf{Tasa de muestreo}       & \textbf{SCPI} & \textbf{VISA} \\ \midrule
+            Owon PDS7102T         & \qty{100}{\mega\hertz}  & \qty{500}{\mega\sample/\second} & No            & No            \\ \midrule
+            GW Instek GDS-1022    & \qty{25}{\mega\hertz}   & \qty{250}{\mega\sample/\second} & Sí            & Sí            \\ \midrule
+            GW Instek GDS-1102A-U & \qty{100}{\mega\hertz}  & \qty{1}{\giga\sample/\second}   & Sí            & Sí            \\ \midrule
+            Keysight DSO1052B     & \qty{100}{\mega\hertz}  & \qty{1}{\giga\sample/\second}   & No            & No            \\ \bottomrule
         \end{tabular}
     \end{small}
 \end{table}
@@ -141,12 +140,12 @@ Entre los osciloscopios del fabricante GW Instek, el modelo GDS-1102A-U fue sele
     \label{tab:gwinstek_especificaciones}
     \begin{tabular}{ll}
         \toprule
-        \textbf{Parámetro técnico} & \textbf{Valor nominal} \\ \midrule
-        Ancho de banda & \qty{100}{\mega\hertz} \\ \midrule
-        Tasa de muestreo máxima & \qty{1}{\giga\sample/\second} \\ \midrule
-        Tensión de entrada máxima & \qty{300}{\volt} \\ \midrule
-        Longitud de memoria & \num{4} k / \num{2} M pts \\ \midrule
-        Resolución vertical & \qty{8}{bit} \\ \bottomrule
+        \textbf{Parámetro técnico} & \textbf{Valor nominal}        \\ \midrule
+        Ancho de banda             & \qty{100}{\mega\hertz}        \\ \midrule
+        Tasa de muestreo máxima    & \qty{1}{\giga\sample/\second} \\ \midrule
+        Tensión de entrada máxima  & \qty{300}{\volt}              \\ \midrule
+        Longitud de memoria        & \num{4} k / \num{2} M pts     \\ \midrule
+        Resolución vertical        & \qty{8}{bit}                  \\ \bottomrule
     \end{tabular}
 \end{table}
 \vspace{3\baselineskip}
@@ -169,12 +168,12 @@ Por el contrario, la solución basada en \emph{Python} emplea bibliotecas de có
         \label{tab:comparativa_software_costos}
         \begin{tabular}{lcc}
             \toprule
-            \textbf{Criterio de evaluación} & \textbf{NI LabVIEW} & \textbf{Ecosistema Python} \\ \midrule
-            Costo de licencia & $\sim$\qty{1100}{USD} (Perpetua) & \qty{0}{USD} (Gratuito / Open Source) \\ \midrule
-            Código fuente & Propietario & Accesible y auditable \\ \midrule
-            Librerías de control y GUI & NI-VISA / LabVIEW GUI & PyVISA / PySide6 / Qt Designer \\ \midrule
-            Procesamiento numérico & Módulos dedicados NI & NumPy / SciPy / h5py \\ \midrule
-            Costo Total de Propiedad & Elevado & Nulo \\ \bottomrule
+            \textbf{Criterio de evaluación} & \textbf{NI LabVIEW}              & \textbf{Ecosistema Python}            \\ \midrule
+            Costo de licencia               & $\sim$\qty{1100}{USD} (Perpetua) & \qty{0}{USD} (Gratuito / Open Source) \\ \midrule
+            Código fuente                   & Propietario                      & Accesible y auditable                 \\ \midrule
+            Librerías de control y GUI      & NI-VISA / LabVIEW GUI            & PyVISA / PySide6 / Qt Designer        \\ \midrule
+            Procesamiento numérico          & Módulos dedicados NI             & NumPy / SciPy / h5py                  \\ \midrule
+            Costo Total de Propiedad        & Elevado                          & Nulo                                  \\ \bottomrule
         \end{tabular}
     \end{small}
 \end{table}
